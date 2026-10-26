@@ -264,3 +264,31 @@ body.document-viewer-open{overflow:hidden}
   .reader-study-heading p{font-size:12px}
   .reader-study-warnings li{padding:10px;font-size:12px}
 }
+
+
+/* Exam-critical facts and self-scored mini quiz */
+.reader-paragraph.reader-exam-critical{position:relative;margin:15px 0;padding:13px 15px 13px 17px;border:1px solid #745332;border-left:4px solid #e6a653;border-radius:10px;background:linear-gradient(100deg,#30251b,#211e1b);color:#ffead1}
+.reader-critical-label{display:block;margin:0 0 6px;color:#ffc77d;font-size:9px;font-weight:800;letter-spacing:.12em}
+.reader-study-panel .reader-quiz-intro{margin:0 0 12px;color:#9eb3c3;font-size:12px;line-height:1.6}
+.reader-quiz-progress{display:flex;justify-content:space-between;gap:12px;color:#9eb3c3;font-size:11px}
+.reader-quiz-track{height:4px;margin:9px 0 12px;border-radius:99px;background:#273a4a;overflow:hidden}
+.reader-quiz-track span{display:block;height:100%;background:#55b9ae;transition:width .2s ease}
+.reader-quiz-card,.reader-quiz-result{padding:16px;border:1px solid #2e4558;border-radius:13px;background:#142536}
+.reader-quiz-card h4{margin:8px 0 14px;color:#e5f0f7;font-size:16px;line-height:1.6}
+.reader-quiz-answer{border-radius:9px;background:#0e1d2b;border:1px solid #2c4254}
+.reader-quiz-answer summary{padding:11px 12px;cursor:pointer;color:#aee8df;font-size:12px;font-weight:650}
+.reader-quiz-answer p{margin:0;padding:12px;border-top:1px solid #2c4254;color:#c1d1dd;font-size:13px;line-height:1.75;overflow-wrap:anywhere}
+.reader-quiz-actions{display:flex;gap:9px;margin-top:13px}
+.reader-quiz-primary,.reader-quiz-secondary{flex:1;min-height:40px;padding:9px 12px;border-radius:9px;font:inherit;font-size:12px;font-weight:700;cursor:pointer}
+.reader-quiz-primary{border:1px solid #378d82;background:#1d625b;color:#e2fffa}
+.reader-quiz-secondary{border:1px solid #465b6e;background:#1b2b3b;color:#d4e3ed}
+.reader-quiz-result{text-align:center}
+.reader-quiz-result>strong{display:block;margin:9px 0;color:#e4fffa;font-size:28px}
+.reader-quiz-result>p{color:#a9bdcb;font-size:12px;line-height:1.6}
+.reader-quiz-result button{margin:6px 3px}
+@media(max-width:640px){
+  .reader-paragraph.reader-exam-critical{padding:11px 12px 11px 13px}
+  .reader-quiz-card,.reader-quiz-result{padding:13px}
+  .reader-quiz-card h4{font-size:14px}
+  .reader-quiz-actions{gap:7px}
+}
