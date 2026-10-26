@@ -160,7 +160,7 @@
     b.setAttribute('aria-pressed',String(!!note.bookmarked));
   };
   const openNoteReader = id => {
-    const note=data.notes.find(n=>n.id===id);if(!note)return;
+    const note=data.notes.find(n=>String(n.id)===String(id)) || (String(id).startsWith('shared_') ? (()=>{const shared=sharedNotes.find(n=>String(n.id)===String(id).slice(7));return shared?{id:'shared_'+String(shared.id),title:shared.title,course:shared.course,body:shared.content||'',date:(shared.updated_at||shared.created_at||'').slice(0,10),isShared:true}:null;})() : null);if(!note){console.warn('Not okuma ekranı için not bulunamadı:',id);return;}
     readerNoteId=id;readerFontSize=18;
     $('#noteReaderCourse').textContent=note.course||'Genel not';
     $('#noteReaderDate').textContent='Oluşturulma tarihi · '+(note.date||'Tarih belirtilmemiş');
@@ -178,8 +178,8 @@
     refreshIcons();
   };
   const closeNoteReader = () => {
-    if(readerNoteId && readerNoteId!==readerSharedId){const n=data.notes.find(x=>x.id===readerNoteId);if(n){const box=$('#noteReaderScroll'),max=box.scrollHeight-box.clientHeight;n.readPosition=max>0?Math.max(0,Math.min(1,box.scrollTop/max)):0;save();}}
-    if(readerSharedId){data.notes=data.notes.filter(x=>x.id!==readerSharedId);readerSharedId=null;}
+    if(readerNoteId && !String(readerNoteId).startsWith('shared_')){const n=data.notes.find(x=>String(x.id)===String(readerNoteId));if(n){const box=$('#noteReaderScroll'),max=box.scrollHeight-box.clientHeight;n.readPosition=max>0?Math.max(0,Math.min(1,box.scrollTop/max)):0;save();}}
+    readerSharedId=null;
     $('#noteReaderBackdrop').hidden=true;document.body.classList.remove('note-reader-open');readerNoteId=null;$('#noteBookmarkBtn').disabled=false;$('#noteHighlightBtn').disabled=false;renderNotes();renderSharedNotes();
   };
   const updateReaderProgress = () => {
@@ -348,7 +348,7 @@
     const ccard=e.target.closest('[data-course-card]');if(ccard){openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===ccard.dataset.courseCard)?.name||'';},0);return;}
     const delCourse=e.target.closest('[data-course-delete]');if(delCourse){const c=data.courses.find(c=>c.id===delCourse.dataset.courseDelete);if(c&&confirm(c.name+' dersini ve bağlantılı çalışma kayıtlarını silmek istiyor musun?')){data.courses=data.courses.filter(x=>x.id!==c.id);data.notes=data.notes.filter(n=>n.course!==c.name);data.cards=data.cards.filter(n=>n.course!==c.name);save();render();toast('Ders silindi.');}return;}
     const delExam=e.target.closest('[data-exam-delete]');if(delExam){data.exams=data.exams.filter(x=>x.id!==delExam.dataset.examDelete);save();render();toast('Sınav kaydı silindi.');return;}
-    const sharedRead=e.target.closest('[data-shared-note-read]');if(sharedRead){e.preventDefault();const note=sharedNotes.find(x=>String(x.id)===String(sharedRead.dataset.sharedNoteRead));if(!note){console.warn('Ortak not bulunamadı:',sharedRead.dataset.sharedNoteRead,sharedNotes.map(x=>x.id));toast('Not bulunamadı. Sayfayı yenileyip tekrar dene.');return;}const temp={id:'shared_'+String(note.id),title:note.title,course:note.course,body:note.content||'',date:(note.updated_at||note.created_at||'').slice(0,10),isShared:true};data.notes=data.notes.filter(n=>n.id!==temp.id);data.notes.unshift(temp);readerSharedId=temp.id;openNoteReader(temp.id);return;}
+    const sharedRead=e.target.closest('[data-shared-note-read]');if(sharedRead){e.preventDefault();e.stopPropagation();const id='shared_'+String(sharedRead.dataset.sharedNoteRead);readerSharedId=id;openNoteReader(id);return;}
     const sharedEdit=e.target.closest('[data-shared-note-edit]');if(sharedEdit){const note=sharedNotes.find(x=>String(x.id)===String(sharedEdit.dataset.sharedNoteEdit));if(note)openSharedNoteEditor(note);return;}
     const sharedDelete=e.target.closest('[data-shared-note-delete]');if(sharedDelete){const note=sharedNotes.find(x=>String(x.id)===String(sharedDelete.dataset.sharedNoteDelete));if(!note||!isLibraryAdmin())return;if(confirm('“'+note.title+'” ortak kütüphaneden silinsin mi?')){const {error}=await supabaseClient.from('shared_notes').delete().eq('id',note.id);if(error){toast('Not silinemedi. Yönetici yetkisini kontrol et.');return;}await loadSharedNotes();toast('Ortak not silindi.');}return;}
     const readNote=e.target.closest('[data-note-read]');if(readNote){const note=data.notes.find(x=>x.id===readNote.dataset.noteRead);if(note){openNoteReader(note.id);}return;}
