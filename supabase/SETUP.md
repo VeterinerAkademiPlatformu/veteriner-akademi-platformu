@@ -1,36 +1,29 @@
 # Supabase setup — Veteriner Akademi Platformu
 
 ## Current status
-The web app currently uses browser localStorage for demo data. This repository does not yet connect to Supabase. Do not describe the app as cloud-synced until sign-in, data migration, and cross-account isolation have been tested.
+The browser app is now wired to Supabase Auth and the `student_workspaces` table. Email/password sign-up, sign-in, sign-out, per-user JSON workspace storage, local demo-data migration prompt, and debounced cloud saves are implemented in `index.html` and `script.js`. The browser uses only the project URL and a publishable key.
 
-## 1. Create the correct project
-Create a NEW Supabase project specifically for **Veteriner Akademi Platformu**. Do not reuse the unrelated `ciftlik-simulasyonu` project. Choose a region near the intended users where available.
+## Database and access control
+The table `public.student_workspaces` has RLS enabled. Authenticated users can read/insert/update/delete only the row where `user_id = auth.uid()`. Anonymous access is revoked. The setup SQL is in `supabase/schema.sql`.
 
-## 2. Create the private student-data table
-In the new project's SQL Editor, open and run `supabase/schema.sql`. The table stores one JSON workspace per authenticated user. Row Level Security (RLS) ensures each account can access only the row whose `user_id` matches its authenticated user ID.
+## Authentication setup
+In the [Supabase project](https://supabase.com/dashboard/project/jvbpoibzjihznlljeech):
+1. Open **Authentication → Sign In / Providers** and ensure Email is enabled.
+2. Set the site's deployed URL as the Site URL and add the deployed URL plus any development URL to the redirect allow list.
+3. Decide whether email confirmation is required. If enabled, new users must open the verification email before signing in.
+4. Deploy the latest GitHub `main` branch so the new UI and client script are served.
 
-After running the script, verify that `student_workspaces` appears in Table Editor and RLS is enabled. The final SELECT in the script reports the RLS status.
+## Important safety notes
+- Only the publishable key is included in browser code. Never put a `service_role` key, secret key, database password, or personal access token in HTML/JavaScript or GitHub.
+- A user's cloud row is loaded before cloud saves are enabled. Existing cloud data takes precedence over local demo data.
+- For a new account with no cloud row, the app asks whether to migrate local data. If a different account was previously used in the same browser, local data is not silently migrated.
+- Signing out switches the visible workspace back to demo data; the signed-in user's cloud data remains in Supabase.
 
-## 3. Get browser-safe client settings
-From the new project's Connect/API settings, obtain:
-- Project URL
-- Publishable key (preferred), or legacy anon key if the project only provides that
-
-These values are intended for browser clients. Never put a `service_role`, secret key, database password, or personal access token in `index.html`, JavaScript files, GitHub, or chat.
-
-## 4. Configure authentication
-In Authentication settings:
-- Enable Email provider.
-- Configure the site's allowed redirect URLs for the deployed site and local development URL.
-- Decide whether email confirmation should be required before sign-in.
-
-## 5. Integration and verification checklist
-The next implementation step is to add a configuration module and sign-in/sign-up/sign-out UI, then safely migrate each account's local demo data to `student_workspaces`.
-Before calling the integration complete, verify:
-- a new user can sign up and sign in;
-- a signed-out visitor cannot read or write student data;
-- user A cannot read or update user B's workspace;
-- notes, courses, flashcards, and review status survive a refresh and sign-in on another device;
-- local demo data is not silently overwritten during first sync.
-
-Until these checks pass, localStorage remains the app's working storage and this SQL file is only the prepared database schema.
+## Verification checklist
+Before treating this as fully production-verified:
+- Test new email sign-up with the project's actual email-confirmation settings.
+- Test sign-in and sign-out in the deployed site.
+- Create a note/card, refresh, and verify it remains after sign-in.
+- Sign in on a second browser/device and verify the same workspace loads.
+- Test with two accounts and confirm each can only access their own row.
+- Check the browser console and Supabase Security Advisor after deployment.
