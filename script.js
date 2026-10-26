@@ -137,8 +137,8 @@
   const runReaderSearch = query => {
     const q=String(query||'').trim().toLocaleLowerCase('tr-TR');
     readerSearchMatches=[];
-    $('.reader-search-match',$('#noteReaderBody')).forEach(el=>el.classList.remove('reader-search-match'));
-    if(q)readerSearchMatches=$('[data-reader-line]',$('#noteReaderBody')).filter(el=>(el.textContent||'').toLocaleLowerCase('tr-TR').includes(q));
+    $$('.reader-search-match',$('#noteReaderBody')).forEach(el=>el.classList.remove('reader-search-match'));
+    if(q)readerSearchMatches=$$('[data-reader-line]',$('#noteReaderBody')).filter(el=>(el.textContent||'').toLocaleLowerCase('tr-TR').includes(q));
     readerSearchIndex=readerSearchMatches.length?Math.min(readerSearchIndex,readerSearchMatches.length-1):0;
     const count=$('#noteReaderSearchCount');
     count.textContent=q?(readerSearchMatches.length?(readerSearchIndex+1)+' / '+readerSearchMatches.length:'Sonuç yok'):'';
