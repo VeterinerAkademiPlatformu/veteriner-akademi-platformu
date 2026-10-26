@@ -279,7 +279,7 @@
     if(authUser)$('#authTitle').textContent='Hesabın bağlı'; else setAuthMode(authMode,false);
     refreshIcons();
   };
-  const openAuth = () => { $('#authBackdrop').hidden=false; updateAccountUI(); if(!authUser)$('#authEmail').focus(); };
+  const openAuth = () => { $('#authBackdrop').hidden=false; updateAccountUI(); };
   const closeAuth = () => { $('#authBackdrop').hidden=true; authMessage(''); };
   const showEmailConfirmation = email => {
     const card=$('#emailConfirmBackdrop');
@@ -336,7 +336,6 @@
       $('#authPassword').value='';
       openAuth();
       authMessage('E-postanı kontrol ettikten sonra doğrulama bağlantısını aç. Ardından şifrenle giriş yap.');
-      $('#authPassword').focus();
     });
     $('#emailConfirmDismiss').addEventListener('click',closeEmailConfirmation);
     $('#emailConfirmBackdrop').addEventListener('click',e=>{if(e.target===$('#emailConfirmBackdrop'))closeEmailConfirmation();});
