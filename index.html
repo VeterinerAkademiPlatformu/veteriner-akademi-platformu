@@ -136,6 +136,15 @@
       <button class="email-confirm-close" id="emailConfirmDismiss" type="button">Şimdilik daha sonra</button>
     </section>
   </div>
+  <div class="verification-page" id="verificationPage" hidden role="status" aria-live="polite">
+    <section class="verification-page-card">
+      <div class="verification-page-icon" id="verificationPageIcon"><i data-lucide="mail-check"></i></div>
+      <span class="eyebrow">VETERİNER AKADEMİ · GÜVENLİ HESAP</span>
+      <h1 id="verificationPageTitle">E-posta adresin doğrulanıyor</h1>
+      <p id="verificationPageCopy">Lütfen bekle; doğrulama bağlantın kontrol ediliyor.</p>
+      <div class="verification-loader" aria-hidden="true"><span></span></div>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"><i data-lucide="check-circle-2"></i><span id="toastMessage">Kaydedildi.</span></div>
   <div class="focus-overlay" id="focusOverlay" hidden><div class="focus-modal"><button class="icon-button focus-close" id="focusClose" aria-label="Kapat"><i data-lucide="x"></i></button><span class="eyebrow">ODAK MODU</span><h2>Şimdi yalnızca öğrenmeye odaklan.</h2><div class="timer-display" id="timerDisplay">25:00</div><p>Tek bir konu seç. Bildirimleri kapat ve kendine bu zamanı ayır.</p><div class="timer-controls"><button class="primary-button" id="timerToggle"><i data-lucide="play"></i> Başlat</button><button class="outline-button" id="timerReset"><i data-lucide="rotate-ccw"></i> Sıfırla</button></div></div></div>
   <script src="script.js"></script>
