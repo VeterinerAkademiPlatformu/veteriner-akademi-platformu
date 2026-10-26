@@ -138,12 +138,9 @@
     panel.innerHTML='<div class="reader-study-heading"><div><span class="eyebrow">AKTİF HATIRLAMA</span><h2>Çalışma modu</h2><p>Önce kendin cevapla, sonra yanıtı aç.</p></div><button type="button" class="reader-study-close" id="noteStudyClose">Kapat</button></div>'+
       (warnings.length?'<section class="reader-study-section"><h3>⚠ Sınavda dikkat</h3><ul class="reader-study-warnings">'+warnings.slice(0,10).map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'<section class="reader-study-section reader-study-empty"><h3>Sınav uyarısı bulunamadı</h3><p>Notta “Dikkat”, “Önemli” veya “Sınavda” gibi ifadeler varsa burada listelenir. Bu bölüm otomatik metin taramasıdır.</p></section>')+
       (prompts.length?'<section class="reader-study-section"><h3>Kendini sına</h3><div class="reader-study-prompts">'+prompts.map((p,i)=>'<details class="reader-study-question"><summary><span>'+(i+1)+'.</span> '+safe(p.title)+' konusu için temel bilgi nedir?</summary><p>'+(p.answer?safe(p.answer):'Bu başlığı not içinde yeniden incele ve kendi cümlenle açıkla.')+'</p></details>').join('')+'</div></section>':'<p class="reader-study-empty">Kendini sınamak için notta başlık bulunamadı. Başlıkları kısa ve belirgin yazmayı deneyebilirsin.</p>')+
-      '<section class="reader-study-section"><h3>📝 5 soruluk mini sınav</h3><p class="reader-quiz-intro">Başlıklardan kısa tekrar soruları hazırlanır. Cevaplarını kendin değerlendir; yanlışlar tekrar turunda yeniden gelir.</p><div id="noteStudyQuiz"></div></section>'+
+      '<section class="reader-study-section"><h3>📝 Mini sınav</h3><p class="reader-quiz-intro">Notta belirgin başlıklar varsa bunlardan kısa tekrar soruları hazırlanır. Soru sayısı notun yapısına bağlıdır.</p><div id="noteStudyQuiz"></div></section>'+
       '<p class="reader-study-disclaimer">Otomatik oluşturulan çalışma yardımıdır; notun içeriğinin yerine geçmez. Mini sınav başlıklardan türetilir, akademik doğruluk kontrolü yapılmış bir test değildir.</p>';
     studyQuizItems=prompts.slice(0,5).map(p=>({question:p.title+' konusundaki temel bilgi nedir?',answer:p.answer}));
-    if(studyQuizItems.length<5){
-      warnings.slice(0,5-studyQuizItems.length).forEach((w,i)=>studyQuizItems.push({question:'Bu önemli uyarının ana mesajı nedir?',answer:w}));
-    }
     studyQuizIndex=0;studyQuizScore=0;studyQuizMissed=[];
     panel.hidden=true;
     button.setAttribute('aria-pressed','false');
