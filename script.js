@@ -261,7 +261,8 @@
       if($('#noteReaderBackdrop')?.hidden)throw new Error('Not okuma penceresi görünür duruma getirilemedi.');
     }catch(err){
       console.error('Ortak not açılamadı:',err);
-      toast('Not açılamadı. Hata ayrıntısı geliştirici konsoluna yazıldı.');
+      const detail=String(err?.message||err||'Bilinmeyen hata').slice(0,180);
+      toast('Not açılamadı: '+detail);
     }
   },true);
   const loadSharedNotes=async()=>{
