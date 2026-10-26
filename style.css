@@ -45,3 +45,15 @@
 .topic-keypoint{margin-top:22px;padding:17px;border:1px solid #2a6c62;border-radius:14px;background:#12302f}.topic-keypoint strong{display:flex;align-items:center;gap:8px;color:var(--teal)}.topic-keypoint p{margin:9px 0 0;line-height:1.7;white-space:normal}
 .topic-study-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 @media(max-width:620px){.topics-header{align-items:flex-start;gap:12px}.topics-heading{order:2;flex-basis:100%}.topics-header>#addTopicBtn{margin-left:auto}.topic-item{align-items:flex-start;flex-wrap:wrap}.topic-copy{flex-basis:calc(100% - 60px)}.topic-open{margin-left:58px}.topic-study-actions>*{width:100%;justify-content:center}}
+
+/* Active recall and topic review states */
+.active-recall-card{margin-top:24px;padding:22px;border:1px solid #34505f;border-radius:18px;background:linear-gradient(145deg,rgba(18,42,57,.82),rgba(13,27,41,.92))}
+.active-recall-card h3{margin:8px 0;font-size:1.18rem;color:var(--text-primary,#edf5fb)}
+.recall-question{line-height:1.7;color:var(--text-secondary,#b6c5d3);margin:10px 0 18px}
+.recall-answer{margin:16px 0;padding:16px;border-radius:12px;background:rgba(20,184,166,.09);border:1px solid rgba(45,212,191,.28)}
+.recall-answer strong{display:flex;align-items:center;gap:8px;color:var(--teal,#5eead4)}
+.recall-answer p{line-height:1.7;margin:8px 0 0;white-space:normal}
+.recall-rating{display:flex;flex-direction:column;gap:12px;margin-top:18px;color:var(--text-secondary,#b6c5d3)}
+.recall-rating>div{display:flex;gap:10px;flex-wrap:wrap}
+.topic-status.needs-review{color:#fbbf24;background:rgba(245,158,11,.12);border-color:rgba(245,158,11,.3)}
+@media(max-width:620px){.active-recall-card{padding:17px}.recall-rating>div>*{flex:1;justify-content:center}}
