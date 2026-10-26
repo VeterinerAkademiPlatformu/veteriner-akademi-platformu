@@ -40,6 +40,8 @@ create policy "Students can delete their own workspace"
 
 grant select, insert, update, delete on public.student_workspaces to authenticated;
 revoke all on public.student_workspaces from anon;
+-- These table-level privileges are not needed by the browser client.
+revoke truncate, references, trigger on table public.student_workspaces from public, anon, authenticated;
 
 -- Verify RLS is enabled:
 select schemaname, tablename, rowsecurity
