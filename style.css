@@ -176,3 +176,30 @@ body.note-reader-open{overflow:hidden}
 .reader-paragraph-space{height:8px}
 .reader-search-match{outline:2px solid #4dd9c4!important;outline-offset:5px;border-radius:4px;background:#153b3b!important;scroll-margin:24px}
 @media(max-width:640px){.reader-search-row{margin-bottom:10px;padding:8px 10px;gap:7px}.reader-search-row input{font-size:12px}.reader-toc{margin-bottom:22px}.reader-section-heading{margin-top:24px}}
+
+/* PDF ve görsel için ayrı belge okuyucu */
+.document-viewer-backdrop{position:fixed;inset:0;z-index:1100;background:#050b14f2;backdrop-filter:blur(12px);display:flex;align-items:stretch;justify-content:center}
+.document-viewer-backdrop[hidden]{display:none!important}
+body.document-viewer-open{overflow:hidden}
+.document-viewer{display:flex;flex-direction:column;width:100%;height:100%;background:#0b1220;color:#e8f1f8;overflow:hidden}
+.document-viewer-topbar{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px clamp(12px,3vw,34px);border-bottom:1px solid #25384d;background:#0d1725}
+.document-viewer-heading{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;flex:1}
+.document-viewer-heading>svg{width:20px;height:20px;color:#66dfcc;flex-shrink:0}
+.document-viewer-heading strong{max-width:min(40vw,520px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.document-viewer-heading small{font-size:11px;color:#8ba2b6;white-space:nowrap}
+.document-viewer-tools{display:flex;align-items:center;gap:8px}
+.document-viewer-tools[hidden],.pdf-page-toolbar[hidden]{display:none!important}
+#pdfZoomLabel{min-width:42px;text-align:center;font-size:11px;color:#b8c9d8}
+.pdf-page-toolbar{display:flex;align-items:center;justify-content:center;gap:18px;padding:9px;border-bottom:1px solid #22354a;background:#101b2a}
+.pdf-page-toolbar span{font-size:12px;color:#a9bdcd}.pdf-page-toolbar strong{color:#eff7fb}
+.pdf-page-toolbar .reader-tool{height:32px;padding:6px 12px}
+.reader-tool:disabled{opacity:.35;cursor:not-allowed}
+.document-viewer-content{flex:1;min-height:0;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:#151f2d;overscroll-behavior:contain}
+#pdfCanvas{display:block;max-width:none;background:#fff;box-shadow:0 12px 40px #0005}
+#imageDocumentPreview{display:block;max-width:100%;max-height:calc(100vh - 150px);height:auto;object-fit:contain;margin:auto;box-shadow:0 12px 40px #0005}
+.document-viewer-loading,.document-viewer-error{margin:auto;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:#8fa7bb}
+.document-viewer-loading[hidden],.document-viewer-error[hidden]{display:none!important}
+.document-viewer-loading svg,.document-viewer-error svg{width:32px;height:32px;color:#63dfcb}
+.document-viewer-loading strong,.document-viewer-error strong{font-size:15px;color:#e5eff7}
+.document-viewer-loading span,.document-viewer-error p{max-width:420px;font-size:12px;line-height:1.7}
+@media(max-width:640px){.document-viewer-topbar{min-height:60px;gap:7px;padding:8px}.document-viewer-heading{flex-direction:column;gap:3px}.document-viewer-heading>svg{display:none}.document-viewer-heading strong{max-width:34vw;font-size:11px}.document-viewer-heading small{max-width:34vw;overflow:hidden;text-overflow:ellipsis;font-size:9px}.document-viewer-tools{gap:4px}.document-viewer-tools .reader-tool{min-width:30px;height:31px;padding:5px 8px}.pdf-page-toolbar{gap:9px;padding:7px}.pdf-page-toolbar .reader-tool{font-size:10px;padding:6px 8px}.document-viewer-content{padding:12px 6px}}
