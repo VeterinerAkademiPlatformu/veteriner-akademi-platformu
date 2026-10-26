@@ -163,11 +163,11 @@
     $('#noteReaderCourse').textContent=note.course||'Genel not';
     $('#noteReaderDate').textContent='Oluşturulma tarihi · '+(note.date||'Tarih belirtilmemiş');
     $('#noteReaderTitle').textContent=note.title||'Başlıksız not';
-    renderReaderBody(note);
-    $('#noteReaderBody').style.fontSize=readerFontSize+'px';
     $('#noteReaderSearch').value='';
     $('#noteReaderSearchCount').textContent='';
     readerSearchMatches=[];readerSearchIndex=0;
+    renderReaderBody(note);
+    $('#noteReaderBody').style.fontSize=readerFontSize+'px';
     $('#noteReaderBackdrop').hidden=false;document.body.classList.add('note-reader-open');
     updateBookmarkButton(note);
     requestAnimationFrame(()=>{const box=$('#noteReaderScroll');const max=box.scrollHeight-box.clientHeight;box.scrollTop=max*Math.max(0,Math.min(1,Number(note.readPosition)||0));updateReaderProgress();});
