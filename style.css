@@ -221,3 +221,13 @@ body.document-viewer-open{overflow:hidden}
   .reader-spacing-control select{max-width:65px;padding:8px 1px;font-size:10px}
   .reader-progress-info{padding:5px 12px;font-size:10px}
 }
+
+
+/* Reading estimates in the note reader */
+.reader-note-stats{font-size:11px;color:#8da8bb;line-height:1.5}
+@media(max-width:640px){
+  .reader-note-meta{gap:10px}
+  .reader-note-icon{width:40px;height:40px;flex:0 0 40px}
+  .reader-note-meta>div{min-width:0}
+  .reader-note-meta small{overflow-wrap:anywhere}
+}
