@@ -39,7 +39,7 @@
     activePage=page;
     $$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+page));
     $$('.nav-item[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
-    const labels={dashboard:'Genel Bakış',courses:'Derslerim',exams:'Sınav Takvimi',notes:'Notlarım',flashcards:'Flash Kartlar',questions:'Soru Çöz',settings:'Ayarlar'};
+    const labels={dashboard:'Genel Bakış',courses:'Derslerim',exams:'Sınav Takvimi',notes:'Notlarım',flashcards:'Flash Kartlar',review:'Tekrar Listem',questions:'Soru Çöz',settings:'Ayarlar'};
     $('#crumbCurrent').textContent=labels[page]||'Veteriner Akademi';
     $('#sidebar').classList.remove('open');
     render(); window.scrollTo({top:0,behavior:'smooth'});
@@ -82,7 +82,16 @@
     $('#flashSetCount').textContent=Object.keys(groups).length+' set';
     $('#flashSets').innerHTML=Object.entries(groups).map(([name,cards],i)=>'<article class="flash-set"><div class="flash-set-head"><span class="course-symbol '+['teal','purple','gold','blue'][i%4]+'">'+icon('layers')+'</span><span class="result-label">'+cards.length+' kart</span></div><h3>'+safe(name)+'</h3><p>Kısa tekrar ve aktif hatırlama</p><button class="outline-button" data-deck="'+safe(name)+'">Tekrar et '+icon('arrow-right')+'</button></article>').join('')||empty('Henüz flash kart yok','Kart oluşturup tekrar setini hazırlayabilirsin.','layers');
   };
-  const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();refreshIcons(); };
+  const renderReview = () => {
+    const review=[];
+    data.courses.forEach(course=>(course.topicList||[]).forEach(topic=>{if(topic.needsReview)review.push({course,topic});}));
+    const count=$('#reviewCount');if(count)count.textContent=String(review.length);
+    const summary=$('#reviewSummary');if(summary)summary.innerHTML='<article class="review-stat"><span>Tekrar bekleyen konu</span><strong>'+review.length+'</strong></article><article class="review-stat"><span>Hatırlama denemesi</span><strong>'+review.reduce((n,x)=>n+(x.topic.recalledCount||0),0)+'</strong></article>';
+    const host=$('#reviewTopicList');if(!host)return;
+    host.innerHTML=review.map(({course,topic})=>'<article class="review-topic-card"><div class="review-topic-icon">'+icon('rotate-ccw')+'</div><div class="review-topic-copy"><span class="eyebrow">'+safe(course.name)+'</span><h3>'+safe(topic.title)+'</h3><p>'+safe(topic.summary.slice(0,180))+(topic.summary.length>180?'…':'')+'</p><small>'+(topic.lastReviewed?'Son tekrar: '+safe(topic.lastReviewed):'Henüz tekrar tarihi yok')+'</small></div><button class="primary-button" data-review-topic="'+safe(course.id)+'|'+safe(topic.id)+'">Tekrar çalış '+icon('arrow-right')+'</button></article>').join('')||'<div class="review-empty"><span>'+icon('check-circle-2')+'</span><h2>Tekrar bekleyen konu yok</h2><p>Bir konu çalışırken “Tekrar etmeliyim” seçeneğini işaretlediğinde burada görünecek.</p><button class="outline-button" data-page="courses">Derslerime dön</button></div>';
+    refreshIcons();
+  };
+  const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();renderReview();refreshIcons(); };
 
   let activeTopicCourseId=null;
   const renderCourseTopics=id=>{
@@ -109,6 +118,7 @@
     if(e.target.closest('#backToCourses')){const p=$('#courseTopicsPanel');if(p)p.hidden=true;$('#allCourses').hidden=false;return;}
     if(e.target.closest('#addTopicBtn')||e.target.closest('#addFirstTopicBtn')){openModal('topic');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===activeTopicCourseId)?.name||'';},0);return;}
     const study=e.target.closest('[data-topic-study]');if(study){studyTopic(study.dataset.topicStudy);return;}
+    const reviewTopic=e.target.closest('[data-review-topic]');if(reviewTopic){const [courseId,topicId]=reviewTopic.dataset.reviewTopic.split('|');activeTopicCourseId=courseId;renderCourseTopics(courseId);studyTopic(topicId);return;}
     if(e.target.closest('#backToTopicList')){renderCourseTopics(activeTopicCourseId);return;}
   });
 
