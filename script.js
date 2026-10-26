@@ -243,6 +243,16 @@
     grid.innerHTML=list.map(n=>'<article class="note-card note-card-reader shared-note-card"><div class="note-meta">'+icon('book-open-text')+' '+safe(n.course)+(n.topic?' · '+safe(n.topic):'')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.content)+'</p><div class="shared-note-actions"><button class="note-read-button" data-shared-note-read="'+safe(n.id)+'">'+icon('book-open-text')+' Notu oku <span>→</span></button>'+(isLibraryAdmin()?'<button class="note-edit-button" data-shared-note-edit="'+safe(n.id)+'" title="Notu düzenle">'+icon('pencil')+'</button><button class="note-delete-button" data-shared-note-delete="'+safe(n.id)+'" title="Ortak notu sil">'+icon('trash-2')+'</button>':'')+'</div><footer><span>'+icon('calendar-days')+' '+safe((n.updated_at||n.created_at||'').slice(0,10)||'Ortak not')+'</span><span>Ortak kütüphane</span></footer></article>').join('')||empty(sharedLibraryLoading?'Notlar yükleniyor':'Henüz yayınlanmış not yok',sharedLibraryLoading?'Ortak kütüphane kontrol ediliyor.':'Yeni ortak notlar eklendiğinde burada ders ve konu başlıklarına göre görünecek.','library-big');
     refreshIcons();
   };
+  // Ortak not okuma tıklamasını doğrudan kütüphane alanında yakala.
+  const sharedNotesGrid=$('#sharedNotesGrid');
+  if(sharedNotesGrid)sharedNotesGrid.addEventListener('click',e=>{
+    const button=e.target.closest('[data-shared-note-read]');
+    if(!button||!sharedNotesGrid.contains(button))return;
+    e.preventDefault();
+    const id='shared_'+String(button.getAttribute('data-shared-note-read')||'');
+    readerSharedId=id;
+    openNoteReader(id);
+  });
   const loadSharedNotes=async()=>{
     if(!supabaseClient){sharedNotes=[];sharedLibraryLoading=false;renderSharedNotes();return;}
     sharedLibraryLoading=true;renderSharedNotes();
@@ -348,7 +358,7 @@
     const ccard=e.target.closest('[data-course-card]');if(ccard){openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===ccard.dataset.courseCard)?.name||'';},0);return;}
     const delCourse=e.target.closest('[data-course-delete]');if(delCourse){const c=data.courses.find(c=>c.id===delCourse.dataset.courseDelete);if(c&&confirm(c.name+' dersini ve bağlantılı çalışma kayıtlarını silmek istiyor musun?')){data.courses=data.courses.filter(x=>x.id!==c.id);data.notes=data.notes.filter(n=>n.course!==c.name);data.cards=data.cards.filter(n=>n.course!==c.name);save();render();toast('Ders silindi.');}return;}
     const delExam=e.target.closest('[data-exam-delete]');if(delExam){data.exams=data.exams.filter(x=>x.id!==delExam.dataset.examDelete);save();render();toast('Sınav kaydı silindi.');return;}
-    const sharedRead=e.target.closest('[data-shared-note-read]');if(sharedRead){e.preventDefault();e.stopPropagation();const id='shared_'+String(sharedRead.dataset.sharedNoteRead);readerSharedId=id;openNoteReader(id);return;}
+
     const sharedEdit=e.target.closest('[data-shared-note-edit]');if(sharedEdit){const note=sharedNotes.find(x=>String(x.id)===String(sharedEdit.dataset.sharedNoteEdit));if(note)openSharedNoteEditor(note);return;}
     const sharedDelete=e.target.closest('[data-shared-note-delete]');if(sharedDelete){const note=sharedNotes.find(x=>String(x.id)===String(sharedDelete.dataset.sharedNoteDelete));if(!note||!isLibraryAdmin())return;if(confirm('“'+note.title+'” ortak kütüphaneden silinsin mi?')){const {error}=await supabaseClient.from('shared_notes').delete().eq('id',note.id);if(error){toast('Not silinemedi. Yönetici yetkisini kontrol et.');return;}await loadSharedNotes();toast('Ortak not silindi.');}return;}
     const readNote=e.target.closest('[data-note-read]');if(readNote){const note=data.notes.find(x=>x.id===readNote.dataset.noteRead);if(note){openNoteReader(note.id);}return;}
