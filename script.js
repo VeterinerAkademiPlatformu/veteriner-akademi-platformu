@@ -309,7 +309,7 @@
   };
   const initAuth = () => {
     if(!supabaseClient){$('#accountButton').addEventListener('click',()=>toast('Hesap servisi yüklenemedi. Sayfayı yenile.'));return;}
-    $('#accountButton').addEventListener('click',openAuth); $('[data-open-account]').forEach(el=>el.addEventListener('click',openAuth));
+    $('#accountButton').addEventListener('click',openAuth); $$('[data-open-account]').forEach(el=>el.addEventListener('click',openAuth));
     $('#authClose').addEventListener('click',closeAuth); $('#authBackdrop').addEventListener('click',e=>{if(e.target===$('#authBackdrop'))closeAuth();});
     $('#authModeToggle').addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
     $('#authForm').addEventListener('submit',async e=>{
