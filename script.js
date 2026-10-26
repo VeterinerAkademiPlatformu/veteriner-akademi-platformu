@@ -2,6 +2,10 @@
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => [...r.querySelectorAll(s)];
   const storeKey = 'veterinerAkademi.v1';
+  const supabaseClient = window.supabase?.createClient('https://jvbpoibzjihznlljeech.supabase.co', 'sb_publishable_BcGDhOHty5_NsY-wHMI_vg_pAfd1tT9');
+  let authUser = null, cloudLoading = false, cloudReady = false, cloudSaveTimer = null, lastLoadedUserId = null;
+  const ownerKey = 'veterinerAkademi.ownerId';
+
   const seed = {
     courses: [
       {id:'c1',name:'Anatomi',year:'1',color:'teal',description:'Organlar, sistemler ve topografik anatomi',topics:8,progress:38},
@@ -28,7 +32,19 @@
   };
   let data;
   try { data = JSON.parse(localStorage.getItem(storeKey)) || structuredClone(seed); } catch { data = structuredClone(seed); }
-  const save = () => { try { localStorage.setItem(storeKey, JSON.stringify(data)); } catch {} };
+  const writeLocal = () => { try { localStorage.setItem(storeKey, JSON.stringify(data)); } catch {} };
+  const queueCloudSave = () => {
+    clearTimeout(cloudSaveTimer);
+    cloudSaveTimer = setTimeout(async () => {
+      if (!authUser || !cloudReady || cloudLoading || !supabaseClient) return;
+      const userId = authUser.id;
+      const snapshot = JSON.parse(JSON.stringify(data));
+      const { error } = await supabaseClient.from('student_workspaces').upsert({ user_id: userId, data: snapshot, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (error) { console.error('Bulut kaydı başarısız:', error.message); toast('Buluta kaydedilemedi. Bağlantını kontrol et.'); }
+      else { const b=$('#accountButton'); if(b) b.title='Bulut senkronizasyonu etkin'; }
+    }, 650);
+  };
+  const save = () => { writeLocal(); if (authUser && cloudReady && !cloudLoading) queueCloudSave(); };
   let activePage='dashboard', modalType='', timerSeconds=(data.focusLength||25)*60, timerRunning=false, timerInterval=null, activeDeck=[], activeCard=0, answerShown=false, selectedAmount='10';
   const safe = v => String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const icon = name => '<i data-lucide="'+name+'"></i>';
@@ -240,4 +256,89 @@
   $('#noteFileInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;if(file.size>8*1024*1024){toast('Dosya 8 MB sınırını aşıyor.');e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{data.notes.unshift({id:crypto.randomUUID(),title:file.name,course:'Ek dosya',body:'Dosya eklendi: '+file.name+' ('+Math.round(file.size/1024)+' KB). Bu demo sürümünde dosyanın kendisi tarayıcıda kalıcı depolanmaz; PDF/görsel bulut yüklemesi sonraki aşamada bağlanacaktır.',date:new Date().toISOString().slice(0,10)});save();renderNotes();toast('Dosya bilgisi notlarına eklendi.');};reader.readAsArrayBuffer(file);e.target.value='';});
   document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus();}if(e.key==='Escape'){if(!$('#modalBackdrop').hidden)closeModal();if(!overlay.hidden)closeFocus();}});
   render();refreshIcons();
+
+  // Supabase Auth + kişiye özel çalışma alanı senkronizasyonu
+  let authMode = 'signin';
+  const authMessage = (message, error=false) => { const el=$('#authMessage'); if(el){el.textContent=message;el.classList.toggle('error',error);} };
+  const setAuthMode = (mode, clearMessage=true) => {
+    authMode=mode; const signup=mode==='signup';
+    const title=$('#authTitle'), submit=$('#authSubmit'), toggle=$('#authModeToggle'), pass=$('#authPassword');
+    if(title)title.textContent=signup?'Hesap oluştur':'Hesabına giriş yap';
+    if(submit)submit.innerHTML=(signup?'Kayıt ol':'Giriş yap')+' '+icon('arrow-right');
+    if(toggle)toggle.textContent=signup?'Zaten hesabın var mı? Giriş yap':'Hesabın yok mu? Hesap oluştur';
+    if(pass)pass.autocomplete=signup?'new-password':'current-password';
+    if(clearMessage)authMessage(''); refreshIcons();
+  };
+  const updateAccountUI = () => {
+    const b=$('#accountButton'); if(!b)return;
+    b.innerHTML = authUser ? icon(cloudReady?'cloud-check':'user-round')+'<span>'+(cloudReady?'Bulut bağlı':'Hesap açık')+'</span>' : icon('user-round')+'<span>Hesaba giriş</span>';
+    b.title = authUser ? 'Oturum: '+authUser.email+(cloudReady?' · Bulut senkronizasyonu etkin':' · Bulut bağlantısı kontrol ediliyor') : 'Giriş yap veya hesap oluştur';
+    const signed=$('#authSignedIn'), form=$('#authForm'), toggle=$('#authModeToggle');
+    if(signed)signed.hidden=!authUser; if(form)form.hidden=!!authUser; if(toggle)toggle.hidden=!!authUser;
+    const email=$('#authUserEmail'); if(email&&authUser)email.textContent=authUser.email||'Oturum açıldı';
+    if(authUser)$('#authTitle').textContent='Hesabın bağlı'; else setAuthMode(authMode,false);
+    refreshIcons();
+  };
+  const openAuth = () => { $('#authBackdrop').hidden=false; updateAccountUI(); if(!authUser)$('#authEmail').focus(); };
+  const closeAuth = () => { $('#authBackdrop').hidden=true; authMessage(''); };
+  const normalizeWorkspace = saved => {
+    const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
+    for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
+    next.dailyGoal=Number(next.dailyGoal)||3; next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0;
+    return next;
+  };
+  const loadCloudWorkspace = async user => {
+    if(!supabaseClient||!user)return;
+    if(lastLoadedUserId===user.id&&cloudReady){authUser=user;updateAccountUI();return;}
+    cloudLoading=true; cloudReady=false; authUser=user; updateAccountUI();
+    const {data:row,error}=await supabaseClient.from('student_workspaces').select('data').eq('user_id',user.id).maybeSingle();
+    if(error){cloudLoading=false;cloudReady=false;toast('Bulut verileri okunamadı. Proje erişimini kontrol et.');console.error('Bulut okuma hatası:',error.message);updateAccountUI();return;}
+    if(row&&row.data&&typeof row.data==='object'){
+      data=normalizeWorkspace(row.data); writeLocal(); try{localStorage.setItem(ownerKey,user.id);}catch{}
+      if($('#dailyGoal'))$('#dailyGoal').value=String(data.dailyGoal); if($('#focusLength'))$('#focusLength').value=String(data.focusLength);
+    } else {
+      let previousOwner=''; try{previousOwner=localStorage.getItem(ownerKey)||'';}catch{}
+      const migrate=previousOwner&&previousOwner!==user.id ? false : confirm('Bu hesapta henüz bulut kaydı yok. Bu tarayıcıdaki ders, not ve flash kart verilerini yeni hesabına aktarmak ister misin? “İptal” seçersen örnek çalışma alanı oluşturulur; mevcut bulut kayıtların etkilenmez.');
+      if(!migrate)data=structuredClone(seed);
+      writeLocal();
+      const {error:writeError}=await supabaseClient.from('student_workspaces').upsert({user_id:user.id,data:JSON.parse(JSON.stringify(data)),updated_at:new Date().toISOString()},{onConflict:'user_id'});
+      if(writeError){cloudLoading=false;cloudReady=false;toast('İlk bulut kaydı oluşturulamadı.');console.error('İlk bulut kaydı hatası:',writeError.message);updateAccountUI();return;}
+    }
+    try{localStorage.setItem(ownerKey,user.id);}catch{}
+    lastLoadedUserId=user.id; cloudLoading=false; cloudReady=true; render(); updateAccountUI(); toast('Hesabın bağlandı; çalışma alanın senkronize.');
+  };
+  const initAuth = () => {
+    if(!supabaseClient){$('#accountButton').addEventListener('click',()=>toast('Hesap servisi yüklenemedi. Sayfayı yenile.'));return;}
+    $('#accountButton').addEventListener('click',openAuth); $('[data-open-account]').forEach(el=>el.addEventListener('click',openAuth));
+    $('#authClose').addEventListener('click',closeAuth); $('#authBackdrop').addEventListener('click',e=>{if(e.target===$('#authBackdrop'))closeAuth();});
+    $('#authModeToggle').addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
+    $('#authForm').addEventListener('submit',async e=>{
+      e.preventDefault(); const email=$('#authEmail').value.trim(), password=$('#authPassword').value; const submit=$('#authSubmit');
+      submit.disabled=true; authMessage(authMode==='signup'?'Hesap oluşturuluyor…':'Giriş yapılıyor…');
+      try {
+        if(authMode==='signup'){
+          const {data:result,error}=await supabaseClient.auth.signUp({email,password}); if(error)throw error;
+          if(result.session){closeAuth();toast('Hesabın oluşturuldu.');}
+          else authMessage('Kayıt isteği alındı. E-posta adresine gelen doğrulama bağlantısını aç, ardından giriş yap.');
+        } else {
+          const {data:result,error}=await supabaseClient.auth.signInWithPassword({email,password}); if(error)throw error;
+          if(result.user)closeAuth();
+        }
+      } catch(err){authMessage(err.message||'İşlem tamamlanamadı. Bilgilerini kontrol et.',true);}
+      finally{submit.disabled=false;}
+    });
+    $('#authSignOut').addEventListener('click',async()=>{
+      const {error}=await supabaseClient.auth.signOut(); if(error){authMessage('Çıkış yapılamadı: '+error.message,true);return;}
+      authUser=null;cloudReady=false;lastLoadedUserId=null;updateAccountUI();closeAuth();toast('Hesabından güvenli çıkış yaptın.');
+    });
+    supabaseClient.auth.onAuthStateChange((event,session)=>{
+      setTimeout(()=>{
+        if(event==='SIGNED_OUT'){authUser=null;cloudReady=false;cloudLoading=false;lastLoadedUserId=null;updateAccountUI();return;}
+        if((event==='INITIAL_SESSION'||event==='SIGNED_IN')&&session?.user){loadCloudWorkspace(session.user);}
+        else if(!session?.user){authUser=null;cloudReady=false;updateAccountUI();}
+      },0);
+    });
+    updateAccountUI();
+  };
+  initAuth();
 })();
