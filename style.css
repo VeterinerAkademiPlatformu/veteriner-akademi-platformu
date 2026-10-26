@@ -110,3 +110,18 @@ html, body, body * {
   color: #edf5fb;
   background: #1da995;
 }
+
+
+/* E-posta doğrulaması için bağımsız, tam ekran dönüş sayfası */
+.verification-page{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:radial-gradient(ellipse at 50% 0%,#123849 0,transparent 48%),#0b1220}
+.verification-page[hidden]{display:none}
+.verification-page-card{width:min(100%,480px);padding:clamp(28px,6vw,48px);text-align:center;border:1px solid #29485a;border-radius:24px;background:linear-gradient(145deg,#111f31,#0d1827);box-shadow:0 24px 80px #02071180}
+.verification-page-icon{width:76px;height:76px;margin:0 auto 25px;display:grid;place-items:center;border-radius:24px;background:#173d42;border:1px solid #2d7770;color:#62e5cf}
+.verification-page-icon svg{width:36px;height:36px}
+.verification-page-card .eyebrow{justify-content:center;font-size:9px;letter-spacing:1.3px}
+.verification-page-card h1{font:800 clamp(24px,5vw,31px)/1.25 Manrope,sans-serif;letter-spacing:-.8px;color:var(--text);margin:17px 0 12px}
+.verification-page-card p{font-size:14px;line-height:1.8;color:var(--muted);margin:0 auto;max-width:350px}
+.verification-loader{height:4px;max-width:180px;margin:28px auto 0;border-radius:9px;background:#22384a;overflow:hidden}
+.verification-loader span{display:block;width:38%;height:100%;border-radius:9px;background:var(--teal);animation:verificationProgress 1.2s ease-in-out infinite alternate}
+@keyframes verificationProgress{from{transform:translateX(0)}to{transform:translateX(165%)}}
+@media(prefers-reduced-motion:reduce){.verification-loader span{animation:none;width:100%}}
