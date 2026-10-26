@@ -30,3 +30,18 @@
 .quiz-review-item p{font-size:13px;color:var(--muted);margin:10px 0 0}
 .quiz-result-actions{justify-content:flex-end;flex-wrap:wrap}
 @media(max-width:560px){.quiz-live-top{align-items:flex-start}.quiz-live-top .eyebrow{width:100%}.quiz-live-bottom{align-items:stretch}.quiz-live-bottom .primary-button{width:100%;justify-content:center}.quiz-review-heading{flex-direction:column;gap:8px}}
+
+/* Course topic study path */
+.course-topics-panel{margin:0 0 24px}.course-topics-panel[hidden]{display:none}
+.topics-header{display:flex;align-items:center;gap:18px;justify-content:space-between;flex-wrap:wrap;padding:22px 0}
+.topics-heading{flex:1;min-width:190px}.topics-heading h2{font:800 clamp(22px,3vw,30px) Manrope,sans-serif;margin:5px 0}.topics-heading p{margin:0;color:var(--muted)}
+.topics-summary{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 18px}.topics-summary span{font-size:12px;color:var(--muted);padding:8px 12px;border:1px solid var(--line);border-radius:99px;background:#101c2c}
+.topic-list{display:grid;gap:12px}.topic-item{display:flex;align-items:center;gap:16px;padding:18px;border:1px solid var(--line);border-radius:16px;background:linear-gradient(120deg,#111d2e,#101a29)}
+.topic-number{flex:0 0 42px;height:42px;display:grid;place-items:center;border-radius:13px;background:#18353a;color:var(--teal);font-weight:800}
+.topic-copy{flex:1;min-width:0}.topic-copy h3{margin:0 0 5px;font:700 15px Manrope,sans-serif}.topic-copy p{margin:0 0 7px;color:var(--muted);font-size:13px;overflow-wrap:anywhere}.topic-status{font-size:11px;color:#e7c477}.topic-status.done{color:#73dfb7}.topic-open{white-space:nowrap;flex-shrink:0}
+.topics-empty{text-align:center;padding:42px 20px;border:1px dashed #30445b;border-radius:18px}.topics-empty h3{margin:0 0 7px}.topics-empty p{color:var(--muted);margin:0 0 18px}
+.topic-study-card{max-width:850px;margin:18px auto;padding:clamp(22px,4vw,38px);border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#142338,#101a29)}
+.topic-study-card h2{font:800 clamp(22px,3vw,30px)/1.35 Manrope,sans-serif;margin:8px 0 20px}.topic-study-body{font-size:15px;line-height:1.9;white-space:normal;overflow-wrap:anywhere}
+.topic-keypoint{margin-top:22px;padding:17px;border:1px solid #2a6c62;border-radius:14px;background:#12302f}.topic-keypoint strong{display:flex;align-items:center;gap:8px;color:var(--teal)}.topic-keypoint p{margin:9px 0 0;line-height:1.7;white-space:normal}
+.topic-study-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
+@media(max-width:620px){.topics-header{align-items:flex-start;gap:12px}.topics-heading{order:2;flex-basis:100%}.topics-header>#addTopicBtn{margin-left:auto}.topic-item{align-items:flex-start;flex-wrap:wrap}.topic-copy{flex-basis:calc(100% - 60px)}.topic-open{margin-left:58px}.topic-study-actions>*{width:100%;justify-content:center}}
