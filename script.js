@@ -310,8 +310,8 @@
     const ccard=e.target.closest('[data-course-card]');if(ccard){openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===ccard.dataset.courseCard)?.name||'';},0);return;}
     const delCourse=e.target.closest('[data-course-delete]');if(delCourse){const c=data.courses.find(c=>c.id===delCourse.dataset.courseDelete);if(c&&confirm(c.name+' dersini ve bağlantılı çalışma kayıtlarını silmek istiyor musun?')){data.courses=data.courses.filter(x=>x.id!==c.id);data.notes=data.notes.filter(n=>n.course!==c.name);data.cards=data.cards.filter(n=>n.course!==c.name);save();render();toast('Ders silindi.');}return;}
     const delExam=e.target.closest('[data-exam-delete]');if(delExam){data.exams=data.exams.filter(x=>x.id!==delExam.dataset.examDelete);save();render();toast('Sınav kaydı silindi.');return;}
-    const readNote=e.target.closest('[data-note-read]');if(readNote){const note=data.notes.find(x=>x.id===readNote.dataset.noteRead);if(note){if(note.fileId)openDocumentViewer(note);else openNoteReader(note.id);}return;}
-    const delNote=e.target.closest('[data-note-delete]');if(delNote){const removed=data.notes.find(x=>x.id===delNote.dataset.noteDelete);data.notes=data.notes.filter(x=>x.id!==delNote.dataset.noteDelete);if(removed?.fileId)deleteDocument(removed.fileId);save();render();toast('Not silindi.');return;}
+    const readNote=e.target.closest('[data-note-read]');if(readNote){const note=data.notes.find(x=>x.id===readNote.dataset.noteRead);if(note){openNoteReader(note.id);}return;}
+    const delNote=e.target.closest('[data-note-delete]');if(delNote){const removed=data.notes.find(x=>x.id===delNote.dataset.noteDelete);data.notes=data.notes.filter(x=>x.id!==delNote.dataset.noteDelete);save();render();toast('Not silindi.');return;}
     const deck=e.target.closest('[data-deck]');if(deck){startDeck(deck.dataset.deck);return;}
     const openCourse=e.target.closest('[data-course-open]');if(openCourse&&!e.target.closest('button'))renderCourseTopics(openCourse.dataset.courseOpen);
   });
@@ -392,91 +392,7 @@
   });
 
   $('#createQuizBtn').addEventListener('click',startDemoQuiz);
-  // PDF/görsel dosyaları bu tarayıcıda IndexedDB içinde saklanır; çalışma alanı verileriyle dosya baytları ayrıdır.
-  const FILE_DB_NAME='veteriner-akademi-documents', FILE_STORE='documents';
-  const openFileDB=()=>new Promise((resolve,reject)=>{
-    if(!('indexedDB' in window)){reject(new Error('Tarayıcı yerel dosya depolamayı desteklemiyor.'));return;}
-    const req=indexedDB.open(FILE_DB_NAME,1);
-    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(FILE_STORE))req.result.createObjectStore(FILE_STORE,{keyPath:'id'});};
-    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||new Error('Dosya arşivi açılamadı.'));
-  });
-  const storeDocument=async(id,file)=>{const db=await openFileDB();return new Promise((resolve,reject)=>{const tx=db.transaction(FILE_STORE,'readwrite');tx.objectStore(FILE_STORE).put({id,name:file.name,type:file.type,blob:file,updatedAt:Date.now()});tx.oncomplete=()=>{db.close();resolve(true);};tx.onerror=()=>{db.close();reject(tx.error||new Error('Dosya kaydedilemedi.'));};});};
-  const getDocument=async id=>{const db=await openFileDB();return new Promise((resolve,reject)=>{const tx=db.transaction(FILE_STORE,'readonly'),req=tx.objectStore(FILE_STORE).get(id);req.onsuccess=()=>{const value=req.result||null;db.close();resolve(value);};req.onerror=()=>{db.close();reject(req.error||new Error('Dosya okunamadı.'));};});};
-  const deleteDocument=async id=>{if(!id)return;try{const db=await openFileDB();await new Promise((resolve,reject)=>{const tx=db.transaction(FILE_STORE,'readwrite');tx.objectStore(FILE_STORE).delete(id);tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);});db.close();}catch(err){console.warn('Yerel dosya silinemedi:',err);}};
-  let activeDocumentUrl=null,activePdf=null,pdfPage=1,pdfScale=1,pdfRenderTask=null,pdfLibraryPromise=null;
-  const loadPdfLibrary=()=>{
-    if(window.pdfjsLib)return Promise.resolve(window.pdfjsLib);
-    if(pdfLibraryPromise)return pdfLibraryPromise;
-    pdfLibraryPromise=new Promise((resolve,reject)=>{
-      const script=document.createElement('script');script.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-      script.onload=()=>{if(!window.pdfjsLib){reject(new Error('PDF okuyucu kütüphanesi yüklenemedi.'));return;}window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';resolve(window.pdfjsLib);};
-      script.onerror=()=>reject(new Error('PDF okuyucu indirilemedi. İnternet bağlantısını kontrol et.'));document.head.appendChild(script);
-    }).catch(err=>{pdfLibraryPromise=null;throw err;});
-    return pdfLibraryPromise;
-  };
-  const setDocumentLoading=(loading,message='Belge hazırlanıyor…')=>{$('#documentViewerLoading').hidden=!loading;$('#documentViewerStatus').textContent=message;$('#documentViewerError').hidden=true;};
-  const renderPdfPage=async()=>{
-    if(!activePdf)return;
-    if(pdfRenderTask){try{pdfRenderTask.cancel();}catch{}pdfRenderTask=null;}
-    const page=await activePdf.getPage(pdfPage),viewport=page.getViewport({scale:pdfScale});
-    const canvas=$('#pdfCanvas'),ctx=canvas.getContext('2d');
-    const dpr=Math.min(window.devicePixelRatio||1,2);
-    canvas.width=Math.floor(viewport.width*dpr);canvas.height=Math.floor(viewport.height*dpr);
-    canvas.style.width=Math.floor(viewport.width)+'px';canvas.style.height=Math.floor(viewport.height)+'px';
-    $('#pdfPageCurrent').textContent=String(pdfPage);$('#pdfPageTotal').textContent=String(activePdf.numPages);
-    $('#pdfPrevPage').disabled=pdfPage<=1;$('#pdfNextPage').disabled=pdfPage>=activePdf.numPages;
-    $('#pdfZoomLabel').textContent=Math.round(pdfScale*100)+'%';
-    pdfRenderTask=page.render({canvasContext:ctx,viewport:page.getViewport({scale:pdfScale*dpr})});
-    try{await pdfRenderTask.promise;$('#pdfCanvas').hidden=false;$('#documentViewerLoading').hidden=true;$('#documentViewerStatus').textContent='PDF belgesi · '+activePdf.numPages+' sayfa';}
-    catch(err){if(err?.name!=='RenderingCancelledException')throw err;}
-  };
-  const openDocumentViewer=async note=>{
-    $('#noteReaderBackdrop').hidden=true;document.body.classList.remove('note-reader-open');
-    $('#documentViewerBackdrop').hidden=false;document.body.classList.add('document-viewer-open');
-    $('#documentViewerTitle').textContent=note.title||note.fileName||'Belge';$('#pdfCanvas').hidden=true;$('#imageDocumentPreview').hidden=true;
-    $('#pdfTools').hidden=true;$('#pdfPageToolbar').hidden=true;setDocumentLoading(true,'Dosya aranıyor…');
-    try{
-      const stored=await getDocument(note.fileId);
-      if(!stored?.blob)throw new Error('Bu dosya bu tarayıcıda bulunamadı. Dosya başka cihazda yüklenmiş olabilir; orijinal dosyayı bu cihazdan yeniden yükle.');
-      if(activeDocumentUrl)URL.revokeObjectURL(activeDocumentUrl);
-      activeDocumentUrl=URL.createObjectURL(stored.blob);
-      if((note.fileType||stored.type)==='application/pdf'||/\.pdf$/i.test(note.fileName||stored.name)){
-        const lib=await loadPdfLibrary();activePdf=await lib.getDocument({url:activeDocumentUrl}).promise;pdfPage=1;pdfScale=1;
-        $('#pdfTools').hidden=false;$('#pdfPageToolbar').hidden=false;
-        await renderPdfPage();
-      }else{
-        activePdf=null;$('#imageDocumentPreview').src=activeDocumentUrl;$('#imageDocumentPreview').hidden=false;
-        $('#documentViewerLoading').hidden=true;$('#documentViewerStatus').textContent='Görsel · '+Math.round(stored.blob.size/1024)+' KB';
-      }
-    }catch(err){
-      $('#documentViewerLoading').hidden=true;$('#documentViewerError').hidden=false;$('#documentViewerErrorText').textContent=err.message||'Dosya açılırken beklenmeyen bir hata oluştu.';$('#documentViewerStatus').textContent='Dosya açılamadı';
-    }
-    refreshIcons();
-  };
-  const closeDocumentViewer=()=>{
-    $('#documentViewerBackdrop').hidden=true;document.body.classList.remove('document-viewer-open');
-    if(activeDocumentUrl){URL.revokeObjectURL(activeDocumentUrl);activeDocumentUrl=null;}
-    activePdf=null;pdfRenderTask=null;$('#imageDocumentPreview').removeAttribute('src');
-  };
-  $('#documentViewerClose').addEventListener('click',closeDocumentViewer);
-  $('#documentViewerBackdrop').addEventListener('click',e=>{if(e.target===$('#documentViewerBackdrop'))closeDocumentViewer();});
-  $('#pdfPrevPage').addEventListener('click',async()=>{if(activePdf&&pdfPage>1){pdfPage--;try{await renderPdfPage();}catch(err){toast('Sayfa açılamadı.');}}});
-  $('#pdfNextPage').addEventListener('click',async()=>{if(activePdf&&pdfPage<activePdf.numPages){pdfPage++;try{await renderPdfPage();}catch(err){toast('Sayfa açılamadı.');}}});
-  $('#pdfZoomIn').addEventListener('click',async()=>{if(activePdf){pdfScale=Math.min(2.5,pdfScale+.15);try{await renderPdfPage();}catch(err){toast('Yakınlaştırma başarısız.');}}});
-  $('#pdfZoomOut').addEventListener('click',async()=>{if(activePdf){pdfScale=Math.max(.5,pdfScale-.15);try{await renderPdfPage();}catch(err){toast('Uzaklaştırma başarısız.');}}});
-  $('#uploadNoteBtn').addEventListener('click',()=>$('#noteFileInput').click());
-  $('#noteFileInput').addEventListener('change',async e=>{
-    const file=e.target.files[0];if(!file)return;
-    if(file.size>8*1024*1024){toast('Dosya 8 MB sınırını aşıyor.');e.target.value='';return;}
-    if(file.type!=='application/pdf'&&!file.type.startsWith('image/')){toast('Yalnızca PDF veya görsel dosyası ekleyebilirsin.');e.target.value='';return;}
-    const id=crypto.randomUUID();
-    try{
-      await storeDocument(id,file);
-      data.notes.unshift({id:crypto.randomUUID(),title:file.name,course:'Ek dosya',body:(file.type==='application/pdf'?'PDF belgesi':'Görsel belge')+' · '+file.name+' · '+Math.max(1,Math.round(file.size/1024))+' KB',fileId:id,fileName:file.name,fileType:file.type,date:new Date().toISOString().slice(0,10)});
-      save();renderNotes();toast('Belge arşive eklendi. Şimdi Notu oku ile açabilirsin.');
-    }catch(err){toast(err.message||'Dosya bu tarayıcıya kaydedilemedi.');}
-    e.target.value='';
-  });
+  // Ortak arşiv metin tabanlıdır; notlar mevcut Supabase senkronizasyonuyla saklanır.
   document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus();}if(e.key==='Escape'){if(!$('#modalBackdrop').hidden)closeModal();if(!$('#noteReaderBackdrop').hidden)closeNoteReader();if(!overlay.hidden)closeFocus();}});
   render();refreshIcons();
 
