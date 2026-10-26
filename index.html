@@ -123,6 +123,19 @@
       <p class="auth-security-note"><i data-lucide="lock-keyhole"></i> Kayıtların hesabına özel güvenlik kurallarıyla korunur.</p>
     </section>
   </div>
+  <div class="email-confirm-backdrop" id="emailConfirmBackdrop" hidden>
+    <section class="email-confirm-card" role="dialog" aria-modal="true" aria-labelledby="emailConfirmTitle">
+      <div class="email-confirm-icon"><i data-lucide="mail-check"></i></div>
+      <span class="eyebrow">E-POSTA DOĞRULAMASI</span>
+      <h2 id="emailConfirmTitle">E-postanı kontrol et</h2>
+      <p class="email-confirm-copy">Kayıt bağlantısını şu adrese gönderdik:</p>
+      <strong class="email-confirm-address" id="emailConfirmAddress"></strong>
+      <p class="email-confirm-copy">Gelen kutunu ve gerekirse spam klasörünü kontrol et. E-postadaki doğrulama bağlantısını açtıktan sonra giriş yapabilirsin.</p>
+      <label class="email-confirm-check"><input type="checkbox" id="emailConfirmCheck"><span>E-postamı kontrol edeceğim ve doğrulama bağlantısını açacağım.</span></label>
+      <button class="primary-button full-width email-confirm-continue" id="emailConfirmContinue" type="button" disabled>Giriş paneline geç <i data-lucide="arrow-right"></i></button>
+      <button class="email-confirm-close" id="emailConfirmDismiss" type="button">Şimdilik daha sonra</button>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"><i data-lucide="check-circle-2"></i><span id="toastMessage">Kaydedildi.</span></div>
   <div class="focus-overlay" id="focusOverlay" hidden><div class="focus-modal"><button class="icon-button focus-close" id="focusClose" aria-label="Kapat"><i data-lucide="x"></i></button><span class="eyebrow">ODAK MODU</span><h2>Şimdi yalnızca öğrenmeye odaklan.</h2><div class="timer-display" id="timerDisplay">25:00</div><p>Tek bir konu seç. Bildirimleri kapat ve kendine bu zamanı ayır.</p><div class="timer-controls"><button class="primary-button" id="timerToggle"><i data-lucide="play"></i> Başlat</button><button class="outline-button" id="timerReset"><i data-lucide="rotate-ccw"></i> Sıfırla</button></div></div></div>
   <script src="script.js"></script>
