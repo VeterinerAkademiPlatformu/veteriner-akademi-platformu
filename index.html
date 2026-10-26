@@ -114,6 +114,7 @@
         <div class="reader-tools">
           <button class="reader-tool" id="noteFontDown" type="button" aria-label="Yazıyı küçült" title="Yazıyı küçült">A−</button>
           <button class="reader-tool" id="noteFontUp" type="button" aria-label="Yazıyı büyüt" title="Yazıyı büyüt">A+</button><label class="reader-spacing-control"><span>Satır</span><select id="noteLineSpacing" aria-label="Satır aralığı"><option value="1.65">Sıkı</option><option value="1.95" selected>Rahat</option><option value="2.2">Geniş</option></select></label>
+          <button class="reader-tool reader-study-toggle" id="noteStudyModeBtn" type="button" aria-pressed="false" title="Sınav odaklı çalışma modunu aç"><i data-lucide="graduation-cap"></i><span>Çalışma modu</span></button>
           <button class="reader-tool" id="noteCopyBtn" type="button" aria-label="Notu kopyala" title="Notu kopyala"><i data-lucide="copy"></i><span>Kopyala</span></button>
           <button class="reader-tool" id="noteBookmarkBtn" type="button" aria-label="Yer imi ekle" title="Yer imi ekle"><i data-lucide="bookmark"></i><span>Yer imi</span></button>
           <button class="reader-tool" id="noteHighlightBtn" type="button" aria-label="Seçili metni vurgula" title="Seçtiğin metni vurgula"><i data-lucide="highlighter"></i><span>Vurgula</span></button>
@@ -136,6 +137,7 @@
             <ol id="noteReaderTocList"></ol>
           </nav>
           <div class="note-reader-body" id="noteReaderBody"></div>
+          <section class="reader-study-panel" id="noteStudyPanel" hidden aria-label="Sınav odaklı çalışma alanı"></section>
           <footer class="reader-note-footer"><span><i data-lucide="book-open-check"></i> Kişisel çalışma arşivin</span><button type="button" class="reader-back-bottom" id="noteReaderCloseBottom">Notlara dön <i data-lucide="arrow-right"></i></button></footer>
         </article>
       </div>
