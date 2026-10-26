@@ -161,9 +161,10 @@
   };
   const openNoteReader = id => {
     const note=data.notes.find(n=>String(n.id)===String(id)) || (String(id).startsWith('shared_') ? (()=>{const shared=sharedNotes.find(n=>String(n.id)===String(id).slice(7));return shared?{id:'shared_'+String(shared.id),title:shared.title,course:shared.course,body:shared.content||'',date:(shared.updated_at||shared.created_at||'').slice(0,10),isShared:true}:null;})() : null);if(!note){console.warn('Not okuma ekranı için not bulunamadı:',id);return;}
-    readerNoteId=id;readerFontSize=18;
+    readerNoteId=id;try{const stored=Number(localStorage.getItem('readerFontSize'));readerFontSize=Number.isFinite(stored)&&stored>=15&&stored<=25?stored:18;}catch(_){readerFontSize=18;}
     $('#noteReaderCourse').textContent=note.course||'Genel not';
     $('#noteReaderDate').textContent='Oluşturulma tarihi · '+(note.date||'Tarih belirtilmemiş');
+    const readerText=String(note.body||'').trim(),wordCount=readerText?readerText.split(/\s+/u).length:0,minutes=Math.max(1,Math.ceil(wordCount/200));const stats=$('#noteReaderStats');if(stats)stats.textContent=wordCount.toLocaleString('tr-TR')+' kelime · yaklaşık '+minutes+' dk okuma';
     $('#noteReaderTitle').textContent=note.title||'Başlıksız not';
     $('#noteReaderSearch').value='';
     $('#noteReaderSearchCount').textContent='';
@@ -212,8 +213,8 @@
     const max=box.scrollHeight-box.clientHeight;n.readPosition=max>0?Math.max(0,Math.min(1,box.scrollTop/max)):0;
     clearTimeout(readerSaveTimer);readerSaveTimer=setTimeout(()=>save(),900);
   },{passive:true});
-  $('#noteFontDown').addEventListener('click',()=>{readerFontSize=Math.max(15,readerFontSize-1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
-  $('#noteFontUp').addEventListener('click',()=>{readerFontSize=Math.min(25,readerFontSize+1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
+  $('#noteFontDown').addEventListener('click',()=>{readerFontSize=Math.max(15,readerFontSize-1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';try{localStorage.setItem('readerFontSize',String(readerFontSize));}catch(_){}});
+  $('#noteFontUp').addEventListener('click',()=>{readerFontSize=Math.min(25,readerFontSize+1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';try{localStorage.setItem('readerFontSize',String(readerFontSize));}catch(_){}});
   $('#noteLineSpacing')?.addEventListener('change',e=>{const value=['1.65','1.95','2.2'].includes(e.target.value)?e.target.value:'1.95';$('#noteReaderBody').style.lineHeight=value;try{localStorage.setItem('readerLineSpacing',value);}catch(_){};});
   $('#noteCopyBtn').addEventListener('click',async()=>{const n=data.notes.find(x=>String(x.id)===String(readerNoteId));const shared=String(readerNoteId||'').startsWith('shared_')?sharedNotes.find(x=>String(x.id)===String(readerNoteId).slice(7)):null;const title=n?.title||shared?.title||'';const body=n?.body??shared?.content??'';if(!n&&!shared)return;try{await navigator.clipboard.writeText(title+'\n\n'+body);toast('Not panoya kopyalandı.');}catch(_){toast('Kopyalama desteklenmiyor. Metni seçip kopyalayabilirsin.');}});
   $('#noteBookmarkBtn').addEventListener('click',()=>{const n=data.notes.find(x=>x.id===readerNoteId);if(!n||n.isShared)return;n.bookmarked=!n.bookmarked;save();updateBookmarkButton(n);renderNotes();toast(n.bookmarked?'Not yer imlerine eklendi.':'Yer imi kaldırıldı.');});
