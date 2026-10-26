@@ -170,6 +170,7 @@
     readerSearchMatches=[];readerSearchIndex=0;
     renderReaderBody(note);
     $('#noteReaderBody').style.fontSize=readerFontSize+'px';
+    const spacing=$('#noteLineSpacing');if(spacing){try{spacing.value=localStorage.getItem('readerLineSpacing')||'1.95';}catch(_){spacing.value='1.95';}$('#noteReaderBody').style.lineHeight=spacing.value;}
     $('#noteReaderBackdrop').hidden=false;document.body.classList.add('note-reader-open');
     $('#noteBookmarkBtn').disabled=!!note.isShared;$('#noteHighlightBtn').disabled=!!note.isShared;
     $('#noteBookmarkBtn').title=note.isShared?'Ortak notlar salt okunurdur':'Yer imi ekle';$('#noteHighlightBtn').title=note.isShared?'Ortak notlar salt okunurdur':'Seçili metni vurgula';
@@ -184,8 +185,8 @@
   };
   const updateReaderProgress = () => {
     const box=$('#noteReaderScroll');if(!box)return;
-    const max=box.scrollHeight-box.clientHeight;
-    $('#noteReaderProgress').style.width=(max>0?Math.min(100,box.scrollTop/max*100):100)+'%';
+    const max=box.scrollHeight-box.clientHeight,percent=Math.round(max>0?Math.max(0,Math.min(100,box.scrollTop/max*100)):100),bar=$('#noteReaderProgress'),track=bar?.parentElement,label=$('#noteReaderProgressLabel');
+    if(bar)bar.style.width=percent+'%';if(track)track.setAttribute('aria-valuenow',String(percent));if(label)label.textContent='Okuma ilerlemesi · '+percent+'%';
   };
   $('#noteReaderSearch').addEventListener('input',()=>{readerSearchIndex=0;runReaderSearch($('#noteReaderSearch').value);});
   $('#noteReaderSearchClear').addEventListener('click',()=>{$('#noteReaderSearch').value='';runReaderSearch('');$('#noteReaderSearch').focus();});
@@ -213,6 +214,7 @@
   },{passive:true});
   $('#noteFontDown').addEventListener('click',()=>{readerFontSize=Math.max(15,readerFontSize-1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
   $('#noteFontUp').addEventListener('click',()=>{readerFontSize=Math.min(25,readerFontSize+1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
+  $('#noteLineSpacing')?.addEventListener('change',e=>{const value=['1.65','1.95','2.2'].includes(e.target.value)?e.target.value:'1.95';$('#noteReaderBody').style.lineHeight=value;try{localStorage.setItem('readerLineSpacing',value);}catch(_){};});
   $('#noteCopyBtn').addEventListener('click',async()=>{const n=data.notes.find(x=>String(x.id)===String(readerNoteId));const shared=String(readerNoteId||'').startsWith('shared_')?sharedNotes.find(x=>String(x.id)===String(readerNoteId).slice(7)):null;const title=n?.title||shared?.title||'';const body=n?.body??shared?.content??'';if(!n&&!shared)return;try{await navigator.clipboard.writeText(title+'\n\n'+body);toast('Not panoya kopyalandı.');}catch(_){toast('Kopyalama desteklenmiyor. Metni seçip kopyalayabilirsin.');}});
   $('#noteBookmarkBtn').addEventListener('click',()=>{const n=data.notes.find(x=>x.id===readerNoteId);if(!n||n.isShared)return;n.bookmarked=!n.bookmarked;save();updateBookmarkButton(n);renderNotes();toast(n.bookmarked?'Not yer imlerine eklendi.':'Yer imi kaldırıldı.');});
   $('#noteHighlightBtn').addEventListener('click',()=>{
