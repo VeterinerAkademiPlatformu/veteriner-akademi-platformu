@@ -290,6 +290,40 @@
     refreshIcons();
   };
   const closeEmailConfirmation = () => { $('#emailConfirmBackdrop').hidden=true; };
+
+  // E-posta bağlantısından dönüldüğünde ayrı doğrulama ekranı göster.
+  let verificationReturn = /(?:^|[?&])code=/.test(window.location.search) ||
+    /(?:^|[&#])type=(?:signup|email|magiclink)(?:&|$)/i.test(window.location.hash) ||
+    /(?:^|[&#])access_token=/.test(window.location.hash);
+  let verificationFinished = false;
+  const verificationPage = $('#verificationPage');
+  const showVerificationPage = (state, message) => {
+    if(!verificationPage)return;
+    const title=$('#verificationPageTitle'), copy=$('#verificationPageCopy'), iconBox=$('#verificationPageIcon');
+    if(title)title.textContent=state==='success'?'E-posta adresin doğrulandı':state==='error'?'Doğrulama tamamlanamadı':'E-posta adresin doğrulanıyor';
+    if(copy)copy.textContent=message || (state==='success'?'Hesabın açılıyor. Birazdan çalışma alanına yönlendirileceksin.':'Lütfen bekle; doğrulama bağlantın kontrol ediliyor.');
+    if(iconBox)iconBox.innerHTML=icon(state==='success'?'check-circle-2':state==='error'?'mail-x':'mail-check');
+    verificationPage.hidden=false;
+    refreshIcons();
+  };
+  const finishVerificationFlow = user => {
+    if(!verificationReturn || verificationFinished || !user)return;
+    verificationFinished=true;
+    showVerificationPage('success','E-posta adresin doğrulandı. Hesabın açılıyor; birazdan çalışma alanına yönlendirileceksin.');
+    // Doğrulama kodunu/adres çubuğundaki tokenları URL'den temizle.
+    try{window.history.replaceState({},document.title,window.location.pathname+window.location.search.replace(/([?&])code=[^&]*/,'$1').replace(/[?&]$/,'') );}catch{}
+    window.setTimeout(()=>{
+      if(verificationPage)verificationPage.hidden=true;
+      const dashboard=$('#page-dashboard');
+      if(dashboard){$('.page').forEach(p=>p.classList.remove('active'));dashboard.classList.add('active');}
+      $('.nav-item[data-page]').forEach(n=>n.classList.toggle('active',n.dataset.page==='dashboard'));
+      const crumb=$('#crumbCurrent');if(crumb)crumb.textContent='Genel Bakış';
+      updateAccountUI();
+      render();
+      refreshIcons();
+    },2200);
+  };
+  if(verificationReturn)showVerificationPage('pending');
   const normalizeWorkspace = saved => {
     const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
     for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
@@ -372,7 +406,10 @@
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       setTimeout(()=>{
         if(event==='SIGNED_OUT'){authUser=null;cloudReady=false;cloudLoading=false;lastLoadedUserId=null;data=structuredClone(seed);writeLocal();render();updateAccountUI();return;}
-        if((event==='INITIAL_SESSION'||event==='SIGNED_IN')&&session?.user){loadCloudWorkspace(session.user);}
+        if((event==='INITIAL_SESSION'||event==='SIGNED_IN')&&session?.user){
+          loadCloudWorkspace(session.user);
+          finishVerificationFlow(session.user);
+        }
         else if(!session?.user){authUser=null;cloudReady=false;updateAccountUI();}
       },0);
     });
