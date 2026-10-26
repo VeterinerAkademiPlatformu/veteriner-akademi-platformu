@@ -212,7 +212,7 @@
   },{passive:true});
   $('#noteFontDown').addEventListener('click',()=>{readerFontSize=Math.max(15,readerFontSize-1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
   $('#noteFontUp').addEventListener('click',()=>{readerFontSize=Math.min(25,readerFontSize+1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
-  $('#noteCopyBtn').addEventListener('click',async()=>{const n=data.notes.find(x=>x.id===readerNoteId);if(!n)return;try{await navigator.clipboard.writeText((n.title||'')+'\n\n'+(n.body||''));toast('Not panoya kopyalandı.');}catch(_){toast('Kopyalama desteklenmiyor. Metni seçip kopyalayabilirsin.');}});
+  $('#noteCopyBtn').addEventListener('click',async()=>{const n=data.notes.find(x=>String(x.id)===String(readerNoteId));const shared=String(readerNoteId||'').startsWith('shared_')?sharedNotes.find(x=>String(x.id)===String(readerNoteId).slice(7)):null;const title=n?.title||shared?.title||'';const body=n?.body??shared?.content??'';if(!n&&!shared)return;try{await navigator.clipboard.writeText(title+'\n\n'+body);toast('Not panoya kopyalandı.');}catch(_){toast('Kopyalama desteklenmiyor. Metni seçip kopyalayabilirsin.');}});
   $('#noteBookmarkBtn').addEventListener('click',()=>{const n=data.notes.find(x=>x.id===readerNoteId);if(!n||n.isShared)return;n.bookmarked=!n.bookmarked;save();updateBookmarkButton(n);renderNotes();toast(n.bookmarked?'Not yer imlerine eklendi.':'Yer imi kaldırıldı.');});
   $('#noteHighlightBtn').addEventListener('click',()=>{
     const n=data.notes.find(x=>x.id===readerNoteId);if(!n||n.isShared)return;
