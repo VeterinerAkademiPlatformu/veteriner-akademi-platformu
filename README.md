@@ -1,6 +1,11 @@
-# veteriner-akademi-platformu
-Veteriner fakültesi öğrencileri için dijital sınav ve çalışma platformu.
+# Veteriner Akademi Platformu
 
-## Supabase hazırlığı
+Veteriner fakültesi öğrencileri için dijital ders, not, sınav ve tekrar çalışma alanı.
 
-Güvenli öğrenci verisi tablosu ve bağlantı kurulum adımları için [`supabase/SETUP.md`](supabase/SETUP.md) dosyasına bakın. SQL şeması [`supabase/schema.sql`](supabase/schema.sql) içindedir. Bu dosyalar altyapı hazırlığıdır; hesap girişi ve bulut senkronizasyonu henüz etkin değildir.
+## Supabase bağlantısı
+Site, Supabase e-posta/şifre kimlik doğrulamasını ve öğrenciye özel bulut çalışma alanını kullanacak şekilde bağlandı. Veriler `public.student_workspaces` tablosunda JSON çalışma alanı olarak saklanır; RLS kullanıcıların yalnızca kendi kayıtlarına erişmesine izin verir.
+
+Kurulum ve doğrulama notları: [`supabase/SETUP.md`](supabase/SETUP.md)  
+Veritabanı şeması: [`supabase/schema.sql`](supabase/schema.sql)
+
+Tarayıcıda yalnızca yayınlanabilir API anahtarı kullanılır. `service_role` veya gizli anahtarlar istemci koduna konulmamalıdır.
