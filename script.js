@@ -111,8 +111,8 @@
     $('#topicAddCard').addEventListener('click',()=>{openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=course.name;const q=$('[name="question"]');if(q)q.value=topic.title+' konusunun temel noktası nedir?';const a=$('[name="answer"]');if(a)a.value=topic.keypoint||topic.summary.slice(0,220);},0);});
     $('#markTopicDone').addEventListener('click',()=>{topic.done=!topic.done;course.progress=course.topicList.length?Math.round(course.topicList.filter(t=>t.done).length/course.topicList.length*100):0;save();renderCourses();renderDashboard();renderCourseTopics(activeTopicCourseId);toast(topic.done?'Konu tamamlandı olarak işaretlendi.':'Konu tekrar listesine alındı.');});
     $('#revealRecallAnswer').addEventListener('click',()=>{$('#recallAnswer').hidden=false;$('#recallRating').hidden=false;$('#revealRecallAnswer').hidden=true;});
-    $('#recallNeedsReview').addEventListener('click',()=>{topic.needsReview=true;topic.lastReviewed=new Date().toISOString().slice(0,10);save();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Konu tekrar listene eklendi.');});
-    $('#recallGotIt').addEventListener('click',()=>{topic.needsReview=false;topic.lastReviewed=new Date().toISOString().slice(0,10);topic.recalledCount=(topic.recalledCount||0)+1;save();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Harika! Konu tekrar durumun güncellendi.');});
+    $('#recallNeedsReview').addEventListener('click',()=>{topic.needsReview=true;topic.lastReviewed=new Date().toISOString().slice(0,10);save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Konu tekrar listene eklendi.');});
+    $('#recallGotIt').addEventListener('click',()=>{topic.needsReview=false;topic.lastReviewed=new Date().toISOString().slice(0,10);topic.recalledCount=(topic.recalledCount||0)+1;save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Harika! Konu tekrar durumun güncellendi.');});
   };
   document.addEventListener('click',e=>{
     if(e.target.closest('#backToCourses')){const p=$('#courseTopicsPanel');if(p)p.hidden=true;$('#allCourses').hidden=false;return;}
