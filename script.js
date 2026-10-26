@@ -306,12 +306,18 @@
       data=normalizeWorkspace(row.data); writeLocal(); try{localStorage.setItem(ownerKey,user.id);}catch{}
       if($('#dailyGoal'))$('#dailyGoal').value=String(data.dailyGoal); if($('#focusLength'))$('#focusLength').value=String(data.focusLength);
     } else {
+      // İlk girişte sürekli onay penceresi açma: aynı tarayıcıdaki veriyi koru,
+      // farklı bir kullanıcıya ait olduğu bilinen yerel verileri ise paylaşma.
       let previousOwner=''; try{previousOwner=localStorage.getItem(ownerKey)||'';}catch{}
-      const migrate=previousOwner&&previousOwner!==user.id ? false : confirm('Bu hesapta henüz bulut kaydı yok. Bu tarayıcıdaki ders, not ve flash kart verilerini yeni hesabına aktarmak ister misin? “İptal” seçersen örnek çalışma alanı oluşturulur; mevcut bulut kayıtların etkilenmez.');
-      if(!migrate)data=structuredClone(seed);
+      if(previousOwner && previousOwner!==user.id) data=structuredClone(seed);
       writeLocal();
       const {error:writeError}=await supabaseClient.from('student_workspaces').upsert({user_id:user.id,data:JSON.parse(JSON.stringify(data)),updated_at:new Date().toISOString()},{onConflict:'user_id'});
-      if(writeError){cloudLoading=false;cloudReady=false;toast('İlk bulut kaydı oluşturulamadı.');console.error('İlk bulut kaydı hatası:',writeError.message);updateAccountUI();return;}
+      if(writeError){
+        cloudLoading=false;cloudReady=false;
+        toast('Bulut kaydı oluşturulamadı. İnternet bağlantısını ve Supabase izinlerini kontrol et.');
+        console.error('İlk bulut kaydı hatası:',writeError.message);
+        updateAccountUI();return;
+      }
     }
     try{localStorage.setItem(ownerKey,user.id);}catch{}
     lastLoadedUserId=user.id; cloudLoading=false; cloudReady=true; render(); updateAccountUI(); toast('Hesabın bağlandı; çalışma alanın senkronize.');
