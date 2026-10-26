@@ -345,6 +345,11 @@
           else { closeAuth(); showEmailConfirmation(email); }
         } else {
           const {data:result,error}=await supabaseClient.auth.signInWithPassword({email,password}); if(error)throw error;
+          if(result.user && !(result.user.email_confirmed_at || result.user.confirmed_at)) {
+            if(result.session) await supabaseClient.auth.signOut({scope:'local'});
+            authMessage('E-posta adresin henüz doğrulanmadı. Gelen kutundaki doğrulama bağlantısını açtıktan sonra giriş yapabilirsin.',true);
+            return;
+          }
           if(result.user)closeAuth();
         }
       } catch(err){authMessage(err.message||'İşlem tamamlanamadı. Bilgilerini kontrol et.',true);}
