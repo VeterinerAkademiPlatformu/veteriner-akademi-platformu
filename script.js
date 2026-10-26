@@ -126,13 +126,13 @@
   $('#modalClose').addEventListener('click',closeModal);$('#modalCancel').addEventListener('click',closeModal);
   $('#modalBackdrop').addEventListener('click',e=>{if(e.target===$('#modalBackdrop'))closeModal();});
   $('#modalForm').addEventListener('submit',e=>{
-    e.preventDefault();const f=Object.fromEntries(new FormData(e.currentTarget).entries());
+    e.preventDefault();const submittedType=modalType;const f=Object.fromEntries(new FormData(e.currentTarget).entries());
     if(modalType==='course')data.courses.push({id:crypto.randomUUID(),name:f.name.trim(),year:f.year,color:['teal','purple','blue','gold'][data.courses.length%4],description:f.description.trim()||'Ders çalışma alanı',topics:0,progress:0});
     if(modalType==='exam')data.exams.push({id:crypto.randomUUID(),course:f.course.trim(),type:f.type,date:f.date,priority:f.priority});
     if(modalType==='note')data.notes.unshift({id:crypto.randomUUID(),title:f.title.trim(),course:f.course||'Genel',body:f.body.trim(),date:new Date().toISOString().slice(0,10)});
     if(modalType==='card')data.cards.push({id:crypto.randomUUID(),course:f.course.trim(),question:f.question.trim(),answer:f.answer.trim()});
-    if(modalType==='topic'){const course=data.courses.find(c=>c.name===f.course);if(course){course.topicList=course.topicList||[];course.topicList.push({id:crypto.randomUUID(),title:f.title.trim(),summary:f.summary.trim(),keypoint:(f.keypoint||'').trim(),done:false});course.topics=course.topicList.length;}}
-    save();closeModal();render();toast('Kaydın başarıyla oluşturuldu.');
+    if(modalType==='topic'){const course=data.courses.find(c=>c.name===f.course);if(course){course.topicList=course.topicList||[];course.topicList.push({id:crypto.randomUUID(),title:f.title.trim(),summary:f.summary.trim(),keypoint:(f.keypoint||'').trim(),done:false});course.topics=course.topicList.length;activeTopicCourseId=course.id;}}
+    save();closeModal();render();if(submittedType==='topic'&&activeTopicCourseId)renderCourseTopics(activeTopicCourseId);toast('Kaydın başarıyla oluşturuldu.');
   });
   document.addEventListener('click',e=>{
     const nav=e.target.closest('[data-page]');if(nav){e.preventDefault();go(nav.dataset.page);return;}
