@@ -87,11 +87,37 @@
     const upcoming=data.exams.filter(e=>new Date(e.date+'T12:00:00')>=now).length;
     $('#examSummary').innerHTML='<div class="summary-tile"><span>Takvimdeki sınavlar</span><strong>'+data.exams.length+'</strong></div><div class="summary-tile"><span>Yaklaşan sınavlar</span><strong>'+upcoming+'</strong></div><div class="summary-tile"><span>Yüksek öncelik</span><strong>'+data.exams.filter(e=>e.priority==='Yüksek').length+'</strong></div>';
   };
+  let readerNoteId=null, readerFontSize=18;
+  const openNoteReader = id => {
+    const note=data.notes.find(n=>n.id===id);if(!note)return;
+    readerNoteId=id;readerFontSize=18;
+    $('#noteReaderCourse').textContent=note.course||'Genel not';
+    $('#noteReaderDate').textContent='Oluşturulma tarihi · '+(note.date||'Tarih belirtilmemiş');
+    $('#noteReaderTitle').textContent=note.title||'Başlıksız not';
+    $('#noteReaderBody').innerHTML=safe(note.body||'Bu notta henüz içerik yok.').replace(/\n/g,'<br>');
+    $('#noteReaderBody').style.fontSize=readerFontSize+'px';
+    $('#noteReaderScroll').scrollTop=0;$('#noteReaderProgress').style.width='0%';
+    $('#noteReaderBackdrop').hidden=false;document.body.classList.add('note-reader-open');
+    refreshIcons();
+  };
+  const closeNoteReader = () => { $('#noteReaderBackdrop').hidden=true;document.body.classList.remove('note-reader-open');readerNoteId=null; };
+  const updateReaderProgress = () => {
+    const box=$('#noteReaderScroll');if(!box)return;
+    const max=box.scrollHeight-box.clientHeight;
+    $('#noteReaderProgress').style.width=(max>0?Math.min(100,box.scrollTop/max*100):100)+'%';
+  };
+  $('#noteReaderClose').addEventListener('click',closeNoteReader);
+  $('#noteReaderCloseBottom').addEventListener('click',closeNoteReader);
+  $('#noteReaderBackdrop').addEventListener('click',e=>{if(e.target===$('#noteReaderBackdrop'))closeNoteReader();});
+  $('#noteReaderScroll').addEventListener('scroll',updateReaderProgress,{passive:true});
+  $('#noteFontDown').addEventListener('click',()=>{readerFontSize=Math.max(15,readerFontSize-1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
+  $('#noteFontUp').addEventListener('click',()=>{readerFontSize=Math.min(25,readerFontSize+1);$('#noteReaderBody').style.fontSize=readerFontSize+'px';});
+  $('#noteCopyBtn').addEventListener('click',async()=>{const n=data.notes.find(x=>x.id===readerNoteId);if(!n)return;try{await navigator.clipboard.writeText((n.title||'')+'\n\n'+(n.body||''));toast('Not panoya kopyalandı.');}catch(_){toast('Kopyalama desteklenmiyor. Metni seçip kopyalayabilirsin.');}});
   const renderNotes = () => {
     const q=($('#noteSearch')?.value||'').toLocaleLowerCase('tr-TR'), course=$('#noteCourseFilter')?.value||'all';
     const select=$('#noteCourseFilter');if(select){const val=select.value;select.innerHTML='<option value="all">Tüm dersler</option>'+data.courses.map(c=>'<option>'+safe(c.name)+'</option>').join('');if([...select.options].some(o=>o.value===val))select.value=val;}
     const list=data.notes.filter(n=>(n.title+' '+n.body+' '+n.course).toLocaleLowerCase('tr-TR').includes(q)&&(course==='all'||n.course===course));
-    $('#notesGrid').innerHTML=list.map(n=>'<article class="note-card"><div class="note-meta">'+icon('notebook-pen')+' '+safe(n.course||'Genel not')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.body)+'</p><footer><span>'+safe(n.date||'Bugün')+'</span><button data-note-delete="'+safe(n.id)+'" aria-label="Notu sil">'+icon('trash-2')+' Sil</button></footer></article>').join('')||empty('Not arşivin hazır','İlk notunu oluşturarak önemli bilgilerini kaydet.','notebook-pen');
+    $('#notesGrid').innerHTML=list.map(n=>'<article class="note-card note-card-reader"><div class="note-meta">'+icon('notebook-pen')+' '+safe(n.course||'Genel not')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.body)+'</p><div class="note-card-actions"><button class="note-read-button" data-note-read="'+safe(n.id)+'">'+icon('book-open-text')+' Notu oku <span>→</span></button><button class="note-delete-button" data-note-delete="'+safe(n.id)+'" aria-label="Notu sil" title="Notu sil">'+icon('trash-2')+'</button></div><footer><span>'+icon('calendar-days')+' '+safe(n.date||'Bugün')+'</span><span>Okuma görünümü</span></footer></article>').join('')||empty('Not arşivin hazır','İlk notunu oluşturarak önemli bilgilerini kaydet.','notebook-pen');
   };
   const renderFlashcards = () => {
     const groups={};data.cards.forEach(c=>(groups[c.course||'Genel kartlar']??=[]).push(c));
@@ -171,6 +197,7 @@
     const ccard=e.target.closest('[data-course-card]');if(ccard){openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===ccard.dataset.courseCard)?.name||'';},0);return;}
     const delCourse=e.target.closest('[data-course-delete]');if(delCourse){const c=data.courses.find(c=>c.id===delCourse.dataset.courseDelete);if(c&&confirm(c.name+' dersini ve bağlantılı çalışma kayıtlarını silmek istiyor musun?')){data.courses=data.courses.filter(x=>x.id!==c.id);data.notes=data.notes.filter(n=>n.course!==c.name);data.cards=data.cards.filter(n=>n.course!==c.name);save();render();toast('Ders silindi.');}return;}
     const delExam=e.target.closest('[data-exam-delete]');if(delExam){data.exams=data.exams.filter(x=>x.id!==delExam.dataset.examDelete);save();render();toast('Sınav kaydı silindi.');return;}
+    const readNote=e.target.closest('[data-note-read]');if(readNote){openNoteReader(readNote.dataset.noteRead);return;}
     const delNote=e.target.closest('[data-note-delete]');if(delNote){data.notes=data.notes.filter(x=>x.id!==delNote.dataset.noteDelete);save();render();toast('Not silindi.');return;}
     const deck=e.target.closest('[data-deck]');if(deck){startDeck(deck.dataset.deck);return;}
     const openCourse=e.target.closest('[data-course-open]');if(openCourse&&!e.target.closest('button'))renderCourseTopics(openCourse.dataset.courseOpen);
@@ -254,7 +281,7 @@
   $('#createQuizBtn').addEventListener('click',startDemoQuiz);
   $('#uploadNoteBtn').addEventListener('click',()=>$('#noteFileInput').click());
   $('#noteFileInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;if(file.size>8*1024*1024){toast('Dosya 8 MB sınırını aşıyor.');e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{data.notes.unshift({id:crypto.randomUUID(),title:file.name,course:'Ek dosya',body:'Dosya eklendi: '+file.name+' ('+Math.round(file.size/1024)+' KB). Bu demo sürümünde dosyanın kendisi tarayıcıda kalıcı depolanmaz; PDF/görsel bulut yüklemesi sonraki aşamada bağlanacaktır.',date:new Date().toISOString().slice(0,10)});save();renderNotes();toast('Dosya bilgisi notlarına eklendi.');};reader.readAsArrayBuffer(file);e.target.value='';});
-  document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus();}if(e.key==='Escape'){if(!$('#modalBackdrop').hidden)closeModal();if(!overlay.hidden)closeFocus();}});
+  document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus();}if(e.key==='Escape'){if(!$('#modalBackdrop').hidden)closeModal();if(!$('#noteReaderBackdrop').hidden)closeNoteReader();if(!overlay.hidden)closeFocus();}});
   render();refreshIcons();
 
   // Supabase Auth + kişiye özel çalışma alanı senkronizasyonu
