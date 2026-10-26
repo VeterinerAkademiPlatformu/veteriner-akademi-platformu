@@ -140,6 +140,31 @@
     </section>
   </div>
 
+  <div class="document-viewer-backdrop" id="documentViewerBackdrop" hidden>
+    <section class="document-viewer" role="dialog" aria-modal="true" aria-labelledby="documentViewerTitle">
+      <header class="document-viewer-topbar">
+        <button class="reader-back-button" id="documentViewerClose" type="button"><i data-lucide="arrow-left"></i><span>Notlarıma dön</span></button>
+        <div class="document-viewer-heading"><i data-lucide="file-text"></i><strong id="documentViewerTitle">Belge okuyucu</strong><small id="documentViewerStatus">Hazırlanıyor…</small></div>
+        <div class="document-viewer-tools" id="pdfTools" hidden>
+          <button class="reader-tool" id="pdfZoomOut" type="button" aria-label="Uzaklaştır">−</button>
+          <span id="pdfZoomLabel">100%</span>
+          <button class="reader-tool" id="pdfZoomIn" type="button" aria-label="Yakınlaştır">+</button>
+        </div>
+      </header>
+      <div class="pdf-page-toolbar" id="pdfPageToolbar" hidden>
+        <button class="reader-tool" id="pdfPrevPage" type="button">‹ Önceki</button>
+        <span>Sayfa <strong id="pdfPageCurrent">1</strong> / <strong id="pdfPageTotal">1</strong></span>
+        <button class="reader-tool" id="pdfNextPage" type="button">Sonraki ›</button>
+      </div>
+      <div class="document-viewer-content" id="documentViewerContent">
+        <div class="document-viewer-loading" id="documentViewerLoading"><i data-lucide="loader-circle"></i><strong>Belge hazırlanıyor</strong><span>Dosya açılırken lütfen bekle.</span></div>
+        <canvas id="pdfCanvas" hidden></canvas>
+        <img id="imageDocumentPreview" alt="Yüklenen görsel" hidden>
+        <div class="document-viewer-error" id="documentViewerError" hidden><i data-lucide="file-warning"></i><strong>Belge açılamadı</strong><p id="documentViewerErrorText">Dosyaya erişilemedi.</p></div>
+      </div>
+    </section>
+  </div>
+
   <div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><div><span class="eyebrow" id="modalEyebrow">YENİ KAYIT</span><h2 id="modalTitle">Yeni kayıt oluştur</h2></div><button class="icon-button" id="modalClose" aria-label="Kapat"><i data-lucide="x"></i></button></div><form id="modalForm"><div id="modalFields" class="modal-fields"></div><div class="modal-actions"><button type="button" class="outline-button" id="modalCancel">Vazgeç</button><button type="submit" class="primary-button"><i data-lucide="check"></i> Kaydet</button></div></form></section></div>
 
   <div class="auth-backdrop" id="authBackdrop" hidden>
