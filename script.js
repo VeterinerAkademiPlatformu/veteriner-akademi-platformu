@@ -203,6 +203,7 @@
   $('#noteReaderClose').addEventListener('click',closeNoteReader);
   $('#noteReaderCloseBottom').addEventListener('click',closeNoteReader);
   $('#noteReaderBackdrop').addEventListener('click',e=>{if(e.target===$('#noteReaderBackdrop'))closeNoteReader();});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape' && $('#noteReaderBackdrop') && !$('#noteReaderBackdrop').hidden){e.preventDefault();closeNoteReader();}});
   $('#noteReaderScroll').addEventListener('scroll',()=>{
     updateReaderProgress();
     if(!readerNoteId || readerNoteId===readerSharedId)return;
