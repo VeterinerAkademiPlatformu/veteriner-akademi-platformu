@@ -340,7 +340,7 @@
       submit.disabled=true; authMessage(authMode==='signup'?'Hesap oluşturuluyor…':'Giriş yapılıyor…');
       try {
         if(authMode==='signup'){
-          const {data:result,error}=await supabaseClient.auth.signUp({email,password}); if(error)throw error;
+          const {data:result,error}=await supabaseClient.auth.signUp({email,password,options:{emailRedirectTo:window.location.origin+window.location.pathname}}); if(error)throw error;
           if(result.session){closeAuth();toast('Hesabın oluşturuldu.');}
           else { closeAuth(); showEmailConfirmation(email); }
         } else {
