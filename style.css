@@ -84,3 +84,20 @@
 .auth-submit{justify-content:center;margin-top:6px;min-height:47px}.auth-message{min-height:20px;margin:8px 0;color:var(--teal);font-size:.88rem;line-height:1.5}.auth-message.error{color:#ff9aa8}.auth-mode-toggle{display:block;width:100%;padding:14px 4px 4px;border:0;background:transparent;color:#72e8d1;font-weight:700}.auth-security-note{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:.78rem;margin:20px 0 0}.auth-security-note svg{width:14px;height:14px}
 .auth-signed-in{display:grid;grid-template-columns:12px 1fr;gap:12px;align-items:start;margin:20px 0 0}.auth-signed-in[hidden]{display:none!important}.auth-status-dot{width:9px;height:9px;border-radius:50%;background:var(--teal);margin-top:7px;box-shadow:0 0 0 4px #42dfc018}.auth-signed-in strong{overflow-wrap:anywhere}.auth-signed-in p{color:var(--muted);margin:4px 0 18px}.auth-signed-in .full-width{grid-column:1/-1;justify-content:center}
 @media(max-width:700px){.account-button{padding:9px 10px}.account-button span{display:none}.auth-modal{padding:23px;border-radius:20px}}
+
+
+/* Centered email confirmation card after signup */
+.email-confirm-backdrop{position:fixed;inset:0;z-index:120;display:grid;place-items:center;padding:18px;background:rgba(3,8,16,.82);backdrop-filter:blur(13px);animation:pageIn .18s ease}
+.email-confirm-backdrop[hidden]{display:none!important}
+.email-confirm-card{width:min(100%,440px);max-height:calc(100vh - 36px);overflow:auto;padding:clamp(23px,5vw,32px);border:1px solid #2e4d61;border-radius:24px;background:linear-gradient(155deg,#172b40,#0e1828 72%);box-shadow:0 28px 90px #0009;text-align:center}
+.email-confirm-icon{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 19px;border-radius:20px;color:#72ead5;background:#42dfc018;border:1px solid #42dfc044}
+.email-confirm-icon svg{width:30px;height:30px}
+.email-confirm-card h2{font:800 clamp(23px,5vw,28px)/1.25 Manrope,sans-serif;margin:10px 0 14px;color:var(--text)}
+.email-confirm-copy{font-size:13px;line-height:1.75;color:var(--muted);margin:12px 0}
+.email-confirm-address{display:block;overflow-wrap:anywhere;padding:12px 14px;border:1px solid #2b465a;border-radius:12px;background:#091321;color:#85eddb;font-size:14px;margin:14px 0}
+.email-confirm-check{display:flex;align-items:flex-start;gap:11px;text-align:left;padding:14px;margin:20px 0 15px;border:1px solid #2b4056;border-radius:13px;background:#0d1a2a;color:#dce8f2;font-size:12px;line-height:1.6;cursor:pointer}
+.email-confirm-check input{flex:0 0 18px;width:18px;height:18px;margin:1px 0 0;accent-color:#42dfc0}
+.email-confirm-continue{min-height:48px;justify-content:center}
+.email-confirm-continue:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.5)}
+.email-confirm-close{border:0;background:transparent;color:var(--muted);font-size:12px;padding:13px 10px 0}
+@media(max-width:520px){.email-confirm-card{border-radius:20px}.email-confirm-copy{font-size:12px}}
