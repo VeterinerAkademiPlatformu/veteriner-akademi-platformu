@@ -11,6 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 </head>
 <body>
   <div class="app-shell">
@@ -49,6 +50,7 @@
         <div class="top-actions">
           <label class="search-box"><i data-lucide="search"></i><input id="globalSearch" type="search" placeholder="Ders, konu veya not ara..." aria-label="Ara"><kbd>⌘ K</kbd></label>
           <button class="icon-button notification-btn" aria-label="Bildirimler" id="notificationBtn"><i data-lucide="bell"></i><span></span></button>
+          <button class="outline-button account-button" id="accountButton" type="button"><i data-lucide="user-round"></i><span>Hesaba giriş</span></button>
           <button class="primary-button top-add" id="topAddBtn"><i data-lucide="plus"></i><span>Yeni ekle</span></button>
         </div>
       </header>
@@ -97,7 +99,7 @@
 
       <section class="page" id="page-questions"><div class="page-header"><div><div class="eyebrow">KENDİNİ DEĞERLENDİR</div><h1>Soru çöz</h1><p class="page-subtitle">Konularını test et, eksiklerini belirle ve tekrar planını güncelle.</p></div></div><div class="quiz-layout"><div class="panel-card quiz-setup"><div class="panel-title"><span class="panel-title-icon"><i data-lucide="clipboard-check"></i></span><div><h3>Yeni çalışma oturumu</h3><p>İhtiyacına göre bir test oluştur.</p></div></div><label class="field-label">Ders seç<input id="quizCourse" placeholder="Örn. Mikrobiyoloji"></label><label class="field-label">Çalışma türü<select id="quizType"><option>Çoktan seçmeli</option><option>Doğru / yanlış</option><option>Klasik sorular</option><option>Sözlü sınav provası</option></select></label><label class="field-label">Soru sayısı<div class="choice-chips" id="questionAmount"><button class="choice-chip active" data-amount="10">10 soru</button><button class="choice-chip" data-amount="20">20 soru</button><button class="choice-chip" data-amount="30">30 soru</button><button class="choice-chip" data-amount="all">Tümü</button></div></label><div class="notice-box"><i data-lucide="info"></i><span>Henüz soru bankası bağlanmadı. Bu alan, soru içerikleri eklendiğinde testlerini burada oluşturacak.</span></div><button class="primary-button full-width" id="createQuizBtn">Çalışma alanını hazırla <i data-lucide="arrow-right"></i></button></div><div class="panel-card quiz-side"><div class="panel-title"><span class="panel-title-icon purple"><i data-lucide="chart-no-axes-combined"></i></span><div><h3>Çalışma yaklaşımı</h3><p>Verimli tekrar için küçük öneriler.</p></div></div><div class="tip-row"><span>01</span><div><strong>Önce hatırla</strong><p>Yanıta bakmadan önce kendin cevaplamayı dene.</p></div></div><div class="tip-row"><span>02</span><div><strong>Yanlışları kaydet</strong><p>Hata yaptığın konuları sonraki oturumda tekrar et.</p></div></div><div class="tip-row"><span>03</span><div><strong>Aralıklı tekrar yap</strong><p>Aynı bilgiyi farklı günlerde yeniden çağır.</p></div></div></div></div></section>
 
-      <section class="page" id="page-settings"><div class="page-header"><div><div class="eyebrow">KİŞİSELLEŞTİR</div><h1>Ayarlar</h1><p class="page-subtitle">Çalışma alanını kendi öğrenme düzenine göre şekillendir.</p></div></div><div class="panel-card settings-panel"><div class="setting-row"><div><strong>Günlük çalışma hedefi</strong><p>Her gün tamamlamak istediğin görev sayısı.</p></div><select id="dailyGoal"><option value="2">2 görev</option><option value="3" selected>3 görev</option><option value="4">4 görev</option><option value="5">5 görev</option></select></div><div class="setting-row"><div><strong>Odaklanma süresi</strong><p>Bir çalışma oturumunun dakika cinsinden süresi.</p></div><select id="focusLength"><option value="15">15 dakika</option><option value="25" selected>25 dakika</option><option value="40">40 dakika</option><option value="50">50 dakika</option></select></div><div class="setting-row"><div><strong>Veri ve hesaplar</strong><p>Şu an demo arayüzündesin. Hesap, bulut senkronizasyonu ve kişiye özel kayıtlar sonraki aşamada bağlanacak.</p></div><span class="soft-badge">Kurulum aşaması</span></div></div></section>
+      <section class="page" id="page-settings"><div class="page-header"><div><div class="eyebrow">KİŞİSELLEŞTİR</div><h1>Ayarlar</h1><p class="page-subtitle">Çalışma alanını kendi öğrenme düzenine göre şekillendir.</p></div></div><div class="panel-card settings-panel"><div class="setting-row"><div><strong>Günlük çalışma hedefi</strong><p>Her gün tamamlamak istediğin görev sayısı.</p></div><select id="dailyGoal"><option value="2">2 görev</option><option value="3" selected>3 görev</option><option value="4">4 görev</option><option value="5">5 görev</option></select></div><div class="setting-row"><div><strong>Odaklanma süresi</strong><p>Bir çalışma oturumunun dakika cinsinden süresi.</p></div><select id="focusLength"><option value="15">15 dakika</option><option value="25" selected>25 dakika</option><option value="40">40 dakika</option><option value="50">50 dakika</option></select></div><div class="setting-row"><div><strong>Veri ve hesaplar</strong><p>Hesabına giriş yaptığında derslerin, notların, flash kartların ve çalışma ilerlemen buluta kaydedilir. Oturum açmadan da bu tarayıcıda çalışabilirsin.</p></div><button class="outline-button" type="button" data-open-account>Hesap ayarları</button></div></div></section>
 
       <footer class="app-footer"><span>© 2026 Veteriner Akademi Platformu</span><span>Bilimsel öğrenme için tasarlandı <i data-lucide="heart"></i></span></footer>
     </main>
@@ -105,6 +107,22 @@
 
   <div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><div><span class="eyebrow" id="modalEyebrow">YENİ KAYIT</span><h2 id="modalTitle">Yeni kayıt oluştur</h2></div><button class="icon-button" id="modalClose" aria-label="Kapat"><i data-lucide="x"></i></button></div><form id="modalForm"><div id="modalFields" class="modal-fields"></div><div class="modal-actions"><button type="button" class="outline-button" id="modalCancel">Vazgeç</button><button type="submit" class="primary-button"><i data-lucide="check"></i> Kaydet</button></div></form></section></div>
 
+  <div class="auth-backdrop" id="authBackdrop" hidden>
+    <section class="auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+      <div class="auth-modal-head"><span class="auth-brand-icon"><i data-lucide="shield-check"></i></span><button class="icon-button" id="authClose" type="button" aria-label="Kapat"><i data-lucide="x"></i></button></div>
+      <span class="eyebrow">KİŞİSEL ÇALIŞMA ALANI</span><h2 id="authTitle">Hesabına giriş yap</h2>
+      <p class="auth-intro">Derslerini, notlarını ve flash kartlarını hesabına kaydet; farklı cihazlardan devam et.</p>
+      <div id="authSignedIn" class="auth-signed-in" hidden><span class="auth-status-dot"></span><div><strong id="authUserEmail"></strong><p>Bulut senkronizasyonu etkin.</p></div><button class="outline-button full-width" id="authSignOut" type="button">Güvenli çıkış yap</button></div>
+      <form id="authForm">
+        <label class="auth-field">E-posta<input id="authEmail" type="email" autocomplete="email" placeholder="ornek@eposta.com" required></label>
+        <label class="auth-field">Şifre<input id="authPassword" type="password" autocomplete="current-password" minlength="8" placeholder="En az 8 karakter" required></label>
+        <p id="authMessage" class="auth-message" role="status" aria-live="polite"></p>
+        <button class="primary-button full-width auth-submit" id="authSubmit" type="submit">Giriş yap <i data-lucide="arrow-right"></i></button>
+      </form>
+      <button class="auth-mode-toggle" id="authModeToggle" type="button">Hesabın yok mu? Hesap oluştur</button>
+      <p class="auth-security-note"><i data-lucide="lock-keyhole"></i> Kayıtların hesabına özel güvenlik kurallarıyla korunur.</p>
+    </section>
+  </div>
   <div class="toast" id="toast" role="status" aria-live="polite"><i data-lucide="check-circle-2"></i><span id="toastMessage">Kaydedildi.</span></div>
   <div class="focus-overlay" id="focusOverlay" hidden><div class="focus-modal"><button class="icon-button focus-close" id="focusClose" aria-label="Kapat"><i data-lucide="x"></i></button><span class="eyebrow">ODAK MODU</span><h2>Şimdi yalnızca öğrenmeye odaklan.</h2><div class="timer-display" id="timerDisplay">25:00</div><p>Tek bir konu seç. Bildirimleri kapat ve kendine bu zamanı ayır.</p><div class="timer-controls"><button class="primary-button" id="timerToggle"><i data-lucide="play"></i> Başlat</button><button class="outline-button" id="timerReset"><i data-lucide="rotate-ccw"></i> Sıfırla</button></div></div></div>
   <script src="script.js"></script>
