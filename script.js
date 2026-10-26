@@ -109,6 +109,30 @@
     });
     return out || '&nbsp;';
   };
+  const readerStudyKeywords=/\b(sınavda|sınav için|dikkat|önemli|kritik|karıştırılmamalı|karıştırmayın|ayırt edici|ayırt edilmelidir|en sık|mutlaka|kesinlikle|istisna|unutmayın|sorulur|soru gelebilir|kilit bilgi)\b/i;
+  const renderReaderStudy = note => {
+    const panel=$('#noteStudyPanel'),button=$('#noteStudyModeBtn');
+    if(!panel||!button)return;
+    const lines=String(note.body||'').replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
+    const warnings=[];
+    lines.forEach(line=>{
+      const clean=line.replace(/^[-*•▪]+\s*/,'').replace(/^#{1,3}\s*/,'');
+      if(readerStudyKeywords.test(clean)&&clean.length>=12&&!warnings.some(x=>x.toLocaleLowerCase('tr-TR')===clean.toLocaleLowerCase('tr-TR')))warnings.push(clean);
+    });
+    const headings=lines.filter(isReaderHeading).map(readerHeadingText).filter(Boolean);
+    const prompts=headings.slice(0,8).map(title=>{
+      const at=lines.findIndex(line=>isReaderHeading(line)&&readerHeadingText(line)===title);
+      const answer=lines.slice(at+1).find(line=>line&&!isReaderHeading(line)&&line.length>12);
+      return {title,answer:answer?answer.replace(/^[-*•▪]+\s*/,'').slice(0,360):''};
+    });
+    panel.innerHTML='<div class="reader-study-heading"><div><span class="eyebrow">AKTİF HATIRLAMA</span><h2>Çalışma modu</h2><p>Önce kendin cevapla, sonra yanıtı aç.</p></div><button type="button" class="reader-study-close" id="noteStudyClose">Kapat</button></div>'+
+      (warnings.length?'<section class="reader-study-section"><h3>⚠ Sınavda dikkat</h3><ul class="reader-study-warnings">'+warnings.slice(0,10).map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'<section class="reader-study-section reader-study-empty"><h3>Sınav uyarısı bulunamadı</h3><p>Notta “Dikkat”, “Önemli” veya “Sınavda” gibi ifadeler varsa burada listelenir. Bu bölüm otomatik metin taramasıdır.</p></section>')+
+      (prompts.length?'<section class="reader-study-section"><h3>Kendini sına</h3><div class="reader-study-prompts">'+prompts.map((p,i)=>'<details class="reader-study-question"><summary><span>'+(i+1)+'.</span> '+safe(p.title)+' konusu için temel bilgi nedir?</summary><p>'+(p.answer?safe(p.answer):'Bu başlığı not içinde yeniden incele ve kendi cümlenle açıkla.')+'</p></details>').join('')+'</div></section>':'<p class="reader-study-empty">Kendini sınamak için notta başlık bulunamadı. Başlıkları kısa ve belirgin yazmayı deneyebilirsin.</p>')+
+      '<p class="reader-study-disclaimer">Otomatik oluşturulan çalışma yardımıdır; notun içeriğinin yerine geçmez.</p>';
+    panel.hidden=true;
+    button.setAttribute('aria-pressed','false');
+    button.classList.remove('is-active');
+  };
   const renderReaderBody = note => {
     const rawLines=String(note.body||'Bu notta henüz içerik yok.').replace(/\r/g,'').split('\n');
     const sections=rawLines.map((text,index)=>({text,index,heading:isReaderHeading(text),title:readerHeadingText(text)})).filter(x=>x.heading);
@@ -133,6 +157,7 @@
       return '<p class="reader-paragraph" data-reader-line="'+index+'">'+highlightReaderLine(line,note)+'</p>';
     }).join('');
     runReaderSearch($('#noteReaderSearch')?.value||'');
+    renderReaderStudy(note);
   };
   const runReaderSearch = query => {
     const q=String(query||'').trim().toLocaleLowerCase('tr-TR');
@@ -202,6 +227,13 @@
     const target=document.getElementById(button.dataset.readerJump);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
     $('.reader-toc-link').forEach(el=>el.classList.toggle('active',el===button));
   });
+  $('#noteStudyModeBtn')?.addEventListener('click',()=>{
+    const panel=$('#noteStudyPanel'),button=$('#noteStudyModeBtn');if(!panel||!button)return;
+    const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-pressed',String(opening));button.classList.toggle('is-active',opening);
+    button.title=opening?'Çalışma modunu kapat':'Sınav odaklı çalışma modunu aç';
+    if(opening)panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+  });
+  $('#noteStudyPanel')?.addEventListener('click',e=>{if(e.target.closest('#noteStudyClose')){$('#noteStudyPanel').hidden=true;$('#noteStudyModeBtn')?.setAttribute('aria-pressed','false');$('#noteStudyModeBtn')?.classList.remove('is-active');}});
   $('#noteReaderClose').addEventListener('click',closeNoteReader);
   $('#noteReaderCloseBottom').addEventListener('click',closeNoteReader);
   $('#noteReaderBackdrop').addEventListener('click',e=>{if(e.target===$('#noteReaderBackdrop'))closeNoteReader();});
