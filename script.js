@@ -357,7 +357,12 @@
           }
           if(result.user)closeAuth();
         }
-      } catch(err){authMessage(err.message||'İşlem tamamlanamadı. Bilgilerini kontrol et.',true);}
+      } catch(err){
+        const message=(err.code==='email_not_confirmed'||/email not confirmed/i.test(err.message||''))
+          ? 'E-posta adresin henüz doğrulanmamış. Lütfen e-posta kutuna gönderdiğimiz doğrulama bağlantısını aç, ardından yeniden giriş yap.'
+          : (err.message||'İşlem tamamlanamadı. Bilgilerini kontrol et.');
+        authMessage(message,true);
+      }
       finally{submit.disabled=false;}
     });
     $('#authSignOut').addEventListener('click',async()=>{
