@@ -71,3 +71,16 @@
 
 /* Ensure hidden recall controls remain hidden despite flex styling */
 .recall-answer[hidden],.recall-rating[hidden]{display:none!important}
+
+
+/* Supabase account and cloud sync */
+.account-button{display:inline-flex;align-items:center;gap:8px;white-space:nowrap;padding:10px 13px;border-radius:12px;color:var(--text);border:1px solid var(--line);background:rgba(17,28,45,.75)}
+.account-button svg{width:17px;height:17px;color:var(--teal)}
+.auth-backdrop{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(3,8,16,.78);backdrop-filter:blur(12px)}.auth-backdrop[hidden]{display:none!important}
+.auth-modal{width:min(100%,440px);max-height:calc(100vh - 36px);overflow:auto;padding:28px;border:1px solid #2b4258;border-radius:24px;background:linear-gradient(155deg,#15263a,#0e1828 70%);box-shadow:0 28px 90px #0008}
+.auth-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}.auth-brand-icon{display:grid;place-items:center;width:46px;height:46px;border-radius:15px;color:var(--teal);background:#42dfc018;border:1px solid #42dfc033}.auth-brand-icon svg{width:24px;height:24px}
+.auth-modal h2{font-family:Manrope,sans-serif;font-size:1.7rem;line-height:1.2;margin:9px 0 10px}.auth-intro{color:var(--muted);line-height:1.7;margin:0 0 22px}
+.auth-field{display:grid;gap:8px;color:#dce8f2;font-weight:600;margin:14px 0}.auth-field input{width:100%;min-height:46px;border:1px solid #2b4056;border-radius:12px;background:#091321;color:var(--text);padding:11px 13px;outline:none}.auth-field input:focus{border-color:var(--teal);box-shadow:0 0 0 3px #42dfc01c}
+.auth-submit{justify-content:center;margin-top:6px;min-height:47px}.auth-message{min-height:20px;margin:8px 0;color:var(--teal);font-size:.88rem;line-height:1.5}.auth-message.error{color:#ff9aa8}.auth-mode-toggle{display:block;width:100%;padding:14px 4px 4px;border:0;background:transparent;color:#72e8d1;font-weight:700}.auth-security-note{display:flex;align-items:center;justify-content:center;gap:7px;color:var(--muted);font-size:.78rem;margin:20px 0 0}.auth-security-note svg{width:14px;height:14px}
+.auth-signed-in{display:grid;grid-template-columns:12px 1fr;gap:12px;align-items:start;margin:20px 0 0}.auth-signed-in[hidden]{display:none!important}.auth-status-dot{width:9px;height:9px;border-radius:50%;background:var(--teal);margin-top:7px;box-shadow:0 0 0 4px #42dfc018}.auth-signed-in strong{overflow-wrap:anywhere}.auth-signed-in p{color:var(--muted);margin:4px 0 18px}.auth-signed-in .full-width{grid-column:1/-1;justify-content:center}
+@media(max-width:700px){.account-button{padding:9px 10px}.account-button span{display:none}.auth-modal{padding:23px;border-radius:20px}}
