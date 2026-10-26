@@ -1,0 +1,150 @@
+(() => {
+  const $ = (s, r=document) => r.querySelector(s);
+  const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+  const storeKey = 'veterinerAkademi.v1';
+  const seed = {
+    courses: [
+      {id:'c1',name:'Anatomi',year:'1',color:'teal',description:'Organlar, sistemler ve topografik anatomi',topics:8,progress:38},
+      {id:'c2',name:'Histoloji ve Embriyoloji',year:'1',color:'purple',description:'Doku yapısı ve gelişim süreçleri',topics:6,progress:24},
+      {id:'c3',name:'Fizyoloji',year:'2',color:'blue',description:'Canlı sistemlerin işleyişi',topics:9,progress:52},
+      {id:'c4',name:'Mikrobiyoloji',year:'2',color:'gold',description:'Bakteriyoloji, viroloji ve mikoloji',topics:7,progress:31},
+      {id:'c5',name:'Patoloji',year:'3',color:'purple',description:'Hastalıkların nedenleri ve mekanizmaları',topics:5,progress:18},
+      {id:'c6',name:'Farmakoloji',year:'3',color:'teal',description:'İlaçlar, etki mekanizmaları ve güvenli kullanım',topics:6,progress:12}
+    ],
+    exams: [
+      {id:'e1',course:'Mikrobiyoloji',type:'Vize',date:'2026-11-04',priority:'Yüksek'},
+      {id:'e2',course:'Fizyoloji',type:'Final',date:'2026-11-18',priority:'Orta'}
+    ],
+    notes: [
+      {id:'n1',title:'PTH ve kalsiyum dengesi',course:'Fizyoloji',body:'PTH, serum kalsiyum düzeyi düştüğünde salgılanır. Kemik rezorpsiyonunu ve böbrekten kalsiyum geri emilimini artırır; aktif D vitamini oluşumunu destekler.',date:'2026-10-24'},
+      {id:'n2',title:'Bakteriyel etkenlerde tanı yaklaşımı',course:'Mikrobiyoloji',body:'Örnek seçimi ve uygun taşıma koşulları tanı başarısını etkiler. Klinik bulgular, mikroskobik inceleme, kültür ve gerekli durumlarda moleküler testler birlikte değerlendirilir.',date:'2026-10-22'}
+    ],
+    cards: [
+      {id:'f1',course:'Mikrobiyoloji',question:'Etiyoloji neyi ifade eder?',answer:'Bir hastalığın nedenini veya hastalığa yol açan etkenleri ifade eder.'},
+      {id:'f2',course:'Fizyoloji',question:'PTH salgısını temel olarak hangi değişiklik artırır?',answer:'Serum iyonize kalsiyum düzeyinin düşmesi.'},
+      {id:'f3',course:'Patoloji',question:'İnflamasyonun beş temel belirtisi nelerdir?',answer:'Rubor (kızarıklık), calor (ısı artışı), tumor (şişlik), dolor (ağrı) ve functio laesa (fonksiyon kaybı).'}
+    ],
+    tasks:[true,true,false], dailyGoal:3, focusLength:25, sessions:0
+  };
+  let data;
+  try { data = JSON.parse(localStorage.getItem(storeKey)) || structuredClone(seed); } catch { data = structuredClone(seed); }
+  const save = () => { try { localStorage.setItem(storeKey, JSON.stringify(data)); } catch {} };
+  let activePage='dashboard', modalType='', timerSeconds=(data.focusLength||25)*60, timerRunning=false, timerInterval=null, activeDeck=[], activeCard=0, answerShown=false, selectedAmount='10';
+  const safe = v => String(v ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const icon = name => '<i data-lucide="'+name+'"></i>';
+  const refreshIcons = () => { if(window.lucide) lucide.createIcons(); };
+  const toast = msg => { const t=$('#toast'), m=$('#toastMessage'); if(!t||!m)return; m.textContent=msg;t.classList.add('show');clearTimeout(toast._timer);toast._timer=setTimeout(()=>t.classList.remove('show'),2600); };
+  const empty = (title,desc,ico='book-open') => '<div class="empty-state">'+icon(ico)+'<strong>'+safe(title)+'</strong><p>'+safe(desc)+'</p></div>';
+  const go = page => {
+    activePage=page;
+    $$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+page));
+    $$('.nav-item[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
+    const labels={dashboard:'Genel Bakış',courses:'Derslerim',exams:'Sınav Takvimi',notes:'Notlarım',flashcards:'Flash Kartlar',questions:'Soru Çöz',settings:'Ayarlar'};
+    $('#crumbCurrent').textContent=labels[page]||'Veteriner Akademi';
+    $('#sidebar').classList.remove('open');
+    render(); window.scrollTo({top:0,behavior:'smooth'});
+  };
+  const courseIcon = c => ({teal:'activity',purple:'microscope',blue:'heart-pulse',gold:'bug'})[c.color]||'book-open';
+  const courseCard = (c, compact=false) => '<article class="course-card" data-course-open="'+safe(c.id)+'"><div class="course-card-top"><span class="course-symbol '+safe(c.color)+'">'+icon(courseIcon(c))+'</span><div><h3>'+safe(c.name)+'</h3><p>'+safe(c.description||'Ders çalışma alanı')+'</p></div></div><div class="course-progress"><span style="width:'+Math.max(0,Math.min(100,Number(c.progress)||0))+'%"></span></div><div class="course-card-foot"><span>'+safe(c.topics||0)+' konu başlığı</span><strong>%'+(Number(c.progress)||0)+' tamamlandı</strong></div>'+(compact?'':'<div class="course-actions"><button class="mini-action" data-course-note="'+safe(c.id)+'">'+icon('notebook-pen')+' Not ekle</button><button class="mini-action" data-course-card="'+safe(c.id)+'">'+icon('layers')+' Kart ekle</button><button class="mini-action" data-course-delete="'+safe(c.id)+'">'+icon('trash-2')+' Sil</button></div>')+'</article>';
+  const examRow = e => { const d=new Date(e.date+'T12:00:00');const day=String(d.getDate()).padStart(2,'0');const month=d.toLocaleDateString('tr-TR',{month:'short'}).replace('.','');return '<div class="exam-row"><div class="exam-date"><strong>'+day+'</strong><small>'+safe(month)+'</small></div><div class="exam-info"><strong>'+safe(e.course)+'</strong><small>'+safe(e.type)+' sınavı · '+d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+'</small></div><span class="exam-type">'+safe(e.type)+'</span><button class="exam-delete" data-exam-delete="'+safe(e.id)+'" title="Sınavı sil">'+icon('x')+'</button></div>'; };
+  const renderDashboard = () => {
+    $('#todayDate').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
+    $('#weeklySessions').textContent=String(data.sessions||0);
+    $('#goalProgress').textContent=String((data.tasks||[]).filter(Boolean).length);
+    $('#savedCount').textContent=String(data.notes.length+data.cards.length);
+    $('#dashboardCourses').innerHTML=data.courses.slice(0,4).map(c=>courseCard(c,true)).join('')||empty('Henüz ders yok','Bir ders ekleyerek çalışma alanını oluştur.','book-open');
+    $('#dashboardExams').innerHTML=data.exams.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3).map(examRow).join('')||empty('Yaklaşan sınav yok','Sınav takvimine tarih ekleyebilirsin.','calendar-days');
+    $$('.task-item input').forEach((el,i)=>{el.checked=!!data.tasks[i];el.closest('.task-item').classList.toggle('done',!!data.tasks[i]);});
+    const taskList=$('#taskList'); if(taskList){const count=(data.tasks||[]).filter(Boolean).length;const pill=$('.tiny-pill',taskList.parentElement);if(pill)pill.textContent=count+'/'+(data.dailyGoal||3);}
+  };
+  const renderCourses = () => {
+    const q=($('#courseSearch')?.value||'').toLocaleLowerCase('tr-TR'), year=$('#semesterFilter')?.value||'all';
+    const list=data.courses.filter(c=>(c.name+' '+(c.description||'')).toLocaleLowerCase('tr-TR').includes(q)&&(year==='all'||c.year===year));
+    $('#allCourses').innerHTML=list.map(c=>courseCard(c)).join('')||empty('Aramana uygun ders bulunamadı','Farklı bir kelime dene veya yeni bir ders ekle.','search');
+    $('#courseResultLabel').textContent=list.length+' ders';
+    $('#courseCount').textContent=String(data.courses.length);
+  };
+  const renderExams = () => {
+    const filter=$('#examFilter')?.value||'all', list=data.exams.filter(e=>filter==='all'||e.type===filter).sort((a,b)=>a.date.localeCompare(b.date));
+    $('#allExams').innerHTML=list.map(examRow).join('')||empty('Sınav kaydı yok','Yeni sınav ekleyerek takvimini oluştur.','calendar-days');
+    const now=new Date();now.setHours(0,0,0,0);
+    const upcoming=data.exams.filter(e=>new Date(e.date+'T12:00:00')>=now).length;
+    $('#examSummary').innerHTML='<div class="summary-tile"><span>Takvimdeki sınavlar</span><strong>'+data.exams.length+'</strong></div><div class="summary-tile"><span>Yaklaşan sınavlar</span><strong>'+upcoming+'</strong></div><div class="summary-tile"><span>Yüksek öncelik</span><strong>'+data.exams.filter(e=>e.priority==='Yüksek').length+'</strong></div>';
+  };
+  const renderNotes = () => {
+    const q=($('#noteSearch')?.value||'').toLocaleLowerCase('tr-TR'), course=$('#noteCourseFilter')?.value||'all';
+    const select=$('#noteCourseFilter');if(select){const val=select.value;select.innerHTML='<option value="all">Tüm dersler</option>'+data.courses.map(c=>'<option>'+safe(c.name)+'</option>').join('');if([...select.options].some(o=>o.value===val))select.value=val;}
+    const list=data.notes.filter(n=>(n.title+' '+n.body+' '+n.course).toLocaleLowerCase('tr-TR').includes(q)&&(course==='all'||n.course===course));
+    $('#notesGrid').innerHTML=list.map(n=>'<article class="note-card"><div class="note-meta">'+icon('notebook-pen')+' '+safe(n.course||'Genel not')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.body)+'</p><footer><span>'+safe(n.date||'Bugün')+'</span><button data-note-delete="'+safe(n.id)+'" aria-label="Notu sil">'+icon('trash-2')+' Sil</button></footer></article>').join('')||empty('Not arşivin hazır','İlk notunu oluşturarak önemli bilgilerini kaydet.','notebook-pen');
+  };
+  const renderFlashcards = () => {
+    const groups={};data.cards.forEach(c=>(groups[c.course||'Genel kartlar']??=[]).push(c));
+    $('#flashSetCount').textContent=Object.keys(groups).length+' set';
+    $('#flashSets').innerHTML=Object.entries(groups).map(([name,cards],i)=>'<article class="flash-set"><div class="flash-set-head"><span class="course-symbol '+['teal','purple','gold','blue'][i%4]+'">'+icon('layers')+'</span><span class="result-label">'+cards.length+' kart</span></div><h3>'+safe(name)+'</h3><p>Kısa tekrar ve aktif hatırlama</p><button class="outline-button" data-deck="'+safe(name)+'">Tekrar et '+icon('arrow-right')+'</button></article>').join('')||empty('Henüz flash kart yok','Kart oluşturup tekrar setini hazırlayabilirsin.','layers');
+  };
+  const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();refreshIcons(); };
+  const openModal = type => {
+    modalType=type;const title={course:'Yeni ders ekle',exam:'Sınav takvimine ekle',note:'Yeni not oluştur',card:'Flash kart oluştur'}[type];
+    $('#modalTitle').textContent=title;$('#modalEyebrow').textContent=({course:'DERS YÖNETİMİ',exam:'SINAV PLANLAMA',note:'KİŞİSEL KÜTÜPHANE',card:'AKTİF HATIRLAMA'})[type];
+    const courses='<option value="">Ders seç (isteğe bağlı)</option>'+data.courses.map(c=>'<option>'+safe(c.name)+'</option>').join('');
+    const field=(label,name,placeholder='',kind='text',required=true)=>'<label class="field-label">'+label+(kind==='textarea'?'<textarea class="field-textarea" name="'+name+'" placeholder="'+placeholder+'" '+(required?'required':'')+'></textarea>':kind==='select'?'<select class="field-select" name="'+name+'" '+(required?'required':'')+'>'+placeholder+'</select>':'<input class="field-input" type="'+kind+'" name="'+name+'" placeholder="'+placeholder+'" '+(required?'required':'')+'>')+'</label>';
+    let html='';
+    if(type==='course') html=field('Ders adı','name','Örn. İç Hastalıkları')+field('Sınıf','year','<option value="1">1. sınıf</option><option value="2">2. sınıf</option><option value="3">3. sınıf</option><option value="4">4. sınıf</option><option value="5">5. sınıf</option>','select')+field('Kısa açıklama','description','Dersin kapsamı', 'text',false);
+    if(type==='exam') html=field('Ders adı','course','Örn. Mikrobiyoloji')+field('Sınav türü','type','<option>Vize</option><option>Final</option><option>Bütünleme</option>','select')+field('Sınav tarihi','date','','date')+field('Öncelik','priority','<option>Yüksek</option><option selected>Orta</option><option>Düşük</option>','select');
+    if(type==='note') html=field('Not başlığı','title','Örn. İnflamasyonun temel belirtileri')+field('Ders','course',courses,'select',false)+field('Not içeriği','body','Önemli bilgileri buraya yaz...','textarea');
+    if(type==='card') html=field('Ders / set adı','course','Örn. Patoloji')+field('Kartın sorusu','question','Ön yüzde görülecek soru')+field('Cevap','answer','Kısa ve net yanıt','textarea');
+    $('#modalFields').innerHTML=html;$('#modalBackdrop').hidden=false;$('#modalBackdrop').setAttribute('aria-hidden','false');refreshIcons();setTimeout(()=>$('#modalFields input, #modalFields textarea')?.focus(),50);
+  };
+  const closeModal=()=>{$('#modalBackdrop').hidden=true;$('#modalBackdrop').setAttribute('aria-hidden','true');$('#modalForm').reset();modalType='';};
+  $('#modalClose').addEventListener('click',closeModal);$('#modalCancel').addEventListener('click',closeModal);
+  $('#modalBackdrop').addEventListener('click',e=>{if(e.target===$('#modalBackdrop'))closeModal();});
+  $('#modalForm').addEventListener('submit',e=>{
+    e.preventDefault();const f=Object.fromEntries(new FormData(e.currentTarget).entries());
+    if(modalType==='course')data.courses.push({id:crypto.randomUUID(),name:f.name.trim(),year:f.year,color:['teal','purple','blue','gold'][data.courses.length%4],description:f.description.trim()||'Ders çalışma alanı',topics:0,progress:0});
+    if(modalType==='exam')data.exams.push({id:crypto.randomUUID(),course:f.course.trim(),type:f.type,date:f.date,priority:f.priority});
+    if(modalType==='note')data.notes.unshift({id:crypto.randomUUID(),title:f.title.trim(),course:f.course||'Genel',body:f.body.trim(),date:new Date().toISOString().slice(0,10)});
+    if(modalType==='card')data.cards.push({id:crypto.randomUUID(),course:f.course.trim(),question:f.question.trim(),answer:f.answer.trim()});
+    save();closeModal();render();toast('Kaydın başarıyla oluşturuldu.');
+  });
+  document.addEventListener('click',e=>{
+    const nav=e.target.closest('[data-page]');if(nav){e.preventDefault();go(nav.dataset.page);return;}
+    const goBtn=e.target.closest('[data-go]');if(goBtn){go(goBtn.dataset.go);return;}
+    const cnote=e.target.closest('[data-course-note]');if(cnote){openModal('note');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===cnote.dataset.courseNote)?.name||'';},0);return;}
+    const ccard=e.target.closest('[data-course-card]');if(ccard){openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===ccard.dataset.courseCard)?.name||'';},0);return;}
+    const delCourse=e.target.closest('[data-course-delete]');if(delCourse){const c=data.courses.find(c=>c.id===delCourse.dataset.courseDelete);if(c&&confirm(c.name+' dersini ve bağlantılı çalışma kayıtlarını silmek istiyor musun?')){data.courses=data.courses.filter(x=>x.id!==c.id);data.notes=data.notes.filter(n=>n.course!==c.name);data.cards=data.cards.filter(n=>n.course!==c.name);save();render();toast('Ders silindi.');}return;}
+    const delExam=e.target.closest('[data-exam-delete]');if(delExam){data.exams=data.exams.filter(x=>x.id!==delExam.dataset.examDelete);save();render();toast('Sınav kaydı silindi.');return;}
+    const delNote=e.target.closest('[data-note-delete]');if(delNote){data.notes=data.notes.filter(x=>x.id!==delNote.dataset.noteDelete);save();render();toast('Not silindi.');return;}
+    const deck=e.target.closest('[data-deck]');if(deck){startDeck(deck.dataset.deck);return;}
+    const openCourse=e.target.closest('[data-course-open]');if(openCourse&&!e.target.closest('button')){const c=data.courses.find(x=>x.id===openCourse.dataset.courseOpen);if(c)toast(c.name+' çalışma alanı seçildi. Not ve flash kart ekleyerek devam edebilirsin.');}
+  });
+  $('#addCourseBtn').addEventListener('click',()=>openModal('course'));
+  $('#addExamBtn').addEventListener('click',()=>openModal('exam'));
+  $('#addNoteBtn').addEventListener('click',()=>openModal('note'));
+  $('#topAddBtn').addEventListener('click',()=>{const choice=prompt('Ne eklemek istiyorsun? 1: Ders, 2: Sınav, 3: Not, 4: Flash kart');({1:()=>openModal('course'),2:()=>openModal('exam'),3:()=>openModal('note'),4:()=>openModal('card')})[choice]?.();});
+  $('#addCardBtn')?.addEventListener('click',()=>openModal('card'));
+  $('#courseSearch').addEventListener('input',renderCourses);$('#semesterFilter').addEventListener('change',renderCourses);
+  $('#examFilter').addEventListener('change',renderExams);$('#noteSearch').addEventListener('input',renderNotes);$('#noteCourseFilter').addEventListener('change',renderNotes);
+  $('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.toLocaleLowerCase('tr-TR');if(data.courses.some(c=>c.name.toLocaleLowerCase('tr-TR').includes(q)))go('courses');else if(data.notes.some(n=>(n.title+n.body).toLocaleLowerCase('tr-TR').includes(q)))go('notes');else if(data.cards.some(c=>(c.question+c.answer).toLocaleLowerCase('tr-TR').includes(q)))go('flashcards');else toast('Bu ifadeyle eşleşen kayıt bulunamadı.');}});
+  $('#menuToggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
+  $('#notificationBtn').addEventListener('click',()=>toast(data.exams.length?'Sınav takvimini kontrol etmeyi unutma.':'Henüz bildirim yok.'));
+  $('#editPlanBtn').addEventListener('click',()=>{const next=prompt('Günlük hedef kaç görev olsun? (2–5)',String(data.dailyGoal||3));const n=Number(next);if(Number.isInteger(n)&&n>=2&&n<=5){data.dailyGoal=n;save();toast('Günlük hedef güncellendi.');render();}});
+  $('#taskList').addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]')){const items=$$('#taskList input');data.tasks=items.map(x=>x.checked);save();renderDashboard();toast('Günlük plan güncellendi.');}});
+  $('#dailyGoal').addEventListener('change',e=>{data.dailyGoal=Number(e.target.value);save();toast('Günlük hedef kaydedildi.');renderDashboard();});
+  $('#focusLength').addEventListener('change',e=>{data.focusLength=Number(e.target.value);timerSeconds=data.focusLength*60;updateTimer();save();});
+  const overlay=$('#focusOverlay');
+  const openFocus=()=>{timerSeconds=(data.focusLength||25)*60;timerRunning=false;clearInterval(timerInterval);updateTimer();overlay.hidden=false;};
+  const closeFocus=()=>{overlay.hidden=true;timerRunning=false;clearInterval(timerInterval);$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();};
+  const updateTimer=()=>{$('#timerDisplay').textContent=String(Math.floor(timerSeconds/60)).padStart(2,'0')+':'+String(timerSeconds%60).padStart(2,'0');};
+  const toggleTimer=()=>{if(timerRunning){clearInterval(timerInterval);timerRunning=false;$('#timerToggle').innerHTML=icon('play')+' Devam et';refreshIcons();}else{timerRunning=true;$('#timerToggle').innerHTML=icon('pause')+' Duraklat';refreshIcons();timerInterval=setInterval(()=>{timerSeconds--;updateTimer();if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;data.sessions=(data.sessions||0)+1;save();renderDashboard();toast('Odak oturumu tamamlandı. Harika iş!');$('#timerToggle').innerHTML=icon('play')+' Yeniden başlat';refreshIcons();}},1000);}};
+  $('#focusStart').addEventListener('click',openFocus);$('#focusClose').addEventListener('click',closeFocus);$('#timerToggle').addEventListener('click',toggleTimer);$('#timerReset').addEventListener('click',()=>{clearInterval(timerInterval);timerRunning=false;timerSeconds=(data.focusLength||25)*60;updateTimer();$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();});
+  overlay.addEventListener('click',e=>{if(e.target===overlay)closeFocus();});
+  const startDeck=name=>{activeDeck=data.cards.filter(c=>(c.course||'Genel kartlar')===name);activeCard=0;answerShown=false;showDeck();};
+  const showDeck=()=>{const host=$('#flashSets');if(!activeDeck.length)return;host.innerHTML='<div class="flash-study"><div class="flash-progress"><span style="width:'+((activeCard+1)/activeDeck.length*100)+'%"></span></div><div class="section-heading compact"><div><h2>'+safe(activeDeck[activeCard].course)+'</h2><p>Kart '+(activeCard+1)+' / '+activeDeck.length+'</p></div><button class="text-button" id="exitDeck">Setlere dön</button></div><article class="study-card" id="studyCard"><small>'+(answerShown?'CEVAP':'SORU')+'</small><h2>'+safe(answerShown?activeDeck[activeCard].answer:activeDeck[activeCard].question)+'</h2><p>'+(answerShown?'Kendini kontrol et.':'Cevabını düşündükten sonra karta dokun.')+'</p></article><div class="study-controls"><button class="outline-button" id="prevCard" '+(activeCard===0?'disabled':'')+'>'+icon('arrow-left')+' Önceki</button><button class="primary-button" id="flipCard">'+(answerShown?'Cevabı gördün':'Cevabı göster')+' '+icon('eye')+'</button><button class="outline-button" id="nextCard">'+(activeCard===activeDeck.length-1?'Bitir':'Sonraki')+' '+icon('arrow-right')+'</button></div></div>';refreshIcons();$('#studyCard').addEventListener('click',()=>{answerShown=!answerShown;showDeck();});$('#flipCard').addEventListener('click',()=>{answerShown=!answerShown;showDeck();});$('#prevCard').addEventListener('click',()=>{if(activeCard>0){activeCard--;answerShown=false;showDeck();}});$('#nextCard').addEventListener('click',()=>{if(activeCard<activeDeck.length-1){activeCard++;answerShown=false;showDeck();}else{activeDeck=[];renderFlashcards();toast('Flash kart setini tamamladın.');}});$('#exitDeck').addEventListener('click',renderFlashcards);};
+  $('#startFlashBtn').addEventListener('click',()=>{if(!data.cards.length){openModal('card');return;}const groups=[...new Set(data.cards.map(c=>c.course||'Genel kartlar'))];startDeck(groups[0]);});
+  $('#questionAmount').addEventListener('click',e=>{const b=e.target.closest('[data-amount]');if(!b)return;selectedAmount=b.dataset.amount;$$('.choice-chip').forEach(x=>x.classList.toggle('active',x===b));});
+  $('#createQuizBtn').addEventListener('click',()=>toast('Soru bankası bağlantısı hazırlandığında test oturumu burada açılacak.'));
+  $('#uploadNoteBtn').addEventListener('click',()=>$('#noteFileInput').click());
+  $('#noteFileInput').addEventListener('change',async e=>{const file=e.target.files[0];if(!file)return;if(file.size>8*1024*1024){toast('Dosya 8 MB sınırını aşıyor.');e.target.value='';return;}const reader=new FileReader();reader.onload=()=>{data.notes.unshift({id:crypto.randomUUID(),title:file.name,course:'Ek dosya',body:'Dosya eklendi: '+file.name+' ('+Math.round(file.size/1024)+' KB). Bu demo sürümünde dosyanın kendisi tarayıcıda kalıcı depolanmaz; PDF/görsel bulut yüklemesi sonraki aşamada bağlanacaktır.',date:new Date().toISOString().slice(0,10)});save();renderNotes();toast('Dosya bilgisi notlarına eklendi.');};reader.readAsArrayBuffer(file);e.target.value='';});
+  document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();$('#globalSearch').focus();}if(e.key==='Escape'){if(!$('#modalBackdrop').hidden)closeModal();if(!overlay.hidden)closeFocus();}});
+  render();refreshIcons();
+})();
