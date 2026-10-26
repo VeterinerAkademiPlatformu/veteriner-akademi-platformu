@@ -6,12 +6,15 @@ The browser app is now wired to Supabase Auth and the `student_workspaces` table
 ## Database and access control
 The table `public.student_workspaces` has RLS enabled. Authenticated users can read/insert/update/delete only the row where `user_id = auth.uid()`. Anonymous access is revoked. The setup SQL is in `supabase/schema.sql`.
 
+The text-only shared library uses `public.shared_notes`. Published notes are readable publicly; only users whose trusted `app_metadata.role` is `admin` can create, edit, or delete shared notes. Its repeatable table/policy setup is in `supabase/shared_notes.sql`. Both tables revoke browser-role `TRUNCATE`, `REFERENCES`, and `TRIGGER` privileges.
+
 ## Authentication setup
 In the [Supabase project](https://supabase.com/dashboard/project/jvbpoibzjihznlljeech):
 1. Open **Authentication → Sign In / Providers** and ensure Email is enabled.
 2. Set the site's deployed URL as the Site URL and add the deployed URL plus any development URL to the redirect allow list.
 3. Decide whether email confirmation is required. If enabled, new users must open the verification email before signing in.
-4. Deploy the latest GitHub `main` branch so the new UI and client script are served.
+4. Open **Authentication → Settings / Password Security** and enable **Leaked Password Protection** if available for the project.
+5. Deploy the latest GitHub `main` branch so the new UI and client script are served.
 
 ## Important safety notes
 - Only the publishable key is included in browser code. Never put a `service_role` key, secret key, database password, or personal access token in HTML/JavaScript or GitHub.
