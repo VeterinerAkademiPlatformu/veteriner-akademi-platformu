@@ -105,6 +105,29 @@
     </main>
   </div>
 
+  <div class="note-reader-backdrop" id="noteReaderBackdrop" hidden>
+    <section class="note-reader" role="dialog" aria-modal="true" aria-labelledby="noteReaderTitle">
+      <header class="note-reader-topbar">
+        <button class="reader-back-button" id="noteReaderClose" type="button"><i data-lucide="arrow-left"></i><span>Notlarıma dön</span></button>
+        <div class="reader-tools">
+          <button class="reader-tool" id="noteFontDown" type="button" aria-label="Yazıyı küçült" title="Yazıyı küçült">A−</button>
+          <button class="reader-tool" id="noteFontUp" type="button" aria-label="Yazıyı büyüt" title="Yazıyı büyüt">A+</button>
+          <button class="reader-tool" id="noteCopyBtn" type="button" aria-label="Notu kopyala" title="Notu kopyala"><i data-lucide="copy"></i><span>Kopyala</span></button>
+        </div>
+      </header>
+      <div class="reader-progress-track"><span id="noteReaderProgress"></span></div>
+      <div class="note-reader-scroll" id="noteReaderScroll">
+        <article class="note-reading-paper">
+          <div class="reader-note-meta"><span class="reader-note-icon"><i data-lucide="book-open-text"></i></span><div><span id="noteReaderCourse">DERS NOTU</span><small id="noteReaderDate"></small></div></div>
+          <h1 id="noteReaderTitle"></h1>
+          <div class="reader-note-divider"></div>
+          <div class="note-reader-body" id="noteReaderBody"></div>
+          <footer class="reader-note-footer"><span><i data-lucide="book-open-check"></i> Kişisel çalışma arşivin</span><button type="button" class="reader-back-bottom" id="noteReaderCloseBottom">Notlara dön <i data-lucide="arrow-right"></i></button></footer>
+        </article>
+      </div>
+    </section>
+  </div>
+
   <div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><div><span class="eyebrow" id="modalEyebrow">YENİ KAYIT</span><h2 id="modalTitle">Yeni kayıt oluştur</h2></div><button class="icon-button" id="modalClose" aria-label="Kapat"><i data-lucide="x"></i></button></div><form id="modalForm"><div id="modalFields" class="modal-fields"></div><div class="modal-actions"><button type="button" class="outline-button" id="modalCancel">Vazgeç</button><button type="submit" class="primary-button"><i data-lucide="check"></i> Kaydet</button></div></form></section></div>
 
   <div class="auth-backdrop" id="authBackdrop" hidden>
