@@ -329,11 +329,11 @@
     });
     $('#authSignOut').addEventListener('click',async()=>{
       const {error}=await supabaseClient.auth.signOut(); if(error){authMessage('Çıkış yapılamadı: '+error.message,true);return;}
-      authUser=null;cloudReady=false;lastLoadedUserId=null;updateAccountUI();closeAuth();toast('Hesabından güvenli çıkış yaptın.');
+      authUser=null;cloudReady=false;lastLoadedUserId=null;data=structuredClone(seed);writeLocal();render();updateAccountUI();closeAuth();toast('Hesabından güvenli çıkış yaptın.');
     });
     supabaseClient.auth.onAuthStateChange((event,session)=>{
       setTimeout(()=>{
-        if(event==='SIGNED_OUT'){authUser=null;cloudReady=false;cloudLoading=false;lastLoadedUserId=null;updateAccountUI();return;}
+        if(event==='SIGNED_OUT'){authUser=null;cloudReady=false;cloudLoading=false;lastLoadedUserId=null;data=structuredClone(seed);writeLocal();render();updateAccountUI();return;}
         if((event==='INITIAL_SESSION'||event==='SIGNED_IN')&&session?.user){loadCloudWorkspace(session.user);}
         else if(!session?.user){authUser=null;cloudReady=false;updateAccountUI();}
       },0);
