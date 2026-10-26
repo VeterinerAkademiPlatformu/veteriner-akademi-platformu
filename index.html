@@ -123,6 +123,16 @@
           <div class="reader-note-meta"><span class="reader-note-icon"><i data-lucide="book-open-text"></i></span><div><span id="noteReaderCourse">DERS NOTU</span><small id="noteReaderDate"></small></div></div>
           <h1 id="noteReaderTitle"></h1>
           <div class="reader-note-divider"></div>
+          <div class="reader-search-row" role="search">
+            <i data-lucide="search"></i>
+            <input id="noteReaderSearch" type="search" placeholder="Bu notta ara..." aria-label="Bu notun içinde ara" autocomplete="off">
+            <span id="noteReaderSearchCount" aria-live="polite"></span>
+            <button id="noteReaderSearchClear" type="button" aria-label="Aramayı temizle" title="Aramayı temizle"><i data-lucide="x"></i></button>
+          </div>
+          <nav class="reader-toc" id="noteReaderToc" aria-label="Not içindekiler" hidden>
+            <button class="reader-toc-toggle" id="noteReaderTocToggle" type="button" aria-expanded="true"><span><i data-lucide="list-tree"></i> Bu notun içindekileri</span><i data-lucide="chevron-up" class="reader-toc-chevron"></i></button>
+            <ol id="noteReaderTocList"></ol>
+          </nav>
           <div class="note-reader-body" id="noteReaderBody"></div>
           <footer class="reader-note-footer"><span><i data-lucide="book-open-check"></i> Kişisel çalışma arşivin</span><button type="button" class="reader-back-bottom" id="noteReaderCloseBottom">Notlara dön <i data-lucide="arrow-right"></i></button></footer>
         </article>
