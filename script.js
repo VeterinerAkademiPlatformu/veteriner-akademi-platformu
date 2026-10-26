@@ -281,6 +281,15 @@
   };
   const openAuth = () => { $('#authBackdrop').hidden=false; updateAccountUI(); if(!authUser)$('#authEmail').focus(); };
   const closeAuth = () => { $('#authBackdrop').hidden=true; authMessage(''); };
+  const showEmailConfirmation = email => {
+    const card=$('#emailConfirmBackdrop');
+    $('#emailConfirmAddress').textContent=email;
+    $('#emailConfirmCheck').checked=false;
+    $('#emailConfirmContinue').disabled=true;
+    card.hidden=false;
+    refreshIcons();
+  };
+  const closeEmailConfirmation = () => { $('#emailConfirmBackdrop').hidden=true; };
   const normalizeWorkspace = saved => {
     const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
     for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
@@ -311,6 +320,19 @@
     if(!supabaseClient){$('#accountButton').addEventListener('click',()=>toast('Hesap servisi yüklenemedi. Sayfayı yenile.'));return;}
     $('#accountButton').addEventListener('click',openAuth); $$('[data-open-account]').forEach(el=>el.addEventListener('click',openAuth));
     $('#authClose').addEventListener('click',closeAuth); $('#authBackdrop').addEventListener('click',e=>{if(e.target===$('#authBackdrop'))closeAuth();});
+    $('#emailConfirmCheck').addEventListener('change',e=>{ $('#emailConfirmContinue').disabled=!e.target.checked; });
+    $('#emailConfirmContinue').addEventListener('click',()=>{
+      if(!$('#emailConfirmCheck').checked)return;
+      const email=$('#emailConfirmAddress').textContent;
+      closeEmailConfirmation();
+      setAuthMode('signin');
+      $('#authEmail').value=email;
+      $('#authPassword').value='';
+      openAuth();
+      authMessage('E-postanı kontrol ettikten sonra doğrulama bağlantısını aç. Ardından şifrenle giriş yap.');
+      $('#authPassword').focus();
+    });
+    $('#emailConfirmBackdrop').addEventListener('click',e=>{if(e.target===$('#emailConfirmBackdrop'))closeEmailConfirmation();});
     $('#authModeToggle').addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
     $('#authForm').addEventListener('submit',async e=>{
       e.preventDefault(); const email=$('#authEmail').value.trim(), password=$('#authPassword').value; const submit=$('#authSubmit');
@@ -319,7 +341,7 @@
         if(authMode==='signup'){
           const {data:result,error}=await supabaseClient.auth.signUp({email,password}); if(error)throw error;
           if(result.session){closeAuth();toast('Hesabın oluşturuldu.');}
-          else authMessage('Kayıt isteği alındı. E-posta adresine gelen doğrulama bağlantısını aç, ardından giriş yap.');
+          else { closeAuth(); showEmailConfirmation(email); }
         } else {
           const {data:result,error}=await supabaseClient.auth.signInWithPassword({email,password}); if(error)throw error;
           if(result.user)closeAuth();
