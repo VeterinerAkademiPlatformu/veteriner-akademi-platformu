@@ -88,14 +88,68 @@
     $('#examSummary').innerHTML='<div class="summary-tile"><span>Takvimdeki sınavlar</span><strong>'+data.exams.length+'</strong></div><div class="summary-tile"><span>Yaklaşan sınavlar</span><strong>'+upcoming+'</strong></div><div class="summary-tile"><span>Yüksek öncelik</span><strong>'+data.exams.filter(e=>e.priority==='Yüksek').length+'</strong></div>';
   };
   let readerNoteId=null, readerFontSize=18, readerSaveTimer=null, showBookmarkedNotes=false;
-  const renderReaderBody = note => {
-    let body=safe(note.body||'Bu notta henüz içerik yok.').replace(/\n/g,'<br>');
-    (note.highlights||[]).slice().sort((a,b)=>b.length-a.length).forEach(mark=>{
-      if(!mark)return;
-      const escaped=safe(mark).replace(/\n/g,'<br>');
-      if(escaped && !escaped.includes('<br>')) body=body.replace(escaped,'<mark class="reader-highlight">'+escaped+'</mark>');
+  let readerSearchMatches=[], readerSearchIndex=0;
+  const isReaderHeading = raw => {
+    const line=raw.trim();
+    if(!line || line.length>100)return false;
+    if(/^#{1,3}\s+\S/.test(line))return true;
+    if(/^\d{1,2}[.)]\s+[^.!?]{3,85}$/.test(line))return true;
+    if(/^(BÖLÜM|KONU|GİRİŞ|SONUÇ|ETİYOLOJİ|PATOGENEZ|KLİNİK BULGULAR|TANI|TEDAVİ|KORUNMA|AŞILAMA|BULAŞMA|BELİRTİLER|AYIRICI TANI|KOMPLİKASYONLAR|ÖZET)\s*:?$/i.test(line))return true;
+    return line.length>=4 && line.length<=75 && !/[.!?]$/.test(line) && line===line.toLocaleUpperCase('tr-TR') && /[A-ZÇĞİÖŞÜ]/.test(line) && line.split(/\s+/).length<=10;
+  };
+  const readerHeadingText = raw => raw.trim().replace(/^#{1,3}\s+/,'').replace(/^\d{1,2}[.)]\s+/,'').replace(/\s*:\s*$/,'').trim();
+  const highlightReaderLine = (line,note) => {
+    let out=safe(line);
+    (note.highlights||[]).filter(Boolean).slice().sort((a,b)=>b.length-a.length).forEach(mark=>{
+      if(mark.includes('\n'))return;
+      const escaped=safe(mark);
+      if(escaped && out.includes(escaped))out=out.replace(escaped,'<mark class="reader-highlight">'+escaped+'</mark>');
     });
-    $('#noteReaderBody').innerHTML=body;
+    return out || '&nbsp;';
+  };
+  const renderReaderBody = note => {
+    const rawLines=String(note.body||'Bu notta henüz içerik yok.').replace(/\r/g,'').split('\n');
+    const sections=rawLines.map((text,index)=>({text,index,heading:isReaderHeading(text),title:readerHeadingText(text)})).filter(x=>x.heading);
+    const toc=$('#noteReaderToc'), tocList=$('#noteReaderTocList');
+    tocList.innerHTML='';
+    if(sections.length>1){
+      toc.hidden=false;
+      sections.forEach((section,i)=>{
+        const id='reader-section-'+section.index;
+        const li=document.createElement('li'),a=document.createElement('button');
+        a.type='button';a.className='reader-toc-link';a.dataset.readerJump=id;
+        a.textContent=section.title;
+        li.appendChild(a);tocList.appendChild(li);
+      });
+    }else toc.hidden=true;
+    $('#noteReaderBody').innerHTML=rawLines.map((line,index)=>{
+      if(isReaderHeading(line)){
+        const title=readerHeadingText(line),level=/^\s*###/.test(line)?3:2;
+        return '<h'+level+' class="reader-section-heading" id="reader-section-'+index+'" data-reader-line="'+index+'">'+safe(title)+'</h'+level+'>';
+      }
+      if(!line.trim())return '<div class="reader-paragraph-space" aria-hidden="true"></div>';
+      return '<p class="reader-paragraph" data-reader-line="'+index+'">'+highlightReaderLine(line,note)+'</p>';
+    }).join('');
+    runReaderSearch($('#noteReaderSearch')?.value||'');
+  };
+  const runReaderSearch = query => {
+    const q=String(query||'').trim().toLocaleLowerCase('tr-TR');
+    readerSearchMatches=[];
+    $('.reader-search-match',$('#noteReaderBody')).forEach(el=>el.classList.remove('reader-search-match'));
+    if(q)readerSearchMatches=$('#noteReaderBody [data-reader-line]').filter(el=>(el.textContent||'').toLocaleLowerCase('tr-TR').includes(q));
+    readerSearchIndex=readerSearchMatches.length?Math.min(readerSearchIndex,readerSearchMatches.length-1):0;
+    const count=$('#noteReaderSearchCount');
+    count.textContent=q?(readerSearchMatches.length?(readerSearchIndex+1)+' / '+readerSearchMatches.length:'Sonuç yok'):'';
+    if(readerSearchMatches.length)readerSearchMatches[readerSearchIndex].classList.add('reader-search-match');
+  };
+  const jumpReaderSearch = direction => {
+    if(!readerSearchMatches.length)return;
+    readerSearchMatches[readerSearchIndex]?.classList.remove('reader-search-match');
+    readerSearchIndex=(readerSearchIndex+direction+readerSearchMatches.length)%readerSearchMatches.length;
+    const target=readerSearchMatches[readerSearchIndex];
+    target.classList.add('reader-search-match');
+    $('#noteReaderSearchCount').textContent=(readerSearchIndex+1)+' / '+readerSearchMatches.length;
+    target.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const updateBookmarkButton = note => {
     const b=$('#noteBookmarkBtn');if(!b||!note)return;
@@ -111,6 +165,9 @@
     $('#noteReaderTitle').textContent=note.title||'Başlıksız not';
     renderReaderBody(note);
     $('#noteReaderBody').style.fontSize=readerFontSize+'px';
+    $('#noteReaderSearch').value='';
+    $('#noteReaderSearchCount').textContent='';
+    readerSearchMatches=[];readerSearchIndex=0;
     $('#noteReaderBackdrop').hidden=false;document.body.classList.add('note-reader-open');
     updateBookmarkButton(note);
     requestAnimationFrame(()=>{const box=$('#noteReaderScroll');const max=box.scrollHeight-box.clientHeight;box.scrollTop=max*Math.max(0,Math.min(1,Number(note.readPosition)||0));updateReaderProgress();});
@@ -125,6 +182,19 @@
     const max=box.scrollHeight-box.clientHeight;
     $('#noteReaderProgress').style.width=(max>0?Math.min(100,box.scrollTop/max*100):100)+'%';
   };
+  $('#noteReaderSearch').addEventListener('input',()=>{readerSearchIndex=0;runReaderSearch($('#noteReaderSearch').value);});
+  $('#noteReaderSearchClear').addEventListener('click',()=>{$('#noteReaderSearch').value='';runReaderSearch('');$('#noteReaderSearch').focus();});
+  $('#noteReaderSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();jumpReaderSearch(e.shiftKey?-1:1);}});
+  $('#noteReaderTocToggle').addEventListener('click',()=>{
+    const list=$('#noteReaderTocList'),button=$('#noteReaderTocToggle'),expanded=button.getAttribute('aria-expanded')==='true';
+    button.setAttribute('aria-expanded',String(!expanded));list.hidden=expanded;
+    button.querySelector('.reader-toc-chevron')?.setAttribute('data-lucide',expanded?'chevron-down':'chevron-up');refreshIcons();
+  });
+  $('#noteReaderTocList').addEventListener('click',e=>{
+    const button=e.target.closest('[data-reader-jump]');if(!button)return;
+    const target=document.getElementById(button.dataset.readerJump);if(target)target.scrollIntoView({behavior:'smooth',block:'start'});
+    $('.reader-toc-link').forEach(el=>el.classList.toggle('active',el===button));
+  });
   $('#noteReaderClose').addEventListener('click',closeNoteReader);
   $('#noteReaderCloseBottom').addEventListener('click',closeNoteReader);
   $('#noteReaderBackdrop').addEventListener('click',e=>{if(e.target===$('#noteReaderBackdrop'))closeNoteReader();});
