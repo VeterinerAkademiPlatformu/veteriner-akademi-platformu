@@ -110,6 +110,16 @@
     return out || '&nbsp;';
   };
   const readerStudyKeywords=/\b(sınavda|sınav için|dikkat|önemli|kritik|karıştırılmamalı|karıştırmayın|ayırt edici|ayırt edilmelidir|en sık|mutlaka|kesinlikle|istisna|unutmayın|sorulur|soru gelebilir|kilit bilgi)\b/i;
+  let studyQuizItems=[],studyQuizIndex=0,studyQuizScore=0,studyQuizMissed=[];
+  const paintStudyQuiz = () => {
+    const host=$('#noteStudyQuiz');if(!host)return;
+    if(!studyQuizItems.length){host.innerHTML='<p class="reader-study-empty">Mini sınav için yeterli başlık bulunamadı. Notunu başlıklarla düzenleyerek tekrar deneyebilirsin.</p>';return;}
+    if(studyQuizIndex>=studyQuizItems.length){
+      host.innerHTML='<div class="reader-quiz-result"><span class="eyebrow">OTURUM SONUCU</span><strong>'+studyQuizScore+' / '+studyQuizItems.length+' doğru</strong><p>'+Math.round(studyQuizScore/studyQuizItems.length*100)+'% başarı · '+studyQuizMissed.length+' konu tekrar listesinde.</p>'+(studyQuizMissed.length?'<button type="button" class="reader-quiz-primary" data-quiz-action="retry">Yanlışları tekrar et ('+studyQuizMissed.length+')</button>':'<p>Harika! Yanlış yanıtlanan konu yok.</p>')+' <button type="button" class="reader-quiz-secondary" data-quiz-action="restart">Yeniden çöz</button></div>';return;
+    }
+    const item=studyQuizItems[studyQuizIndex];
+    host.innerHTML='<div class="reader-quiz-progress"><span>Soru '+(studyQuizIndex+1)+' / '+studyQuizItems.length+'</span><span>'+studyQuizScore+' doğru</span></div><div class="reader-quiz-track"><span style="width:'+Math.round(studyQuizIndex/studyQuizItems.length*100)+'%"></span></div><article class="reader-quiz-card"><span class="eyebrow">KENDİNİ SINA</span><h4>'+safe(item.question)+'</h4><details class="reader-quiz-answer"><summary>Yanıtı göster</summary><p>'+safe(item.answer||'Bu başlığı nottan tekrar et ve kendi cümlenle açıkla.')+'</p></details><div class="reader-quiz-actions"><button type="button" class="reader-quiz-primary" data-quiz-action="known">Bildim</button><button type="button" class="reader-quiz-secondary" data-quiz-action="missed">Tekrar et</button></div></article>';
+  };
   const renderReaderStudy = note => {
     const panel=$('#noteStudyPanel'),button=$('#noteStudyModeBtn');
     if(!panel||!button)return;
@@ -128,7 +138,13 @@
     panel.innerHTML='<div class="reader-study-heading"><div><span class="eyebrow">AKTİF HATIRLAMA</span><h2>Çalışma modu</h2><p>Önce kendin cevapla, sonra yanıtı aç.</p></div><button type="button" class="reader-study-close" id="noteStudyClose">Kapat</button></div>'+
       (warnings.length?'<section class="reader-study-section"><h3>⚠ Sınavda dikkat</h3><ul class="reader-study-warnings">'+warnings.slice(0,10).map(x=>'<li>'+safe(x)+'</li>').join('')+'</ul></section>':'<section class="reader-study-section reader-study-empty"><h3>Sınav uyarısı bulunamadı</h3><p>Notta “Dikkat”, “Önemli” veya “Sınavda” gibi ifadeler varsa burada listelenir. Bu bölüm otomatik metin taramasıdır.</p></section>')+
       (prompts.length?'<section class="reader-study-section"><h3>Kendini sına</h3><div class="reader-study-prompts">'+prompts.map((p,i)=>'<details class="reader-study-question"><summary><span>'+(i+1)+'.</span> '+safe(p.title)+' konusu için temel bilgi nedir?</summary><p>'+(p.answer?safe(p.answer):'Bu başlığı not içinde yeniden incele ve kendi cümlenle açıkla.')+'</p></details>').join('')+'</div></section>':'<p class="reader-study-empty">Kendini sınamak için notta başlık bulunamadı. Başlıkları kısa ve belirgin yazmayı deneyebilirsin.</p>')+
-      '<p class="reader-study-disclaimer">Otomatik oluşturulan çalışma yardımıdır; notun içeriğinin yerine geçmez.</p>';
+      '<section class="reader-study-section"><h3>📝 5 soruluk mini sınav</h3><p class="reader-quiz-intro">Başlıklardan kısa tekrar soruları hazırlanır. Cevaplarını kendin değerlendir; yanlışlar tekrar turunda yeniden gelir.</p><div id="noteStudyQuiz"></div></section>'+
+      '<p class="reader-study-disclaimer">Otomatik oluşturulan çalışma yardımıdır; notun içeriğinin yerine geçmez. Mini sınav başlıklardan türetilir, akademik doğruluk kontrolü yapılmış bir test değildir.</p>';
+    studyQuizItems=prompts.slice(0,5).map(p=>({question:p.title+' konusundaki temel bilgi nedir?',answer:p.answer}));
+    if(studyQuizItems.length<5){
+      warnings.slice(0,5-studyQuizItems.length).forEach((w,i)=>studyQuizItems.push({question:'Bu önemli uyarının ana mesajı nedir?',answer:w}));
+    }
+    studyQuizIndex=0;studyQuizScore=0;studyQuizMissed=[];
     panel.hidden=true;
     button.setAttribute('aria-pressed','false');
     button.classList.remove('is-active');
@@ -154,7 +170,8 @@
         return '<h'+level+' class="reader-section-heading" id="reader-section-'+index+'" data-reader-line="'+index+'">'+safe(title)+'</h'+level+'>';
       }
       if(!line.trim())return '<div class="reader-paragraph-space" aria-hidden="true"></div>';
-      return '<p class="reader-paragraph" data-reader-line="'+index+'">'+highlightReaderLine(line,note)+'</p>';
+      const examCritical=readerStudyKeywords.test(line)&&line.length>=12;
+      return '<p class="reader-paragraph'+(examCritical?' reader-exam-critical':'')+'" data-reader-line="'+index+'">'+(examCritical?'<span class="reader-critical-label">SINAVDA DİKKAT</span>':'')+highlightReaderLine(line,note)+'</p>';
     }).join('');
     runReaderSearch($('#noteReaderSearch')?.value||'');
     renderReaderStudy(note);
@@ -231,9 +248,17 @@
     const panel=$('#noteStudyPanel'),button=$('#noteStudyModeBtn');if(!panel||!button)return;
     const opening=panel.hidden;panel.hidden=!opening;button.setAttribute('aria-pressed',String(opening));button.classList.toggle('is-active',opening);
     button.title=opening?'Çalışma modunu kapat':'Sınav odaklı çalışma modunu aç';
-    if(opening)panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+    if(opening){paintStudyQuiz();panel.scrollIntoView({behavior:'smooth',block:'nearest'});}
   });
-  $('#noteStudyPanel')?.addEventListener('click',e=>{if(e.target.closest('#noteStudyClose')){$('#noteStudyPanel').hidden=true;$('#noteStudyModeBtn')?.setAttribute('aria-pressed','false');$('#noteStudyModeBtn')?.classList.remove('is-active');}});
+  $('#noteStudyPanel')?.addEventListener('click',e=>{
+    if(e.target.closest('#noteStudyClose')){$('#noteStudyPanel').hidden=true;$('#noteStudyModeBtn')?.setAttribute('aria-pressed','false');$('#noteStudyModeBtn')?.classList.remove('is-active');return;}
+    const action=e.target.closest('[data-quiz-action]')?.dataset.quizAction;if(!action)return;
+    if(action==='restart'){studyQuizIndex=0;studyQuizScore=0;studyQuizMissed=[];paintStudyQuiz();return;}
+    if(action==='retry'){studyQuizItems=studyQuizMissed.slice();studyQuizMissed=[];studyQuizIndex=0;studyQuizScore=0;paintStudyQuiz();return;}
+    const current=studyQuizItems[studyQuizIndex];if(!current)return;
+    if(action==='known')studyQuizScore++;else if(action==='missed')studyQuizMissed.push(current);
+    studyQuizIndex++;paintStudyQuiz();
+  });
   $('#noteReaderClose').addEventListener('click',closeNoteReader);
   $('#noteReaderCloseBottom').addEventListener('click',closeNoteReader);
   $('#noteReaderBackdrop').addEventListener('click',e=>{if(e.target===$('#noteReaderBackdrop'))closeNoteReader();});
