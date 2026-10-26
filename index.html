@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0b1220">
+  <meta name="description" content="Veteriner fakültesi öğrencileri için ders, sınav ve tekrar çalışma platformu.">
+  <title>Veteriner Akademi Platformu</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="#" data-page="dashboard" aria-label="Ana sayfa">
+        <span class="brand-mark"><i data-lucide="stethoscope"></i></span>
+        <span class="brand-copy"><strong>Veteriner<span>Akademi</span></strong><small>Öğren · Uygula · Geliş</small></span>
+      </a>
+      <div class="workspace-label">ÇALIŞMA ALANI</div>
+      <nav class="nav-list" aria-label="Ana menü">
+        <button class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Genel Bakış</span></button>
+        <button class="nav-item" data-page="courses"><i data-lucide="book-open"></i><span>Derslerim</span><span class="nav-count" id="courseCount">6</span></button>
+        <button class="nav-item" data-page="exams"><i data-lucide="calendar-days"></i><span>Sınav Takvimi</span></button>
+        <button class="nav-item" data-page="notes"><i data-lucide="notebook-pen"></i><span>Notlarım</span></button>
+        <button class="nav-item" data-page="flashcards"><i data-lucide="layers"></i><span>Flash Kartlar</span></button>
+        <button class="nav-item" data-page="questions"><i data-lucide="list-checks"></i><span>Soru Çöz</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="focus-card">
+          <span class="focus-icon"><i data-lucide="timer"></i></span>
+          <div><strong>Odaklanma zamanı</strong><p>Küçük adımlar, büyük gelişim.</p></div>
+          <button class="icon-button subtle" id="focusStart" aria-label="Odaklanma sayacını başlat"><i data-lucide="play"></i></button>
+        </div>
+        <button class="nav-item" data-page="settings"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
+        <div class="profile">
+          <div class="avatar">VA</div><div class="profile-text"><strong>Öğrenci Alanı</strong><small>Kişisel çalışma alanın</small></div><i data-lucide="chevrons-up-down" class="profile-more"></i>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main-area">
+      <header class="topbar">
+        <button class="icon-button mobile-menu" id="menuToggle" aria-label="Menüyü aç"><i data-lucide="menu"></i></button>
+        <div class="breadcrumb"><span>Veteriner Akademi</span><i data-lucide="chevron-right"></i><strong id="crumbCurrent">Genel Bakış</strong></div>
+        <div class="top-actions">
+          <label class="search-box"><i data-lucide="search"></i><input id="globalSearch" type="search" placeholder="Ders, konu veya not ara..." aria-label="Ara"><kbd>⌘ K</kbd></label>
+          <button class="icon-button notification-btn" aria-label="Bildirimler" id="notificationBtn"><i data-lucide="bell"></i><span></span></button>
+          <button class="primary-button top-add" id="topAddBtn"><i data-lucide="plus"></i><span>Yeni ekle</span></button>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="welcome-row">
+          <div><div class="eyebrow"><span class="eyebrow-dot"></span> AKADEMİK ÇALIŞMA ALANI</div><h1>Bugün ne öğreniyoruz?</h1><p class="page-subtitle">Planlı çalış, bilgini güçlendir ve sınavlara güvenle hazırlan.</p></div>
+          <div class="date-chip"><i data-lucide="calendar"></i><span id="todayDate">Bugün</span></div>
+        </div>
+        <div class="hero-panel">
+          <div class="hero-content"><span class="hero-kicker">BUGÜNÜN HEDEFİ</span><h2>Her gün biraz daha<br><em>yetkin bir veteriner.</em></h2><p>Bir konu seç, kısa bir tekrar yap ve öğrendiklerini sorularla pekiştir.</p><button class="hero-button" data-page="courses">Çalışmaya başla <i data-lucide="arrow-up-right"></i></button></div>
+          <div class="hero-art" aria-hidden="true"><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div><div class="art-cross"><i data-lucide="plus"></i></div><div class="art-icon"><i data-lucide="stethoscope"></i></div><span class="art-label label-top">BİLGİ</span><span class="art-label label-bottom">PRATİK</span><span class="art-dot dot-one"></span><span class="art-dot dot-two"></span></div>
+          <div class="hero-footer"><span><i data-lucide="sparkles"></i> Kendi öğrenme ritmini oluştur</span><span>01 <b>/</b> 03</span></div>
+        </div>
+        <div class="section-heading"><div><h2>Çalışma özeti</h2><p>İlerlemeni takip et, sıradaki adımını belirle.</p></div><button class="text-button" data-page="settings">Hedefleri düzenle <i data-lucide="arrow-up-right"></i></button></div>
+        <div class="stats-grid">
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon teal"><i data-lucide="book-open-check"></i></span><span class="stat-caption">BU HAFTA</span></div><div class="stat-number"><span id="weeklySessions">4</span><small>oturum</small></div><div class="stat-bottom"><span class="status-dot"></span> Düzenli çalışmaya devam et</div></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon violet"><i data-lucide="target"></i></span><span class="stat-caption">GÜNLÜK HEDEF</span></div><div class="stat-number"> <span id="goalProgress">2</span><small>/ 3 görev</small></div><div class="mini-progress"><span style="width:66%"></span></div><div class="stat-bottom">Bir görev daha tamamla</div></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon amber"><i data-lucide="clock-3"></i></span><span class="stat-caption">ODAK SÜRESİ</span></div><div class="stat-number">1<small>s 25 dk</small></div><div class="stat-bottom"><span class="status-dot amber-dot"></span> Bugünkü toplam çalışma</div></article>
+          <article class="stat-card"><div class="stat-top"><span class="stat-icon blue"><i data-lucide="bookmark"></i></span><span class="stat-caption">KAYDEDİLEN</span></div><div class="stat-number"><span id="savedCount">8</span><small>öğe</small></div><div class="stat-bottom">Tekrar etmek için hazır</div></article>
+        </div>
+        <div class="dashboard-columns">
+          <div class="main-column">
+            <div class="section-heading compact"><div><h2>Son çalıştığın dersler</h2><p>Kaldığın yerden devam et.</p></div><button class="text-button" data-page="courses">Tüm dersler <i data-lucide="arrow-right"></i></button></div>
+            <div class="course-grid" id="dashboardCourses"></div>
+            <div class="section-heading compact upcoming-heading"><div><h2>Yaklaşan sınavlar</h2><p>Takvimini gözden kaçırma.</p></div><button class="text-button" data-page="exams">Takvimi aç <i data-lucide="arrow-right"></i></button></div>
+            <div class="exam-list" id="dashboardExams"></div>
+          </div>
+          <aside class="right-column">
+            <div class="panel-card daily-card"><div class="panel-title"><span class="panel-title-icon"><i data-lucide="check-check"></i></span><div><h3>Bugünün planı</h3><p>Az ama istikrarlı ilerle.</p></div><span class="tiny-pill">2/3</span></div><div class="task-list" id="taskList"><label class="task-item done"><input type="checkbox" checked><span class="fake-check"><i data-lucide="check"></i></span><span><strong>Önceki konuyu tekrar et</strong><small>15 dakika</small></span></label><label class="task-item done"><input type="checkbox" checked><span class="fake-check"><i data-lucide="check"></i></span><span><strong>10 test sorusu çöz</strong><small>20 dakika</small></span></label><label class="task-item"><input type="checkbox"><span class="fake-check"><i data-lucide="check"></i></span><span><strong>Bir flash kart seti tamamla</strong><small>10 dakika</small></span></label></div><button class="outline-button full-width" id="editPlanBtn"><i data-lucide="list-todo"></i> Planı düzenle</button></div>
+            <div class="panel-card quick-card"><div class="panel-title"><span class="panel-title-icon purple"><i data-lucide="zap"></i></span><div><h3>Hızlı erişim</h3><p>Bir sonraki adımını seç.</p></div></div><button class="quick-link" data-page="notes"><span class="quick-link-icon"><i data-lucide="notebook-pen"></i></span><span><strong>Not oluştur</strong><small>Önemli bilgiyi kaydet</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="questions"><span class="quick-link-icon pink"><i data-lucide="brain"></i></span><span><strong>Kendini sına</strong><small>Bilgini sorularla ölç</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="flashcards"><span class="quick-link-icon gold"><i data-lucide="layers"></i></span><span><strong>Flash kartları aç</strong><small>Aktif hatırlama zamanı</small></span><i data-lucide="arrow-up-right"></i></button></div>
+            <div class="quote-card"><i data-lucide="quote"></i><p>Öğrenmek, tekrar ettikçe kalıcı hâle gelir.</p><span>BUGÜNÜN HATIRLATMASI</span></div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="page" id="page-courses"><div class="page-header"><div><div class="eyebrow">ÖĞRENME MERKEZİ</div><h1>Derslerim</h1><p class="page-subtitle">Derslerini düzenle, konularını çalış ve sınavlara hazırlan.</p></div><button class="primary-button" id="addCourseBtn"><i data-lucide="plus"></i> Ders ekle</button></div><div class="filter-row"><label class="filter-search"><i data-lucide="search"></i><input id="courseSearch" placeholder="Ders ara..."></label><select id="semesterFilter" aria-label="Dönem seç"><option value="all">Tüm dönemler</option><option value="1">1. Sınıf</option><option value="2">2. Sınıf</option><option value="3">3. Sınıf</option><option value="4">4. Sınıf</option><option value="5">5. Sınıf</option></select><span class="result-label" id="courseResultLabel">Derslerin</span></div><div class="all-course-grid" id="allCourses"></div></section>
+
+      <section class="page" id="page-exams"><div class="page-header"><div><div class="eyebrow">PLANLAMA</div><h1>Sınav takvimi</h1><p class="page-subtitle">Vize, final ve bütünleme sınavlarını tek yerden takip et.</p></div><button class="primary-button" id="addExamBtn"><i data-lucide="plus"></i> Sınav ekle</button></div><div class="exam-summary" id="examSummary"></div><div class="panel-card exam-page-panel"><div class="panel-title"><div><h3>Sınav planın</h3><p>Tarihleri ve önceliklerini gözden geçir.</p></div><select id="examFilter" aria-label="Sınav türü"><option value="all">Tüm sınavlar</option><option value="Vize">Vize</option><option value="Final">Final</option><option value="Bütünleme">Bütünleme</option></select></div><div id="allExams" class="full-exam-list"></div></div></section>
+
+      <section class="page" id="page-notes"><div class="page-header"><div><div class="eyebrow">BİLGİ ARŞİVİ</div><h1>Notlarım</h1><p class="page-subtitle">Ders notlarını, kısa özetleri ve önemli görselleri tek yerde tut.</p></div><button class="primary-button" id="addNoteBtn"><i data-lucide="plus"></i> Not oluştur</button></div><div class="note-toolbar"><label class="filter-search"><i data-lucide="search"></i><input id="noteSearch" placeholder="Notlarında ara..."></label><select id="noteCourseFilter" aria-label="Derse göre filtrele"><option value="all">Tüm dersler</option></select><button class="outline-button" id="uploadNoteBtn"><i data-lucide="paperclip"></i> PDF / görsel ekle</button><input type="file" id="noteFileInput" accept=".pdf,image/*" hidden></div><div class="notes-grid" id="notesGrid"></div></section>
+
+      <section class="page" id="page-flashcards"><div class="page-header"><div><div class="eyebrow">AKTİF HATIRLAMA</div><h1>Flash kartlar</h1><p class="page-subtitle">Kısa tekrarlarla bilgiyi uzun süreli belleğe taşı.</p></div><button class="primary-button" id="startFlashBtn"><i data-lucide="play"></i> Tekrara başla</button></div><div class="flash-intro"><div><span class="hero-kicker">TEKRAR STÜDYOSU</span><h2>Hatırla. Kontrol et.<br><em>Kalıcı öğren.</em></h2><p>Kartın ön yüzündeki soruyu cevapla, sonra yanıtı açıp kendini değerlendir.</p></div><div class="flash-symbol"><i data-lucide="layers-3"></i><span>AKTİF ÖĞRENME</span></div></div><div class="section-heading compact"><div><h2>Kart setlerin</h2><p>Derslere göre tekrar yap.</p></div><span class="result-label" id="flashSetCount"></span></div><div class="flash-set-grid" id="flashSets"></div></section>
+
+      <section class="page" id="page-questions"><div class="page-header"><div><div class="eyebrow">KENDİNİ DEĞERLENDİR</div><h1>Soru çöz</h1><p class="page-subtitle">Konularını test et, eksiklerini belirle ve tekrar planını güncelle.</p></div></div><div class="quiz-layout"><div class="panel-card quiz-setup"><div class="panel-title"><span class="panel-title-icon"><i data-lucide="clipboard-check"></i></span><div><h3>Yeni çalışma oturumu</h3><p>İhtiyacına göre bir test oluştur.</p></div></div><label class="field-label">Ders seç<input id="quizCourse" placeholder="Örn. Mikrobiyoloji"></label><label class="field-label">Çalışma türü<select id="quizType"><option>Çoktan seçmeli</option><option>Doğru / yanlış</option><option>Klasik sorular</option><option>Sözlü sınav provası</option></select></label><label class="field-label">Soru sayısı<div class="choice-chips" id="questionAmount"><button class="choice-chip active" data-amount="10">10 soru</button><button class="choice-chip" data-amount="20">20 soru</button><button class="choice-chip" data-amount="30">30 soru</button><button class="choice-chip" data-amount="all">Tümü</button></div></label><div class="notice-box"><i data-lucide="info"></i><span>Henüz soru bankası bağlanmadı. Bu alan, soru içerikleri eklendiğinde testlerini burada oluşturacak.</span></div><button class="primary-button full-width" id="createQuizBtn">Çalışma alanını hazırla <i data-lucide="arrow-right"></i></button></div><div class="panel-card quiz-side"><div class="panel-title"><span class="panel-title-icon purple"><i data-lucide="chart-no-axes-combined"></i></span><div><h3>Çalışma yaklaşımı</h3><p>Verimli tekrar için küçük öneriler.</p></div></div><div class="tip-row"><span>01</span><div><strong>Önce hatırla</strong><p>Yanıta bakmadan önce kendin cevaplamayı dene.</p></div></div><div class="tip-row"><span>02</span><div><strong>Yanlışları kaydet</strong><p>Hata yaptığın konuları sonraki oturumda tekrar et.</p></div></div><div class="tip-row"><span>03</span><div><strong>Aralıklı tekrar yap</strong><p>Aynı bilgiyi farklı günlerde yeniden çağır.</p></div></div></div></div></section>
+
+      <section class="page" id="page-settings"><div class="page-header"><div><div class="eyebrow">KİŞİSELLEŞTİR</div><h1>Ayarlar</h1><p class="page-subtitle">Çalışma alanını kendi öğrenme düzenine göre şekillendir.</p></div></div><div class="panel-card settings-panel"><div class="setting-row"><div><strong>Günlük çalışma hedefi</strong><p>Her gün tamamlamak istediğin görev sayısı.</p></div><select id="dailyGoal"><option value="2">2 görev</option><option value="3" selected>3 görev</option><option value="4">4 görev</option><option value="5">5 görev</option></select></div><div class="setting-row"><div><strong>Odaklanma süresi</strong><p>Bir çalışma oturumunun dakika cinsinden süresi.</p></div><select id="focusLength"><option value="15">15 dakika</option><option value="25" selected>25 dakika</option><option value="40">40 dakika</option><option value="50">50 dakika</option></select></div><div class="setting-row"><div><strong>Veri ve hesaplar</strong><p>Şu an demo arayüzündesin. Hesap, bulut senkronizasyonu ve kişiye özel kayıtlar sonraki aşamada bağlanacak.</p></div><span class="soft-badge">Kurulum aşaması</span></div></div></section>
+
+      <footer class="app-footer"><span>© 2026 Veteriner Akademi Platformu</span><span>Bilimsel öğrenme için tasarlandı <i data-lucide="heart"></i></span></footer>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="modalBackdrop" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle"><div class="modal-header"><div><span class="eyebrow" id="modalEyebrow">YENİ KAYIT</span><h2 id="modalTitle">Yeni kayıt oluştur</h2></div><button class="icon-button" id="modalClose" aria-label="Kapat"><i data-lucide="x"></i></button></div><form id="modalForm"><div id="modalFields" class="modal-fields"></div><div class="modal-actions"><button type="button" class="outline-button" id="modalCancel">Vazgeç</button><button type="submit" class="primary-button"><i data-lucide="check"></i> Kaydet</button></div></form></section></div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"><i data-lucide="check-circle-2"></i><span id="toastMessage">Kaydedildi.</span></div>
+  <div class="focus-overlay" id="focusOverlay" hidden><div class="focus-modal"><button class="icon-button focus-close" id="focusClose" aria-label="Kapat"><i data-lucide="x"></i></button><span class="eyebrow">ODAK MODU</span><h2>Şimdi yalnızca öğrenmeye odaklan.</h2><div class="timer-display" id="timerDisplay">25:00</div><p>Tek bir konu seç. Bildirimleri kapat ve kendine bu zamanı ayır.</p><div class="timer-controls"><button class="primary-button" id="timerToggle"><i data-lucide="play"></i> Başlat</button><button class="outline-button" id="timerReset"><i data-lucide="rotate-ccw"></i> Sıfırla</button></div></div></div>
+  <script src="script.js"></script>
+</body>
+</html>
