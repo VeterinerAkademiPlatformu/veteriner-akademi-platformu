@@ -243,16 +243,27 @@
     grid.innerHTML=list.map(n=>'<article class="note-card note-card-reader shared-note-card"><div class="note-meta">'+icon('book-open-text')+' '+safe(n.course)+(n.topic?' · '+safe(n.topic):'')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.content)+'</p><div class="shared-note-actions"><button class="note-read-button" data-shared-note-read="'+safe(n.id)+'">'+icon('book-open-text')+' Notu oku <span>→</span></button>'+(isLibraryAdmin()?'<button class="note-edit-button" data-shared-note-edit="'+safe(n.id)+'" title="Notu düzenle">'+icon('pencil')+'</button><button class="note-delete-button" data-shared-note-delete="'+safe(n.id)+'" title="Ortak notu sil">'+icon('trash-2')+'</button>':'')+'</div><footer><span>'+icon('calendar-days')+' '+safe((n.updated_at||n.created_at||'').slice(0,10)||'Ortak not')+'</span><span>Ortak kütüphane</span></footer></article>').join('')||empty(sharedLibraryLoading?'Notlar yükleniyor':'Henüz yayınlanmış not yok',sharedLibraryLoading?'Ortak kütüphane kontrol ediliyor.':'Yeni ortak notlar eklendiğinde burada ders ve konu başlıklarına göre görünecek.','library-big');
     refreshIcons();
   };
-  // Ortak not okuma tıklamasını doğrudan kütüphane alanında yakala.
-  const sharedNotesGrid=$('#sharedNotesGrid');
-  if(sharedNotesGrid)sharedNotesGrid.addEventListener('click',e=>{
-    const button=e.target.closest('[data-shared-note-read]');
-    if(!button||!sharedNotesGrid.contains(button))return;
+  // Ortak not okuma: belge yakalama aşamasında işle; diğer tıklama
+  // dinleyicilerinden bağımsız çalışsın ve hata olursa kullanıcıya bildirilsin.
+  document.addEventListener('click',e=>{
+    const target=e.target instanceof Element ? e.target : e.target?.parentElement;
+    const button=target?.closest('[data-shared-note-read]');
+    if(!button)return;
     e.preventDefault();
-    const id='shared_'+String(button.getAttribute('data-shared-note-read')||'');
+    e.stopPropagation();
+    const rawId=button.getAttribute('data-shared-note-read');
+    const shared=sharedNotes.find(n=>String(n.id)===String(rawId));
+    if(!shared){toast('Not henüz yüklenemedi. Sayfayı yenileyip tekrar dene.');console.warn('Ortak not listede bulunamadı:',rawId);return;}
+    const id='shared_'+String(shared.id);
     readerSharedId=id;
-    openNoteReader(id);
-  });
+    try{
+      openNoteReader(id);
+      if($('#noteReaderBackdrop')?.hidden)throw new Error('Not okuma penceresi görünür duruma getirilemedi.');
+    }catch(err){
+      console.error('Ortak not açılamadı:',err);
+      toast('Not açılamadı. Hata ayrıntısı geliştirici konsoluna yazıldı.');
+    }
+  },true);
   const loadSharedNotes=async()=>{
     if(!supabaseClient){sharedNotes=[];sharedLibraryLoading=false;renderSharedNotes();return;}
     sharedLibraryLoading=true;renderSharedNotes();
