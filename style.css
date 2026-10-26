@@ -101,3 +101,12 @@
 .email-confirm-continue:disabled{opacity:.42;cursor:not-allowed;filter:saturate(.5)}
 .email-confirm-close{border:0;background:transparent;color:var(--muted);font-size:12px;padding:13px 10px 0}
 @media(max-width:520px){.email-confirm-card{border-radius:20px}.email-confirm-copy{font-size:12px}}
+
+/* Mobil Chrome'un mavi dokunma parlamasını kaldır; erişilebilir klavye odağını koru. */
+html, body, body * {
+  -webkit-tap-highlight-color: transparent;
+}
+::selection {
+  color: #edf5fb;
+  background: #1da995;
+}
