@@ -45,7 +45,7 @@
     render(); window.scrollTo({top:0,behavior:'smooth'});
   };
   const courseIcon = c => ({teal:'activity',purple:'microscope',blue:'heart-pulse',gold:'bug'})[c.color]||'book-open';
-  const courseCard = (c, compact=false) => '<article class="course-card" data-course-open="'+safe(c.id)+'"><div class="course-card-top"><span class="course-symbol '+safe(c.color)+'">'+icon(courseIcon(c))+'</span><div><h3>'+safe(c.name)+'</h3><p>'+safe(c.description||'Ders çalışma alanı')+'</p></div></div><div class="course-progress"><span style="width:'+Math.max(0,Math.min(100,Number(c.progress)||0))+'%"></span></div><div class="course-card-foot"><span>'+safe(c.topics||0)+' konu başlığı</span><strong>%'+(Number(c.progress)||0)+' tamamlandı</strong></div>'+(compact?'':'<div class="course-actions"><button class="mini-action" data-course-note="'+safe(c.id)+'">'+icon('notebook-pen')+' Not ekle</button><button class="mini-action" data-course-card="'+safe(c.id)+'">'+icon('layers')+' Kart ekle</button><button class="mini-action" data-course-delete="'+safe(c.id)+'">'+icon('trash-2')+' Sil</button></div>')+'</article>';
+  const courseCard = (c, compact=false) => '<article class="course-card" data-course-open="'+safe(c.id)+'"><div class="course-card-top"><span class="course-symbol '+safe(c.color)+'">'+icon(courseIcon(c))+'</span><div><h3>'+safe(c.name)+'</h3><p>'+safe(c.description||'Ders çalışma alanı')+'</p></div></div><div class="course-progress"><span style="width:'+Math.max(0,Math.min(100,Number(c.progress)||0))+'%"></span></div><div class="course-card-foot"><span>'+safe(c.topics||0)+' konu başlığı</span><strong>%'+(Number(c.progress)||0)+' tamamlandı</strong></div>'+(compact?'':'<div class="course-actions"><button class="mini-action" data-course-topics="'+safe(c.id)+'">'+icon('book-open')+' Konuları gör</button><button class="mini-action" data-course-note="'+safe(c.id)+'">'+icon('notebook-pen')+' Not ekle</button><button class="mini-action" data-course-card="'+safe(c.id)+'">'+icon('layers')+' Kart ekle</button><button class="mini-action" data-course-delete="'+safe(c.id)+'">'+icon('trash-2')+' Sil</button></div>')+'</article>';
   const examRow = e => { const d=new Date(e.date+'T12:00:00');const day=String(d.getDate()).padStart(2,'0');const month=d.toLocaleDateString('tr-TR',{month:'short'}).replace('.','');return '<div class="exam-row"><div class="exam-date"><strong>'+day+'</strong><small>'+safe(month)+'</small></div><div class="exam-info"><strong>'+safe(e.course)+'</strong><small>'+safe(e.type)+' sınavı · '+d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+'</small></div><span class="exam-type">'+safe(e.type)+'</span><button class="exam-delete" data-exam-delete="'+safe(e.id)+'" title="Sınavı sil">'+icon('x')+'</button></div>'; };
   const renderDashboard = () => {
     $('#todayDate').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
@@ -83,9 +83,35 @@
     $('#flashSets').innerHTML=Object.entries(groups).map(([name,cards],i)=>'<article class="flash-set"><div class="flash-set-head"><span class="course-symbol '+['teal','purple','gold','blue'][i%4]+'">'+icon('layers')+'</span><span class="result-label">'+cards.length+' kart</span></div><h3>'+safe(name)+'</h3><p>Kısa tekrar ve aktif hatırlama</p><button class="outline-button" data-deck="'+safe(name)+'">Tekrar et '+icon('arrow-right')+'</button></article>').join('')||empty('Henüz flash kart yok','Kart oluşturup tekrar setini hazırlayabilirsin.','layers');
   };
   const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();refreshIcons(); };
+
+  let activeTopicCourseId=null;
+  const renderCourseTopics=id=>{
+    const course=data.courses.find(c=>c.id===id);if(!course)return;activeTopicCourseId=id;
+    let panel=$('#courseTopicsPanel');
+    if(!panel){panel=document.createElement('section');panel.id='courseTopicsPanel';panel.className='course-topics-panel';$('#allCourses').parentElement.insertBefore(panel,$('#allCourses'));}
+    $('#allCourses').hidden=true;panel.hidden=false;
+    const topics=course.topicList||[];
+    panel.innerHTML='<div class="topics-header"><button class="text-button" id="backToCourses">'+icon('arrow-left')+' Tüm dersler</button><div class="topics-heading"><span class="eyebrow">'+safe(course.year)+'. SINIF · KONU ÇALIŞMA</span><h2>'+safe(course.name)+'</h2><p>'+safe(course.description||'Ders konuları ve kişisel tekrar alanı')+'</p></div><button class="primary-button" id="addTopicBtn">'+icon('plus')+' Konu ekle</button></div><div class="topics-summary"><span>'+topics.length+' konu</span><span>'+topics.filter(t=>t.done).length+' tamamlandı</span><span>İlerleme '+(topics.length?Math.round(topics.filter(t=>t.done).length/topics.length*100):0)+'%</span></div><div class="topic-list">'+(topics.length?topics.map((t,i)=>'<article class="topic-item"><div class="topic-number">'+String(i+1).padStart(2,'0')+'</div><div class="topic-copy"><h3>'+safe(t.title)+'</h3><p>'+safe(t.summary.slice(0,150))+(t.summary.length>150?'…':'')+'</p><span class="topic-status '+(t.done?'done':'')+'">'+(t.done?'Tamamlandı':'Çalışılmadı')+'</span></div><button class="outline-button topic-open" data-topic-study="'+safe(t.id)+'">Konu çalış '+icon('arrow-right')+'</button></article>').join(''):'<div class="topics-empty"><h3>Henüz konu eklenmedi</h3><p>İlk konuyu ekleyerek bu ders için kişisel çalışma yolunu oluştur.</p><button class="primary-button" id="addFirstTopicBtn">'+icon('plus')+' İlk konuyu ekle</button></div>')+'</div>';
+    refreshIcons();
+  };
+  const studyTopic=id=>{
+    const course=data.courses.find(c=>c.id===activeTopicCourseId),topic=course?.topicList?.find(t=>t.id===id);if(!course||!topic)return;
+    $('#courseTopicsPanel').innerHTML='<div class="topics-header"><button class="text-button" id="backToTopicList">'+icon('arrow-left')+' Konu listesine dön</button><span class="eyebrow">'+safe(course.name)+'</span></div><article class="topic-study-card"><span class="eyebrow">KONU ANLATIMI</span><h2>'+safe(topic.title)+'</h2><div class="topic-study-body">'+safe(topic.summary).replace(/\n/g,'<br>')+'</div>'+(topic.keypoint?'<div class="topic-keypoint"><strong>'+icon('bookmark')+' Sınavda hatırla</strong><p>'+safe(topic.keypoint).replace(/\n/g,'<br>')+'</p></div>':'')+'<div class="topic-study-actions"><button class="outline-button" id="topicAddNote">'+icon('notebook-pen')+' Bu konudan not oluştur</button><button class="outline-button" id="topicAddCard">'+icon('layers')+' Flash kart oluştur</button><button class="primary-button" id="markTopicDone">'+icon('check-circle-2')+' '+(topic.done?'Tamamlandı':'Konuyu tamamladım')+'</button></div></article>';
+    refreshIcons();
+    $('#topicAddNote').addEventListener('click',()=>{openModal('note');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=course.name;const t=$('[name="title"]');if(t)t.value=topic.title;const b=$('[name="body"]');if(b)b.value=topic.summary+(topic.keypoint?'\n\nSınavda hatırla: '+topic.keypoint:'');},0);});
+    $('#topicAddCard').addEventListener('click',()=>{openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=course.name;const q=$('[name="question"]');if(q)q.value=topic.title+' konusunun temel noktası nedir?';const a=$('[name="answer"]');if(a)a.value=topic.keypoint||topic.summary.slice(0,220);},0);});
+    $('#markTopicDone').addEventListener('click',()=>{topic.done=!topic.done;course.progress=course.topicList.length?Math.round(course.topicList.filter(t=>t.done).length/course.topicList.length*100):0;save();renderCourses();renderDashboard();renderCourseTopics(activeTopicCourseId);toast(topic.done?'Konu tamamlandı olarak işaretlendi.':'Konu tekrar listesine alındı.');});
+  };
+  document.addEventListener('click',e=>{
+    if(e.target.closest('#backToCourses')){const p=$('#courseTopicsPanel');if(p)p.hidden=true;$('#allCourses').hidden=false;return;}
+    if(e.target.closest('#addTopicBtn')||e.target.closest('#addFirstTopicBtn')){openModal('topic');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===activeTopicCourseId)?.name||'';},0);return;}
+    const study=e.target.closest('[data-topic-study]');if(study){studyTopic(study.dataset.topicStudy);return;}
+    if(e.target.closest('#backToTopicList')){renderCourseTopics(activeTopicCourseId);return;}
+  });
+
   const openModal = type => {
-    modalType=type;const title={course:'Yeni ders ekle',exam:'Sınav takvimine ekle',note:'Yeni not oluştur',card:'Flash kart oluştur'}[type];
-    $('#modalTitle').textContent=title;$('#modalEyebrow').textContent=({course:'DERS YÖNETİMİ',exam:'SINAV PLANLAMA',note:'KİŞİSEL KÜTÜPHANE',card:'AKTİF HATIRLAMA'})[type];
+    modalType=type;const title={course:'Yeni ders ekle',exam:'Sınav takvimine ekle',note:'Yeni not oluştur',card:'Flash kart oluştur',topic:'Ders konusunu ekle'}[type];
+    $('#modalTitle').textContent=title;$('#modalEyebrow').textContent=({course:'DERS YÖNETİMİ',exam:'SINAV PLANLAMA',note:'KİŞİSEL KÜTÜPHANE',card:'AKTİF HATIRLAMA',topic:'KONU ÇALIŞMA ALANI'})[type];
     const courses='<option value="">Ders seç (isteğe bağlı)</option>'+data.courses.map(c=>'<option>'+safe(c.name)+'</option>').join('');
     const field=(label,name,placeholder='',kind='text',required=true)=>'<label class="field-label">'+label+(kind==='textarea'?'<textarea class="field-textarea" name="'+name+'" placeholder="'+placeholder+'" '+(required?'required':'')+'></textarea>':kind==='select'?'<select class="field-select" name="'+name+'" '+(required?'required':'')+'>'+placeholder+'</select>':'<input class="field-input" type="'+kind+'" name="'+name+'" placeholder="'+placeholder+'" '+(required?'required':'')+'>')+'</label>';
     let html='';
@@ -93,6 +119,7 @@
     if(type==='exam') html=field('Ders adı','course','Örn. Mikrobiyoloji')+field('Sınav türü','type','<option>Vize</option><option>Final</option><option>Bütünleme</option>','select')+field('Sınav tarihi','date','','date')+field('Öncelik','priority','<option>Yüksek</option><option selected>Orta</option><option>Düşük</option>','select');
     if(type==='note') html=field('Not başlığı','title','Örn. İnflamasyonun temel belirtileri')+field('Ders','course',courses,'select',false)+field('Not içeriği','body','Önemli bilgileri buraya yaz...','textarea');
     if(type==='card') html=field('Ders / set adı','course','Örn. Patoloji')+field('Kartın sorusu','question','Ön yüzde görülecek soru')+field('Cevap','answer','Kısa ve net yanıt','textarea');
+    if(type==='topic') html=field('Ders','course',courses,'select')+field('Konu başlığı','title','Örn. Hücre zarının yapısı')+field('Kısa konu anlatımı','summary','Temel kavramları buraya yaz...','textarea')+field('Sınavda hatırlanacak nokta','keypoint','Önemli tanım veya ayrım','textarea',false);
     $('#modalFields').innerHTML=html;$('#modalBackdrop').hidden=false;$('#modalBackdrop').setAttribute('aria-hidden','false');refreshIcons();setTimeout(()=>$('#modalFields input, #modalFields textarea')?.focus(),50);
   };
   const closeModal=()=>{$('#modalBackdrop').hidden=true;$('#modalBackdrop').setAttribute('aria-hidden','true');$('#modalForm').reset();modalType='';};
@@ -104,18 +131,20 @@
     if(modalType==='exam')data.exams.push({id:crypto.randomUUID(),course:f.course.trim(),type:f.type,date:f.date,priority:f.priority});
     if(modalType==='note')data.notes.unshift({id:crypto.randomUUID(),title:f.title.trim(),course:f.course||'Genel',body:f.body.trim(),date:new Date().toISOString().slice(0,10)});
     if(modalType==='card')data.cards.push({id:crypto.randomUUID(),course:f.course.trim(),question:f.question.trim(),answer:f.answer.trim()});
+    if(modalType==='topic'){const course=data.courses.find(c=>c.name===f.course);if(course){course.topicList=course.topicList||[];course.topicList.push({id:crypto.randomUUID(),title:f.title.trim(),summary:f.summary.trim(),keypoint:(f.keypoint||'').trim(),done:false});course.topics=course.topicList.length;}}
     save();closeModal();render();toast('Kaydın başarıyla oluşturuldu.');
   });
   document.addEventListener('click',e=>{
     const nav=e.target.closest('[data-page]');if(nav){e.preventDefault();go(nav.dataset.page);return;}
     const goBtn=e.target.closest('[data-go]');if(goBtn){go(goBtn.dataset.go);return;}
+    const ctopics=e.target.closest('[data-course-topics]');if(ctopics){renderCourseTopics(ctopics.dataset.courseTopics);return;}
     const cnote=e.target.closest('[data-course-note]');if(cnote){openModal('note');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===cnote.dataset.courseNote)?.name||'';},0);return;}
     const ccard=e.target.closest('[data-course-card]');if(ccard){openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=data.courses.find(c=>c.id===ccard.dataset.courseCard)?.name||'';},0);return;}
     const delCourse=e.target.closest('[data-course-delete]');if(delCourse){const c=data.courses.find(c=>c.id===delCourse.dataset.courseDelete);if(c&&confirm(c.name+' dersini ve bağlantılı çalışma kayıtlarını silmek istiyor musun?')){data.courses=data.courses.filter(x=>x.id!==c.id);data.notes=data.notes.filter(n=>n.course!==c.name);data.cards=data.cards.filter(n=>n.course!==c.name);save();render();toast('Ders silindi.');}return;}
     const delExam=e.target.closest('[data-exam-delete]');if(delExam){data.exams=data.exams.filter(x=>x.id!==delExam.dataset.examDelete);save();render();toast('Sınav kaydı silindi.');return;}
     const delNote=e.target.closest('[data-note-delete]');if(delNote){data.notes=data.notes.filter(x=>x.id!==delNote.dataset.noteDelete);save();render();toast('Not silindi.');return;}
     const deck=e.target.closest('[data-deck]');if(deck){startDeck(deck.dataset.deck);return;}
-    const openCourse=e.target.closest('[data-course-open]');if(openCourse&&!e.target.closest('button')){const c=data.courses.find(x=>x.id===openCourse.dataset.courseOpen);if(c)toast(c.name+' çalışma alanı seçildi. Not ve flash kart ekleyerek devam edebilirsin.');}
+    const openCourse=e.target.closest('[data-course-open]');if(openCourse&&!e.target.closest('button'))renderCourseTopics(openCourse.dataset.courseOpen);
   });
   $('#addCourseBtn').addEventListener('click',()=>openModal('course'));
   $('#addExamBtn').addEventListener('click',()=>openModal('exam'));
