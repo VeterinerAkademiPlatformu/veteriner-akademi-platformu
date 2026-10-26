@@ -332,6 +332,7 @@
       authMessage('E-postanı kontrol ettikten sonra doğrulama bağlantısını aç. Ardından şifrenle giriş yap.');
       $('#authPassword').focus();
     });
+    $('#emailConfirmDismiss').addEventListener('click',closeEmailConfirmation);
     $('#emailConfirmBackdrop').addEventListener('click',e=>{if(e.target===$('#emailConfirmBackdrop'))closeEmailConfirmation();});
     $('#authModeToggle').addEventListener('click',()=>setAuthMode(authMode==='signin'?'signup':'signin'));
     $('#authForm').addEventListener('submit',async e=>{
