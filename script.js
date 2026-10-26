@@ -179,6 +179,12 @@
     refreshIcons();
   };
   quizLayout.addEventListener('click', e => {
+    const amountButton = e.target.closest('[data-amount]');
+    if (amountButton) {
+      selectedAmount = amountButton.dataset.amount;
+      $('.choice-chip', quizLayout).forEach(button => button.classList.toggle('active', button === amountButton));
+      return;
+    }
     const answer = e.target.closest('[data-quiz-answer]');
     if (answer) { quizAnswers[quizIndex] = Number(answer.dataset.quizAnswer); renderQuizQuestion(); return; }
     const action = e.target.closest('[data-quiz-action]')?.dataset.quizAction;
