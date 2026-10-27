@@ -25,6 +25,11 @@
   // The central event handler changes the active page first; this listener
   // then opens its containing section without duplicating navigation logic.
   document.addEventListener('click', event => {
+    const courseShortcut = event.target.closest('.course-study-shortcut[data-page]');
+    if (courseShortcut?.dataset.page === 'questions') {
+      const courseInput = document.getElementById('quizCourse');
+      if (courseInput) courseInput.value = courseShortcut.dataset.courseName || '';
+    }
     const pageButton = event.target.closest('.nav-item[data-page]');
     if (!pageButton || !sidebar.contains(pageButton)) return;
     const parentGroup = pageButton.closest('[data-nav-group]');
