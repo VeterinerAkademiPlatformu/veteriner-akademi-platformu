@@ -72,3 +72,15 @@ Tarayıcıda yalnızca yayınlanabilir API anahtarı kullanılmalıdır. `servic
 
 Kurulum ve doğrulama notları: [`supabase/SETUP.md`](supabase/SETUP.md)  
 Veritabanı şeması: [`supabase/schema.sql`](supabase/schema.sql)
+
+
+## Flask API bağlantı köprüsü
+
+Arayüzde `js/config.js` ve `js/modules/study-api.js` eklendi. Bu köprü Flask API için modüler Fetch yardımcıları sağlar (sağlık kontrolü, oturum, kişisel notlar, flash kart tekrar puanı ve çalışma planı). **Varsayılan olarak kapalıdır**; `js/config.js` içindeki `VETERINER_AKADEMI_API_URL` boş bırakılırsa mevcut Supabase akışı değişmez. API dağıtıldıktan sonra buraya Render HTTPS origin'i yazılabilir.
+
+Bu, mevcut ekranların veri kaynağını otomatik olarak Flask'a taşımış değildir. Supabase kimlik doğrulamasını ve `student_workspaces` senkronizasyonunu değiştirmek; veri eşleme, hesap geçişi ve uçtan uca doğrulama gerektirir. Bu nedenle canlı öğrenci verisini sessizce başka backend'e yönlendirmemek için geçiş açıkça opt-in bırakılmıştır.
+
+
+Üniversite sınav hazırlığı için Flask API başlangıç mimarisi `backend/` altında geliştirilmektedir. Kurulum, endpoint sözleşmeleri ve GitHub Pages/Flask dağıtım ayrımı için [backend/README.md](backend/README.md) dosyasına bakın. Backend şu aşamada ayrı bir geliştirme dalındadır; canlı GitHub Pages sitesi kendiliğinden Flask API'ye bağlanmış değildir.
+
+Üniversite sınav hazırlığı için Flask API başlangıç mimarisi `backend/` altında geliştirilmektedir. Kurulum, endpoint sözleşmeleri ve GitHub Pages/Flask dağıtım ayrımı için [backend/README.md](backend/README.md) dosyasına bakın. Backend şu aşamada ayrı bir geliştirme dalındadır; canlı GitHub Pages sitesi kendiliğinden Flask API'ye bağlanmış değildir.
