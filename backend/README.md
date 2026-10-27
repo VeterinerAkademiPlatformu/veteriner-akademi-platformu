@@ -46,7 +46,7 @@ Tüm kişisel veri uçları oturum açmayı gerektirir. Kullanıcı kimliği ist
 ## Mimari notları
 - `app/models.py`: Users, Subjects, Topics, Flashcards, StudySessions, CalendarEntries, Notes, MindMaps ilişkisel tabloları.
 - `app/services/spaced_repetition.py`: SM-2'den esinlenen deterministik aralıklı tekrar hesabı.
-- `app/routes/api.py`: şu an API uçlarının ilk birleşik uygulaması; sonraki refaktörde `auth.py`, `flashcards.py`, `schedule.py`, `pomodoro.py`, `notes.py` ve `mindmaps.py` blueprint'lerine ayrılmalıdır.
+- `app/routes/`: `auth.py`, `flashcards.py`, `schedule.py`, `pomodoro.py`, `calendar.py`, `notes.py`, `mindmaps.py` özellik bazlı blueprint'leri. Ortak sahiplik kontrolleri `common.py` içindedir.
 - `app/services/scheduler.py`: sınav öncesi çalışma planı oluşturma ve kaçırılan günleri yeniden planlama algoritması.
 - `frontend-example/`: mevcut Vanilla JS arayüzüne bağlamak için Fetch API örnekleri. Bu dosyalar şu an canlı siteye yüklenmiyor; backend adresi ve güvenli oturum ayarları netleşince kontrollü biçimde bağlanacak.
 - `app/config.py`: çevre değişkenleri ve veritabanı ayarı.
