@@ -9,7 +9,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/quiz.css">
+  <link rel="stylesheet" href="css/courses.css">
+  <link rel="stylesheet" href="css/review.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/note-reader.css">
+  <link rel="stylesheet" href="css/shared-library.css">
+  <link rel="stylesheet" href="css/content-management.css">
+  <link rel="stylesheet" href="css/admin.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 </head>
@@ -199,6 +207,22 @@
   </div>
   <div class="toast" id="toast" role="status" aria-live="polite"><i data-lucide="check-circle-2"></i><span id="toastMessage">Kaydedildi.</span></div>
   <div class="focus-overlay" id="focusOverlay" hidden><div class="focus-modal"><button class="icon-button focus-close" id="focusClose" aria-label="Kapat"><i data-lucide="x"></i></button><span class="eyebrow">ODAK MODU</span><h2>Şimdi yalnızca öğrenmeye odaklan.</h2><div class="timer-display" id="timerDisplay">25:00</div><p>Tek bir konu seç. Bildirimleri kapat ve kendine bu zamanı ayır.</p><div class="timer-controls"><button class="primary-button" id="timerToggle"><i data-lucide="play"></i> Başlat</button><button class="outline-button" id="timerReset"><i data-lucide="rotate-ccw"></i> Sıfırla</button></div></div></div>
-  <script src="script.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/modules/dashboard.js"></script>
+  <script src="js/modules/exams.js"></script>
+  <script src="js/core/shared-state.js"></script>
+  <script src="js/modules/note-reader.js"></script>
+  <script src="js/modules/shared-library.js"></script>
+  <script src="js/modules/notes.js"></script>
+  <script src="js/modules/flashcards.js"></script>
+  <script src="js/modules/review.js"></script>
+  <script src="js/core/render.js"></script>
+  <script src="js/modules/courses.js"></script>
+  <script src="js/core/modal.js"></script>
+  <script src="js/core/events.js"></script>
+  <script src="js/modules/focus-timer.js"></script>
+  <script src="js/modules/flashcard-session.js"></script>
+  <script src="js/modules/questions.js"></script>
+  <script src="js/modules/auth.js"></script>
 </body>
 </html>
