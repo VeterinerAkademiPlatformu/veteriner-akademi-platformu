@@ -2,16 +2,25 @@ from datetime import date, datetime, timedelta, timezone
 
 from flask import Blueprint, jsonify, request
 from flask_login import current_user, login_required, login_user, logout_user
+from flask_wtf.csrf import generate_csrf
 from sqlalchemy import select
 from werkzeug.security import check_password_hash, generate_password_hash
 
-from app import db
+from app import db, limiter
 from app.models import CalendarEntry, Flashcard, MindMap, Note, Subject, StudySession, Topic, User
 from app.routes.common import owned_card, owned_topic
 
 bp = Blueprint("auth_api", __name__)
 
+
+@bp.get("/auth/csrf")
+def csrf_token():
+    """Return a session-bound CSRF token for browser clients."""
+    return jsonify(csrf_token=generate_csrf())
+
+
 @bp.post("/auth/register")
+@limiter.limit("5 per minute")
 def register():
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
@@ -29,7 +38,9 @@ def register():
     login_user(user)
     return jsonify(id=user.id, email=user.email), 201
 
+
 @bp.post("/auth/login")
+@limiter.limit("5 per minute")
 def login():
     data = request.get_json(silent=True) or {}
     email = str(data.get("email", "")).strip().lower()
@@ -40,11 +51,13 @@ def login():
     login_user(user)
     return jsonify(id=user.id, email=user.email)
 
+
 @bp.post("/auth/logout")
 @login_required
 def logout():
     logout_user()
     return jsonify(status="ok")
+
 
 @bp.get("/auth/me")
 @login_required
