@@ -45,7 +45,7 @@ test.describe('Veteriner Akademi çalışma istasyonu', () => {
     await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#sidebar .nav-group')).toHaveCount(4);
 
-    const learningGroup = page.locator('#sidebar [data-nav-group]').filter({ has: page.locator('.nav-group-toggle', { hasText: 'Aktif öğrenme' }) });
+    const learningGroup = page.locator('#sidebar [data-nav-group]').nth(1);
     await learningGroup.locator('.nav-group-toggle').click();
     await expect(learningGroup.locator('.nav-submenu')).toBeVisible();
     await learningGroup.locator('[data-page="flashcards"]').click();
