@@ -72,3 +72,8 @@ Tarayıcıda yalnızca yayınlanabilir API anahtarı kullanılmalıdır. `servic
 
 Kurulum ve doğrulama notları: [`supabase/SETUP.md`](supabase/SETUP.md)  
 Veritabanı şeması: [`supabase/schema.sql`](supabase/schema.sql)
+
+
+## Flask çalışma platformu backend'i
+
+Üniversite sınav hazırlığı için Flask API başlangıç mimarisi `backend/` altında geliştirilmektedir. Kurulum, endpoint sözleşmeleri ve GitHub Pages/Flask dağıtım ayrımı için [backend/README.md](backend/README.md) dosyasına bakın. Backend şu aşamada ayrı bir geliştirme dalındadır; canlı GitHub Pages sitesi kendiliğinden Flask API'ye bağlanmış değildir.
