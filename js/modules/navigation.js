@@ -33,8 +33,17 @@
     }
   });
 
-  // Keep the active destination visible when the page is reloaded or restored.
-  const active = sidebar.querySelector('.nav-item.active[data-page]');
-  const activeGroup = active?.closest('[data-nav-group]');
-  if (activeGroup) groups.forEach(group => setGroupOpen(group, group === activeGroup));
+  const revealActiveDestination = () => {
+    const active = sidebar.querySelector('.nav-item.active[data-page]');
+    const activeGroup = active?.closest('[data-nav-group]');
+    if (activeGroup) groups.forEach(group => setGroupOpen(group, group === activeGroup));
+  };
+
+  // Keep grouped destinations visible even when another component navigates
+  // programmatically through the existing go(page) function.
+  const activeObserver = new MutationObserver(revealActiveDestination);
+  sidebar.querySelectorAll('.nav-item[data-page]').forEach(item => {
+    activeObserver.observe(item, { attributes: true, attributeFilter: ['class'] });
+  });
+  revealActiveDestination();
 })();
