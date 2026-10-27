@@ -69,7 +69,10 @@ def create_app(test_config=None):
     ):
         app.register_blueprint(blueprint, url_prefix="/api")
 
+    # Render polls this endpoint frequently. Exempt only the health check from
+    # the global IP rate limits so platform probes cannot exhaust user quotas.
     @app.get("/api/health")
+    @limiter.exempt
     def health():
         return jsonify({"status": "ok", "service": "veteriner-akademi-study-api"})
 
