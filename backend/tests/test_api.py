@@ -80,3 +80,17 @@ def test_private_endpoints_require_authentication():
     app, client = make_client()
     response = client.get("/api/notes")
     assert response.status_code == 401
+
+
+def test_production_rejects_development_secret():
+    try:
+        create_app({
+            "TESTING": True,
+            "ENV": "production",
+            "SECRET_KEY": "dev-only-change-this-secret",
+            "SQLALCHEMY_DATABASE_URI": "sqlite://",
+        })
+    except RuntimeError as error:
+        assert "SECRET_KEY" in str(error)
+    else:
+        raise AssertionError("Production must reject the development secret")
