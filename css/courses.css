@@ -18,3 +18,46 @@
 .course-study-shortcuts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .course-study-shortcuts .outline-button{font-size:12px;padding:8px 10px}
 @media(max-width:620px){.course-study-shortcuts{width:100%}.course-study-shortcuts .outline-button{flex:1;justify-content:center}}
+
+
+/* Focused learning flow: topic list -> readable lesson -> active recall. */
+.course-topics-panel{animation:course-panel-in .22s ease-out both}
+@keyframes course-panel-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.topics-header{border-bottom:1px solid rgba(50,72,94,.55);margin-bottom:16px}
+.topics-header>.text-button{flex-shrink:0}
+.topic-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+.topic-item{align-items:flex-start;min-width:0;transition:border-color .18s ease,background .18s ease,transform .18s ease}
+.topic-item:hover{border-color:#35566a;background:linear-gradient(120deg,#14253a,#101c2c);transform:translateY(-1px)}
+.topic-number{flex-shrink:0}
+.topic-copy h3{line-height:1.45;overflow-wrap:anywhere}
+.topic-item-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap;max-width:100%}
+.topic-open{min-height:38px}
+.topic-study-card{box-shadow:0 16px 44px #02071126}
+.topic-study-card>.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid #28534f;border-radius:99px;background:#102b2d;color:#7ce6d2;letter-spacing:.08em}
+.topic-study-body{color:#d7e4ee;font-size:16px;line-height:1.95;overflow-wrap:anywhere}
+.active-recall-card{margin-top:28px;padding:clamp(18px,3vw,26px);border:1px solid #2a5960;border-radius:18px;background:radial-gradient(ellipse at 100% 0,rgba(61,175,163,.12),transparent 42%),linear-gradient(145deg,#102a35,#101b2b 76%)}
+.active-recall-card>.eyebrow{color:#7de4d1}
+.active-recall-card h3{margin:10px 0 8px;font:800 20px/1.35 Manrope,sans-serif;letter-spacing:-.4px}
+.active-recall-card .recall-question{max-width:65ch;color:#c5d7e4;line-height:1.75;margin:0}
+.recall-answer{margin-top:18px;padding:16px;border:1px solid #315e59;border-radius:13px;background:rgba(12,37,39,.72)}
+.recall-answer strong{display:flex;align-items:center;gap:8px;color:#7de4d1}
+.recall-answer p{margin:9px 0 0;line-height:1.8;color:#e1edf3;overflow-wrap:anywhere}
+#revealRecallAnswer{margin-top:17px}
+.recall-rating{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:18px;padding-top:16px;border-top:1px solid #294653}
+.recall-rating>span{font-size:13px;font-weight:700;color:#d8e7ee}
+.recall-rating>div{display:flex;gap:8px;flex-wrap:wrap}
+.topic-study-actions{padding-top:18px;border-top:1px solid rgba(50,72,94,.6)}
+@media(max-width:1050px){.topic-list{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:620px){
+  .topics-header{padding:14px 0;align-items:flex-start}
+  .topic-item{gap:12px;padding:14px}
+  .topic-copy{flex:1 1 calc(100% - 56px);min-width:0}
+  .topic-item-actions{width:100%;justify-content:flex-start;padding-left:54px}
+  .topic-open{margin-left:0}
+  .topic-study-card{margin:12px auto;padding:18px}
+  .topic-study-body{font-size:15px;line-height:1.85}
+  .recall-rating{align-items:flex-start}
+  .recall-rating>div{width:100%}
+  .recall-rating>div button{flex:1;justify-content:center}
+}
+@media(prefers-reduced-motion:reduce){.course-topics-panel{animation:none}}
