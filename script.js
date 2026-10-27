@@ -29,11 +29,11 @@
       {id:'f2',course:'Fizyoloji',question:'PTH salgısını temel olarak hangi değişiklik artırır?',answer:'Serum iyonize kalsiyum düzeyinin düşmesi.'},
       {id:'f3',course:'Patoloji',question:'İnflamasyonun beş temel belirtisi nelerdir?',answer:'Rubor (kızarıklık), calor (ısı artışı), tumor (şişlik), dolor (ağrı) ve functio laesa (fonksiyon kaybı).'}
     ],
-    tasks:[false,false,false], taskDate:localDateKey(), dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0, activity:[], sessionHistory:[]
+    tasks:[false,false,false], taskDate:localDateKey(), dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0, activity:[], sessionHistory:[], quizHistory:[]
   };
   let data;
   try { data = JSON.parse(localStorage.getItem(storeKey)) || structuredClone(seed); } catch { data = structuredClone(seed); }
-  if(!Array.isArray(data.activity))data.activity=[]; if(!Array.isArray(data.sessionHistory))data.sessionHistory=[];
+  if(!Array.isArray(data.activity))data.activity=[]; if(!Array.isArray(data.sessionHistory))data.sessionHistory=[]; if(!Array.isArray(data.quizHistory))data.quizHistory=[];
   const todayKey=localDateKey;
   data.dailyGoal=Math.max(2,Math.min(5,Number(data.dailyGoal)||3));
   if(!Array.isArray(data.tasks))data.tasks=[];
@@ -430,8 +430,8 @@
     $('#topicAddCard').addEventListener('click',()=>{openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=course.name;const q=$('[name="question"]');if(q)q.value=topic.title+' konusunun temel noktası nedir?';const a=$('[name="answer"]');if(a)a.value=topic.keypoint||topic.summary.slice(0,220);},0);});
     $('#markTopicDone').addEventListener('click',()=>{topic.done=!topic.done;course.progress=course.topicList.length?Math.round(course.topicList.filter(t=>t.done).length/course.topicList.length*100):0;logActivity(topic.done?'Konu tamamlandı':'Konu tekrar açıldı',course.name+' · '+topic.title,topic.done?'check-circle-2':'rotate-ccw');save();renderCourses();renderDashboard();renderCourseTopics(activeTopicCourseId);toast(topic.done?'Konu tamamlandı olarak işaretlendi.':'Konu tekrar listesine alındı.');});
     $('#revealRecallAnswer').addEventListener('click',()=>{$('#recallAnswer').hidden=false;$('#recallRating').hidden=false;$('#revealRecallAnswer').hidden=true;});
-    $('#recallNeedsReview').addEventListener('click',()=>{topic.needsReview=true;topic.lastReviewed=new Date().toISOString().slice(0,10);save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Konu tekrar listene eklendi.');});
-    $('#recallGotIt').addEventListener('click',()=>{topic.needsReview=false;topic.lastReviewed=new Date().toISOString().slice(0,10);topic.recalledCount=(topic.recalledCount||0)+1;save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Harika! Konu tekrar durumun güncellendi.');});
+    $('#recallNeedsReview').addEventListener('click',()=>{topic.needsReview=true;topic.lastReviewed=todayKey();logActivity('Konu tekrar listesine eklendi',course.name+' · '+topic.title,'rotate-ccw');save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Konu tekrar listene eklendi.');});
+    $('#recallGotIt').addEventListener('click',()=>{topic.needsReview=false;topic.lastReviewed=todayKey();topic.recalledCount=(topic.recalledCount||0)+1;logActivity('Konu hatırlandı',course.name+' · '+topic.title,'brain');save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Harika! Konu tekrar durumun güncellendi.');});
   };
   document.addEventListener('click',async e=>{
     const editCourse=e.target.closest('#editCourseBtn');if(editCourse&&activeTopicCourseId){openModal('course',activeTopicCourseId);return;}
@@ -531,7 +531,7 @@
   $('#focusStart').addEventListener('click',openFocus);$('#focusClose').addEventListener('click',closeFocus);$('#timerToggle').addEventListener('click',toggleTimer);$('#timerReset').addEventListener('click',()=>{clearInterval(timerInterval);timerRunning=false;timerSeconds=(data.focusLength||25)*60;updateTimer();$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();});
   overlay.addEventListener('click',e=>{if(e.target===overlay)closeFocus();});
   const startDeck=name=>{activeDeck=data.cards.filter(c=>(c.course||'Genel kartlar')===name);activeCard=0;answerShown=false;showDeck();};
-  const showDeck=()=>{const host=$('#flashSets');if(!activeDeck.length)return;host.innerHTML='<div class="flash-study"><div class="flash-progress"><span style="width:'+((activeCard+1)/activeDeck.length*100)+'%"></span></div><div class="section-heading compact"><div><h2>'+safe(activeDeck[activeCard].course)+'</h2><p>Kart '+(activeCard+1)+' / '+activeDeck.length+'</p></div><button class="text-button" id="exitDeck">Setlere dön</button></div><article class="study-card" id="studyCard"><small>'+(answerShown?'CEVAP':'SORU')+'</small><h2>'+safe(answerShown?activeDeck[activeCard].answer:activeDeck[activeCard].question)+'</h2><p>'+(answerShown?'Kendini kontrol et.':'Cevabını düşündükten sonra karta dokun.')+'</p></article><div class="study-controls"><button class="outline-button" id="prevCard" '+(activeCard===0?'disabled':'')+'>'+icon('arrow-left')+' Önceki</button><button class="primary-button" id="flipCard">'+(answerShown?'Cevabı gördün':'Cevabı göster')+' '+icon('eye')+'</button><button class="outline-button" id="nextCard">'+(activeCard===activeDeck.length-1?'Bitir':'Sonraki')+' '+icon('arrow-right')+'</button></div></div>';refreshIcons();$('#studyCard').addEventListener('click',()=>{answerShown=!answerShown;showDeck();});$('#flipCard').addEventListener('click',()=>{answerShown=!answerShown;showDeck();});$('#prevCard').addEventListener('click',()=>{if(activeCard>0){activeCard--;answerShown=false;showDeck();}});$('#nextCard').addEventListener('click',()=>{if(activeCard<activeDeck.length-1){activeCard++;answerShown=false;showDeck();}else{activeDeck=[];renderFlashcards();toast('Flash kart setini tamamladın.');}});$('#exitDeck').addEventListener('click',renderFlashcards);};
+  const showDeck=()=>{const host=$('#flashSets');if(!activeDeck.length)return;host.innerHTML='<div class="flash-study"><div class="flash-progress"><span style="width:'+((activeCard+1)/activeDeck.length*100)+'%"></span></div><div class="section-heading compact"><div><h2>'+safe(activeDeck[activeCard].course)+'</h2><p>Kart '+(activeCard+1)+' / '+activeDeck.length+'</p></div><button class="text-button" id="exitDeck">Setlere dön</button></div><article class="study-card" id="studyCard"><small>'+(answerShown?'CEVAP':'SORU')+'</small><h2>'+safe(answerShown?activeDeck[activeCard].answer:activeDeck[activeCard].question)+'</h2><p>'+(answerShown?'Kendini kontrol et.':'Cevabını düşündükten sonra karta dokun.')+'</p></article><div class="study-controls"><button class="outline-button" id="prevCard" '+(activeCard===0?'disabled':'')+'>'+icon('arrow-left')+' Önceki</button><button class="primary-button" id="flipCard">'+(answerShown?'Cevabı gördün':'Cevabı göster')+' '+icon('eye')+'</button><button class="outline-button" id="nextCard">'+(activeCard===activeDeck.length-1?'Bitir':'Sonraki')+' '+icon('arrow-right')+'</button></div></div>';refreshIcons();$('#studyCard').addEventListener('click',()=>{answerShown=!answerShown;showDeck();});$('#flipCard').addEventListener('click',()=>{answerShown=!answerShown;showDeck();});$('#prevCard').addEventListener('click',()=>{if(activeCard>0){activeCard--;answerShown=false;showDeck();}});$('#nextCard').addEventListener('click',()=>{if(activeCard<activeDeck.length-1){activeCard++;answerShown=false;showDeck();}else{logActivity('Flash kart seti tamamlandı',activeDeck.length+' kartlık set','layers');save();activeDeck=[];renderFlashcards();renderDashboard();toast('Flash kart setini tamamladın.');}});$('#exitDeck').addEventListener('click',renderFlashcards);};
   $('#startFlashBtn').addEventListener('click',()=>{if(!data.cards.length){openModal('card');return;}const groups=[...new Set(data.cards.map(c=>c.course||'Genel kartlar'))];startDeck(groups[0]);});
   $('#questionAmount').addEventListener('click',e=>{const b=e.target.closest('[data-amount]');if(!b)return;selectedAmount=b.dataset.amount;$$('.choice-chip').forEach(x=>x.classList.toggle('active',x===b));});
 
@@ -547,7 +547,7 @@
   ];
   const quizLayout = $('.quiz-layout');
   const quizSetupMarkup = quizLayout.innerHTML;
-  let activeQuiz = [], quizIndex = 0, quizAnswers = [];
+  let activeQuiz = [], quizIndex = 0, quizAnswers = [], quizResultLogged = false;
   const startDemoQuiz = () => {
     const typedCourse = ($('#quizCourse').value || '').trim().toLocaleLowerCase('tr-TR');
     let pool = demoQuestionBank.filter(q => !typedCourse || q.course.toLocaleLowerCase('tr-TR').includes(typedCourse) || typedCourse.includes(q.course.toLocaleLowerCase('tr-TR')));
@@ -556,6 +556,7 @@
     const amount = selectedAmount === 'all' ? pool.length : Math.min(Number(selectedAmount) || 10, pool.length);
     activeQuiz = pool.slice().sort(() => Math.random() - 0.5).slice(0, amount);
     quizIndex = 0;
+    quizResultLogged = false;
     quizAnswers = Array(activeQuiz.length).fill(null);
     renderQuizQuestion(!filtered && !!typedCourse);
   };
@@ -567,6 +568,15 @@
   };
   const renderQuizResult = () => {
     const correct = activeQuiz.reduce((n,q,i)=>n+(quizAnswers[i]===q.answer?1:0),0);
+    if(!quizResultLogged){
+      quizResultLogged=true;
+      const courses=[...new Set(activeQuiz.map(q=>q.course))];
+      data.quizHistory=Array.isArray(data.quizHistory)?data.quizHistory:[];
+      data.quizHistory.push({at:new Date().toISOString(),correct,total:activeQuiz.length,courses});
+      data.quizHistory=data.quizHistory.slice(-100);
+      logActivity('Soru çözümü tamamlandı',correct+'/'+activeQuiz.length+' doğru · '+courses.join(', '),'list-checks');
+      save();renderDashboard();
+    }
     quizLayout.innerHTML = '<div class="panel-card quiz-result"><span class="eyebrow">OTURUM TAMAMLANDI</span><div class="quiz-score-ring"><strong>'+correct+'/'+activeQuiz.length+'</strong><span>doğru</span></div><h2>Çalışmanı tamamladın.</h2><p>Bu örnek oturumdaki doğru yanıt sayın. Yanlış yaptığın soruların açıklamalarını aşağıdan inceleyebilirsin.</p><div class="quiz-review-list">'+activeQuiz.map((q,i)=>'<article class="quiz-review-item"><div class="quiz-review-heading"><strong>'+(i+1)+'. '+safe(q.question)+'</strong><span class="'+(quizAnswers[i]===q.answer?'correct':'incorrect')+'">'+(quizAnswers[i]===q.answer?'Doğru':'Tekrar et')+'</span></div><p><b>Doğru yanıt:</b> '+safe(q.options[q.answer])+'</p><p>'+safe(q.explanation)+'</p></article>').join('')+'</div><div class="quiz-result-actions"><button class="outline-button" data-quiz-action="exit">Ayarlarına dön</button><button class="primary-button" data-quiz-action="retry">'+icon('rotate-ccw')+' Yeniden çöz</button></div></div>';
     refreshIcons();
   };
@@ -574,7 +584,7 @@
     const amountButton = e.target.closest('[data-amount]');
     if (amountButton) {
       selectedAmount = amountButton.dataset.amount;
-      $('.choice-chip', quizLayout).forEach(button => button.classList.toggle('active', button === amountButton));
+      $$('.choice-chip', quizLayout).forEach(button => button.classList.toggle('active', button === amountButton));
       return;
     }
     const answer = e.target.closest('[data-quiz-answer]');
@@ -662,7 +672,7 @@
   const normalizeWorkspace = saved => {
     const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
     for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
-    next.dailyGoal=Math.max(2,Math.min(5,Number(next.dailyGoal)||3)); next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0); if(!Array.isArray(next.activity))next.activity=[];if(!Array.isArray(next.sessionHistory))next.sessionHistory=[];
+    next.dailyGoal=Math.max(2,Math.min(5,Number(next.dailyGoal)||3)); next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0); if(!Array.isArray(next.activity))next.activity=[];if(!Array.isArray(next.sessionHistory))next.sessionHistory=[];if(!Array.isArray(next.quizHistory))next.quizHistory=[];
     if(next.taskDate!==todayKey()){next.tasks=Array.from({length:next.dailyGoal},()=>false);next.taskDate=todayKey();}else next.tasks=Array.from({length:next.dailyGoal},(_,i)=>!!next.tasks[i]);
     return next;
   };
