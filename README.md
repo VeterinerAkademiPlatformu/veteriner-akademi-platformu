@@ -33,6 +33,7 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 │       ├── notes.js
 │       ├── note-reader.js
 │       ├── shared-library.js
+│       ├── admin.js
 │       ├── flashcards.js
 │       ├── flashcard-session.js
 │       ├── review.js
@@ -49,7 +50,7 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 
 - `js/core.js`: ortak yardımcılar, yerel kayıt ve uygulamanın temel başlangıç durumu.
 - `js/core/`: ortak durum, ekran çizimi, modal ve genel olay yönlendirmesi.
-- `js/modules/`: menü ve özellik bazlı uygulama kodları.
+- `js/modules/`: menü ve özellik bazlı uygulama kodları. `admin.js`, yönetim panelini; `shared-library.js`, öğrenci ortak not kütüphanesini yönetir.
 - `css/`: temel tasarım ve her özellik alanının stilleri.
 - `index.html`: sayfa yapısı ve dosyaların yüklenme sırası.
 - `supabase/`: veritabanı şeması ve kurulum belgeleri.
