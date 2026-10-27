@@ -23,6 +23,9 @@ def create_app(test_config=None):
     if test_config:
         app.config.update(test_config)
 
+    if app.config.get("ENV") == "production" and app.config.get("SECRET_KEY") == "dev-only-change-this-secret":
+        raise RuntimeError("Production ortamında güçlü bir SECRET_KEY tanımlanmalıdır.")
+
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
