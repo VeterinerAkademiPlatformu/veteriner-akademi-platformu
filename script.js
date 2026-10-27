@@ -28,7 +28,7 @@
       {id:'f2',course:'Fizyoloji',question:'PTH salgısını temel olarak hangi değişiklik artırır?',answer:'Serum iyonize kalsiyum düzeyinin düşmesi.'},
       {id:'f3',course:'Patoloji',question:'İnflamasyonun beş temel belirtisi nelerdir?',answer:'Rubor (kızarıklık), calor (ısı artışı), tumor (şişlik), dolor (ağrı) ve functio laesa (fonksiyon kaybı).'}
     ],
-    tasks:[true,true,false], dailyGoal:3, focusLength:25, sessions:0
+    tasks:[true,true,false], dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0
   };
   let data;
   try { data = JSON.parse(localStorage.getItem(storeKey)) || structuredClone(seed); } catch { data = structuredClone(seed); }
@@ -69,8 +69,13 @@
     $('#weeklySessions').textContent=String(data.sessions||0);
     $('#goalProgress').textContent=String((data.tasks||[]).filter(Boolean).length);
     $('#savedCount').textContent=String(data.notes.length+data.cards.length);
+    const focusTotal=$('#focusTotal');if(focusTotal)focusTotal.textContent=String(Math.max(0,Number(data.focusMinutes)||0));
     $('#dashboardCourses').innerHTML=data.courses.slice(0,4).map(c=>courseCard(c,true)).join('')||empty('Henüz ders yok','Bir ders ekleyerek çalışma alanını oluştur.','book-open');
-    $('#dashboardExams').innerHTML=data.exams.slice().sort((a,b)=>a.date.localeCompare(b.date)).slice(0,3).map(examRow).join('')||empty('Yaklaşan sınav yok','Sınav takvimine tarih ekleyebilirsin.','calendar-days');
+    const today=new Date();today.setHours(0,0,0,0);
+    const upcomingExams=data.exams.filter(e=>e.date&&new Date(e.date+'T12:00:00')>=today).sort((a,b)=>a.date.localeCompare(b.date));
+    $('#dashboardExams').innerHTML=upcomingExams.slice(0,3).map(examRow).join('')||empty('Yaklaşan sınav yok','Sınav takvimine yeni bir tarih ekleyebilirsin.','calendar-days');
+    const reviewTopics=[];data.courses.forEach(course=>(course.topicList||[]).forEach(topic=>{if(topic.needsReview)reviewTopics.push({course,topic});}));
+    const reviewHost=$('#dashboardReviewTopics');if(reviewHost)reviewHost.innerHTML=reviewTopics.slice(0,3).map(({course,topic})=>'<button type="button" class="dashboard-review-item" data-page="review"><span class="dashboard-review-icon">'+icon('rotate-ccw')+'</span><span class="dashboard-review-copy"><strong>'+safe(topic.title)+'</strong><small>'+safe(course.name)+(topic.lastReviewed?' · Son tekrar: '+safe(topic.lastReviewed):' · Henüz tekrar edilmedi')+'</small></span>'+icon('arrow-right')+'</button>').join('')||empty('Tekrar bekleyen konu yok','Bir konuyu tekrar listene eklediğinde burada görünecek.','check-circle-2');
     $$('.task-item input').forEach((el,i)=>{el.checked=!!data.tasks[i];el.closest('.task-item').classList.toggle('done',!!data.tasks[i]);});
     const taskList=$('#taskList'); if(taskList){const count=(data.tasks||[]).filter(Boolean).length;const pill=$('.tiny-pill',taskList.parentElement);if(pill)pill.textContent=count+'/'+(data.dailyGoal||3);}
   };
@@ -506,7 +511,7 @@
   const openFocus=()=>{timerSeconds=(data.focusLength||25)*60;timerRunning=false;clearInterval(timerInterval);updateTimer();overlay.hidden=false;};
   const closeFocus=()=>{overlay.hidden=true;timerRunning=false;clearInterval(timerInterval);$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();};
   const updateTimer=()=>{$('#timerDisplay').textContent=String(Math.floor(timerSeconds/60)).padStart(2,'0')+':'+String(timerSeconds%60).padStart(2,'0');};
-  const toggleTimer=()=>{if(timerRunning){clearInterval(timerInterval);timerRunning=false;$('#timerToggle').innerHTML=icon('play')+' Devam et';refreshIcons();}else{timerRunning=true;$('#timerToggle').innerHTML=icon('pause')+' Duraklat';refreshIcons();timerInterval=setInterval(()=>{timerSeconds--;updateTimer();if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;data.sessions=(data.sessions||0)+1;save();renderDashboard();toast('Odak oturumu tamamlandı. Harika iş!');$('#timerToggle').innerHTML=icon('play')+' Yeniden başlat';refreshIcons();}},1000);}};
+  const toggleTimer=()=>{if(timerRunning){clearInterval(timerInterval);timerRunning=false;$('#timerToggle').innerHTML=icon('play')+' Devam et';refreshIcons();}else{timerRunning=true;$('#timerToggle').innerHTML=icon('pause')+' Duraklat';refreshIcons();timerInterval=setInterval(()=>{timerSeconds--;updateTimer();if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;data.sessions=(data.sessions||0)+1;data.focusMinutes=(data.focusMinutes||0)+(data.focusLength||25);save();renderDashboard();toast('Odak oturumu tamamlandı. Harika iş!');$('#timerToggle').innerHTML=icon('play')+' Yeniden başlat';refreshIcons();}},1000);}};
   $('#focusStart').addEventListener('click',openFocus);$('#focusClose').addEventListener('click',closeFocus);$('#timerToggle').addEventListener('click',toggleTimer);$('#timerReset').addEventListener('click',()=>{clearInterval(timerInterval);timerRunning=false;timerSeconds=(data.focusLength||25)*60;updateTimer();$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();});
   overlay.addEventListener('click',e=>{if(e.target===overlay)closeFocus();});
   const startDeck=name=>{activeDeck=data.cards.filter(c=>(c.course||'Genel kartlar')===name);activeCard=0;answerShown=false;showDeck();};
@@ -641,7 +646,7 @@
   const normalizeWorkspace = saved => {
     const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
     for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
-    next.dailyGoal=Number(next.dailyGoal)||3; next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0;
+    next.dailyGoal=Number(next.dailyGoal)||3; next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0);
     return next;
   };
   const loadCloudWorkspace = async user => {
