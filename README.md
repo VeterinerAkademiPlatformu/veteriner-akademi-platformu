@@ -11,15 +11,20 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 ├── index.html
 ├── css/
 │   ├── base.css
+│   ├── dashboard.css
 │   ├── courses.css
+│   ├── exams.css
+│   ├── notes.css
+│   ├── flashcards.css
+│   ├── focus-timer.css
+│   ├── settings.css
 │   ├── quiz.css
 │   ├── review.css
 │   ├── auth.css
 │   ├── note-reader.css
 │   ├── shared-library.css
 │   ├── content-management.css
-├── admin.css
-│   └── settings.css
+│   └── admin.css
 ├── js/
 │   ├── core.js
 │   ├── core/
@@ -40,7 +45,6 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 │       ├── review.js
 │       ├── questions.js
 │       ├── focus-timer.js
-│       ├── settings.js
 │       ├── settings.js
 │       └── auth.js
 └── supabase/
