@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from app import db
 from app.models import CalendarEntry, Flashcard, MindMap, Note, Subject, StudySession, Topic, User
 from app.routes.common import owned_card, owned_topic
+from app.services.spaced_repetition import calculate_next_review
 
 bp = Blueprint("flashcards_api", __name__)
 
