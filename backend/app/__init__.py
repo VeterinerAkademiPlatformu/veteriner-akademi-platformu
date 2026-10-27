@@ -28,8 +28,19 @@ def create_app(test_config=None):
             return None
 
     from app import models  # noqa: F401
-    from app.routes.api import api_bp
-    app.register_blueprint(api_bp, url_prefix="/api")
+    from app.routes.auth import bp as auth_bp
+    from app.routes.flashcards import bp as flashcards_bp
+    from app.routes.schedule import bp as schedule_bp
+    from app.routes.pomodoro import bp as pomodoro_bp
+    from app.routes.calendar import bp as calendar_bp
+    from app.routes.notes import bp as notes_bp
+    from app.routes.mindmaps import bp as mindmaps_bp
+
+    for blueprint in (
+        auth_bp, flashcards_bp, schedule_bp, pomodoro_bp,
+        calendar_bp, notes_bp, mindmaps_bp,
+    ):
+        app.register_blueprint(blueprint, url_prefix="/api")
 
     @app.get("/api/health")
     def health():
