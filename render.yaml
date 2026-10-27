@@ -1,3 +1,9 @@
+databases:
+  - name: veteriner-akademi-study-db
+    databaseName: veteriner_akademi
+    user: veteriner_akademi_user
+    plan: free
+
 services:
   - type: web
     name: veteriner-akademi-study-api
@@ -18,4 +24,6 @@ services:
       - key: CORS_ORIGINS
         sync: false
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: veteriner-akademi-study-db
+          property: connectionString
