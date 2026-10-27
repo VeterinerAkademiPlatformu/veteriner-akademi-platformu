@@ -1,14 +1,17 @@
 from app import create_app, db
 
 
-def make_client():
-    app = create_app({
+def make_client(extra_config=None):
+    config = {
         "TESTING": True,
         "SQLALCHEMY_DATABASE_URI": "sqlite://",
         "SECRET_KEY": "test-secret-key",
         "SESSION_COOKIE_SECURE": False,
         "RATELIMIT_ENABLED": False,
-    })
+    }
+    if extra_config:
+        config.update(extra_config)
+    app = create_app(config)
     with app.app_context():
         db.create_all()
     return app, app.test_client()
@@ -116,3 +119,38 @@ def test_initial_migration_upgrades_empty_database(tmp_path):
         "users", "subjects", "topics", "flashcards", "study_sessions",
         "calendar_entries", "notes", "mind_maps", "alembic_version",
     }.issubset(table_names)
+
+
+def test_cors_allows_only_configured_origin_and_credentials():
+    allowed_origin = "https://veterinerakademiplatformu.github.io"
+    _app, client = make_client({"CORS_ORIGINS": [allowed_origin]})
+
+    allowed = client.get("/api/health", headers={"Origin": allowed_origin})
+    assert allowed.status_code == 200
+    assert allowed.headers.get("Access-Control-Allow-Origin") == allowed_origin
+    assert allowed.headers.get("Access-Control-Allow-Credentials") == "true"
+    assert "Origin" in allowed.headers.get("Vary", "")
+
+    rejected = client.get(
+        "/api/health",
+        headers={"Origin": "https://example.com"},
+    )
+    assert rejected.status_code == 200
+    assert rejected.headers.get("Access-Control-Allow-Origin") is None
+
+
+def test_cors_preflight_allows_csrf_header_for_configured_origin():
+    origin = "https://veterinerakademiplatformu.github.io"
+    _app, client = make_client({"CORS_ORIGINS": [origin]})
+    response = client.options(
+        "/api/notes",
+        headers={
+            "Origin": origin,
+            "Access-Control-Request-Method": "POST",
+            "Access-Control-Request-Headers": "content-type,x-csrftoken",
+        },
+    )
+    assert response.status_code == 200
+    assert response.headers.get("Access-Control-Allow-Origin") == origin
+    assert response.headers.get("Access-Control-Allow-Credentials") == "true"
+    assert "X-CSRFToken" in response.headers.get("Access-Control-Allow-Headers", "")
