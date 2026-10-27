@@ -342,10 +342,10 @@
     }
   },true);
   const loadSharedNotes=async()=>{
-    if(!supabaseClient){sharedNotes=[];sharedLibraryLoading=false;renderSharedNotes();return;}
+    if(!supabaseClient){sharedNotes=[];sharedLibraryLoading=false;renderSharedNotes();renderAdminPanel();return;}
     sharedLibraryLoading=true;renderSharedNotes();
     const {data:rows,error}=await supabaseClient.from('shared_notes').select('id,course,topic,title,content,published,created_at,updated_at').eq('published',true).order('course',{ascending:true}).order('topic',{ascending:true}).order('title',{ascending:true});
-    sharedLibraryLoading=false;if(error){console.error('Ortak notlar yüklenemedi:',error.message);sharedNotes=[];renderSharedNotes();return;}sharedNotes=rows||[];renderSharedNotes();renderAdminPanel();
+    sharedLibraryLoading=false;if(error){console.error('Ortak notlar yüklenemedi:',error.message);sharedNotes=[];renderSharedNotes();renderAdminPanel();return;}sharedNotes=rows||[];renderSharedNotes();renderAdminPanel();
   };
   const openSharedNoteEditor=note=>{
     if(!isLibraryAdmin()){toast('Ortak not eklemek için yönetici yetkisi gerekir.');return;}
