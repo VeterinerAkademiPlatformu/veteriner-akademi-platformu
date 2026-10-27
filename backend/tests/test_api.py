@@ -7,10 +7,17 @@ def make_client():
         "SQLALCHEMY_DATABASE_URI": "sqlite://",
         "SECRET_KEY": "test-secret-key",
         "SESSION_COOKIE_SECURE": False,
+        "RATELIMIT_ENABLED": False,
     })
     with app.app_context():
         db.create_all()
     return app, app.test_client()
+
+
+def csrf_headers(client):
+    response = client.get("/api/auth/csrf")
+    assert response.status_code == 200
+    return {"X-CSRFToken": response.get_json()["csrf_token"]}
 
 
 def test_health_endpoint_and_blueprint_registration():
@@ -22,20 +29,33 @@ def test_health_endpoint_and_blueprint_registration():
     assert "/api/notes" in rules
     assert "/api/schedule/reschedule" in rules
     assert "/api/mindmaps" in rules
+    assert "/api/auth/csrf" in rules
+
+
+def test_write_requests_require_csrf_token():
+    _app, client = make_client()
+    response = client.post("/api/auth/register", json={
+        "email": "student@example.com",
+        "password": "a-strong-test-password",
+    })
+    assert response.status_code == 400
+    assert "CSRF" in response.get_json()["error"]
 
 
 def test_registration_and_personal_notes_crud():
     app, client = make_client()
+    headers = csrf_headers(client)
     registered = client.post("/api/auth/register", json={
         "email": "student@example.com",
         "password": "a-strong-test-password",
-    })
+    }, headers=headers)
     assert registered.status_code == 201
 
+    headers = csrf_headers(client)
     created = client.post("/api/notes", json={
         "title": "Sınav notum",
         "content": "Aktif hatırlama ile tekrar yap.",
-    })
+    }, headers=headers)
     assert created.status_code == 201
     note_id = created.get_json()["id"]
 
@@ -43,13 +63,15 @@ def test_registration_and_personal_notes_crud():
     assert listed.status_code == 200
     assert listed.get_json()["notes"][0]["title"] == "Sınav notum"
 
+    headers = csrf_headers(client)
     updated = client.put(f"/api/notes/{note_id}", json={
         "title": "Güncellenmiş not",
         "content": "Aralıklı tekrar.",
-    })
+    }, headers=headers)
     assert updated.status_code == 200
 
-    deleted = client.delete(f"/api/notes/{note_id}")
+    headers = csrf_headers(client)
+    deleted = client.delete(f"/api/notes/{note_id}", headers=headers)
     assert deleted.status_code == 200
     assert client.get("/api/notes").get_json()["notes"] == []
 
