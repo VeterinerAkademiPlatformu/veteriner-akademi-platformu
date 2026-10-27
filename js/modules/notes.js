@@ -1,0 +1,7 @@
+  const renderNotes = () => {
+    const q=($('#noteSearch')?.value||'').toLocaleLowerCase('tr-TR'), course=$('#noteCourseFilter')?.value||'all';
+    const select=$('#noteCourseFilter');if(select){const val=select.value;select.innerHTML='<option value="all">Tüm dersler</option>'+data.courses.map(c=>'<option>'+safe(c.name)+'</option>').join('');if([...select.options].some(o=>o.value===val))select.value=val;}
+    const list=data.notes.filter(n=>(n.title+' '+n.body+' '+n.course).toLocaleLowerCase('tr-TR').includes(q)&&(course==='all'||n.course===course)&&(!showBookmarkedNotes||n.bookmarked));
+    $('#notesGrid').innerHTML=list.map(n=>'<article class="note-card note-card-reader"><div class="note-meta">'+icon(n.bookmarked?'bookmark-check':'notebook-pen')+' '+safe(n.course||'Genel not')+(n.bookmarked?' · Yer imli':'')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.body)+'</p><div class="note-card-actions"><button class="note-read-button" data-note-read="'+safe(n.id)+'">'+icon('book-open-text')+(n.readPosition>0.03?' Kaldığın yerden devam et':' Notu oku')+' <span>→</span></button><button class="note-delete-button" data-note-delete="'+safe(n.id)+'" aria-label="Notu sil" title="Notu sil">'+icon('trash-2')+'</button></div><footer><span>'+icon('calendar-days')+' '+safe(n.date||'Bugün')+'</span><span>'+(n.highlights&&n.highlights.length?n.highlights.length+' vurgu':'Okuma görünümü')+'</span></footer></article>').join('')||empty('Not arşivin hazır','İlk notunu oluşturarak önemli bilgilerini kaydet.','notebook-pen');
+  };
+  const renderFlashcards = () => {
