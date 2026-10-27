@@ -1,6 +1,6 @@
 # Veteriner Akademi — Study Platform API
 
-Bu klasör, üniversite ara sınav/final hazırlık sistemi için Python/Flask API temelidir. Aktif hatırlama, aralıklı tekrar, çalışma takvimi, Pomodoro kayıtları, notlar ve JSON tabanlı zihin haritaları klasik algoritmalarla çalışır. **Bu backend'de yapay zekâ, LLM veya AI API kullanılmaz.**
+Bu klasör, üniversite ara sınav/final hazırlık sistemi için Python/Flask API temelidir. Aktif hatırlama, aralıklı tekrar, çalışma takvimi, Pomodoro kayıtları, notlar ve JSON tabanlı zihin haritaları klasik algoritmalarla çalışır. **Yapay zekâ, LLM veya AI API kullanılmaz.**
 
 ## Gereksinimler
 - Python 3.11+
@@ -19,44 +19,43 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-`.env` dosyasındaki `SECRET_KEY` değerini uzun, rastgele ve gizli bir değerle değiştir. Ardından veritabanı tablolarını oluştur:
+`.env` içindeki `SECRET_KEY` değerini uzun, rastgele ve gizli bir değerle değiştir. Ardından tabloları oluştur:
 ```bash
 flask --app run.py db init
 flask --app run.py db migrate -m "initial schema"
 flask --app run.py db upgrade
 python run.py
 ```
-
 İlk migration için `db init` yalnızca bir kez çalıştırılır. Migration dosyaları repoda tutulmalıdır. Sağlık kontrolü: `GET /api/health`.
 
-## İlk API uçları
+## API uçları
+- `GET /api/auth/csrf` — oturumla ilişkili CSRF token alır; tüm POST/PUT/DELETE istekleri `X-CSRFToken` başlığıyla bu token'ı göndermelidir.
 - `POST /api/auth/register` — e-posta ve en az 10 karakterli şifreyle kayıt.
 - `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` — sunucu oturumu.
 - `PUT /api/flashcards/review` — `{ "flashcard_id": 12, "rating": 1 | 3 | 5 }`; `next_review_date` hesaplanır.
 - `POST /api/schedule/generate` — `{ "subject_id": 1, "exam_date": "2026-12-20", "topic_ids": [1,2,3] }`.
-- `POST /api/schedule/reschedule` — `{ "exam_date": "2026-12-20" }`; geciken ve gelecekteki tamamlanmamış planları kalan günlere dağıtır; tamamlanan geçmiş kayıtları korur.
+- `POST /api/schedule/reschedule` — `{ "exam_date": "2026-12-20" }`; geciken ve gelecekteki tamamlanmamış planları kalan günlere dağıtır.
 - `GET /api/calendar?start=YYYY-MM-DD&end=YYYY-MM-DD` — takvim ve ilerleme yüzdeleri.
-- `GET /api/notes`, `POST /api/notes`, `PUT /api/notes/<id>`, `DELETE /api/notes/<id>` — kişisel not CRUD işlemleri.
-- `POST /api/pomodoro/save` — `{ "topic_id": 1, "duration_minutes": 25, "started_at": "2026-10-27T10:00:00Z", "ended_at": "2026-10-27T10:25:00Z" }`.
-- `POST /api/mindmaps` — `{ "title": "...", "topic_id": 1, "data": { "nodes": [{"id":"n1","x":100,"y":80,"text":"Ana kavram"}], "edges": [] } }`.
-- `PUT /api/mindmaps/<id>` — aynı JSON yapısını kaydeder.
+- `GET /api/notes`, `POST /api/notes`, `PUT /api/notes/<id>`, `DELETE /api/notes/<id>` — kişisel not işlemleri.
+- `POST /api/pomodoro/save` — Pomodoro oturum kaydı.
+- `POST /api/mindmaps`, `PUT /api/mindmaps/<id>` — JSON tabanlı zihin haritaları.
 
-Tüm kişisel veri uçları oturum açmayı gerektirir. Kullanıcı kimliği istek gövdesinden alınmaz; oturumdan belirlenir. Her ders/konu/kart sorgusu sahiplik açısından kontrol edilir. Şifreler düz metin değil, Werkzeug hash'i olarak saklanır.
+## Güvenlik
+- CSRF koruması tüm güvenli olmayan HTTP metotlarında etkin; tarayıcı istemcileri önce `GET /api/auth/csrf` çağırıp token'ı `X-CSRFToken` ile göndermelidir. Örnek yardımcı: `frontend-example/api.js`.
+- Genel API sınırı IP başına 50 istek/saat ve 200 istek/gün; kayıt ve giriş için ek olarak 5 istek/dakika sınırı uygulanır.
+- Şifreler Werkzeug hash'iyle saklanır. Özel uçlar oturum açmayı gerektirir; sahiplik kontrolleri kullanıcı verilerini ayırır.
+- Üretimde `FLASK_ENV=production`, güçlü `SECRET_KEY`, HTTPS ve `SESSION_COOKIE_SECURE=true` kullan. Birden çok worker için `RATELIMIT_STORAGE_URI` değerini Redis gibi ortak bir depoya ayarla; varsayılan bellek deposu tek süreç içindir.
+- Üretim dağıtımında bağımlılıkları güncel tut, e-posta doğrulama/şifre sıfırlama, yedekleme, izleme ve veritabanı migration'larını ayrıca gözden geçir.
 
-## Mimari notları
-- `app/models.py`: Users, Subjects, Topics, Flashcards, StudySessions, CalendarEntries, Notes, MindMaps ilişkisel tabloları.
+## Mimari
+- `app/models.py`: kullanıcılar, dersler, konular, kartlar, çalışma oturumları, takvim kayıtları, notlar ve zihin haritaları.
 - `app/services/spaced_repetition.py`: SM-2'den esinlenen deterministik aralıklı tekrar hesabı.
-- `app/routes/`: `auth.py`, `flashcards.py`, `schedule.py`, `pomodoro.py`, `calendar.py`, `notes.py`, `mindmaps.py` özellik bazlı blueprint'leri. Ortak sahiplik kontrolleri `common.py` içindedir.
-- `app/services/scheduler.py`: sınav öncesi çalışma planı oluşturma ve kaçırılan günleri yeniden planlama algoritması.
-- `frontend-example/`: mevcut Vanilla JS arayüzüne bağlamak için Fetch API örnekleri. Bu dosyalar şu an canlı siteye yüklenmiyor; backend adresi ve güvenli oturum ayarları netleşince kontrollü biçimde bağlanacak.
-- `app/config.py`: çevre değişkenleri ve veritabanı ayarı.
+- `app/services/scheduler.py`: sınav öncesi plan üretimi ve tamamlanmamış işleri yeniden dağıtma.
+- `app/routes/`: özellik bazlı Flask blueprint'leri.
+- `frontend-example/`: mevcut Vanilla JS arayüzüne bağlamak için Fetch API örnekleri.
 
 ## Testler
+`backend/` klasöründe `pytest -q` çalıştır. GitHub Actions backend testlerini ve statik arayüz için tarayıcı smoke testlerini çalıştırır.
 
-`backend/` klasöründe `pytest -q` çalıştır. GitHub Actions, backend dosyaları değiştiğinde testleri otomatik çalıştırmak üzere yapılandırılmıştır.
-
-## Yayına almadan önce
-Bu ilk aşama backend iskeletidir; üretim dağıtımı öncesinde CSRF koruması (oturum tabanlı yazma istekleri), güvenli cookie ayarları, HTTPS, hız sınırlama, e-posta doğrulama/şifre sıfırlama, migration gözden geçirmesi, yedekleme ve otomatik testler tamamlanmalıdır. `SECRET_KEY` veya veritabanı parolası GitHub'a eklenmemelidir.
-
-## GitHub Pages hakkında
-GitHub Pages yalnızca statik dosya sunar; Flask çalıştıramaz. Mevcut HTML/CSS/JS arayüzü GitHub Pages'te kalacaksa Flask API ayrı bir Python servisine dağıtılmalı ve yalnızca izin verilen frontend origin'ine CORS açılmalıdır. Daha sade üretim mimarisi, Flask'ın frontend'i ve `/api` uçlarını aynı origin'den sunmasıdır. Bu PR, mevcut statik siteyi otomatik olarak Flask'a taşımış veya canlı API dağıtmış değildir.
+## Yayına alma sınırı
+Bu PR backend kodunu hazırlar ancak API'yi dağıtmaz ve canlı GitHub Pages arayüzüne bağlamaz. GitHub Pages Flask çalıştıramaz. Arayüz GitHub Pages'te kalacaksa API ayrı bir Python servisine dağıtılmalı; yalnızca tam frontend origin'ine credentialed CORS açılmalı ve cross-site cookie gereksinimleri (HTTPS, `SameSite=None; Secure`) birlikte ayarlanmalıdır. Daha sade seçenek, Flask'ın arayüzü ve `/api` uçlarını aynı origin'den sunmasıdır. Canlı entegrasyon, dağıtım adresi ve güvenlik ayarları doğrulandıktan sonra yapılmalıdır.
