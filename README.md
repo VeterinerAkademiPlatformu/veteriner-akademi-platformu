@@ -18,7 +18,8 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 │   ├── note-reader.css
 │   ├── shared-library.css
 │   ├── content-management.css
-│   └── admin.css
+├── admin.css
+│   └── settings.css
 ├── js/
 │   ├── core.js
 │   ├── core/
@@ -39,6 +40,7 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 │       ├── review.js
 │       ├── questions.js
 │       ├── focus-timer.js
+│       ├── settings.js
 │       └── auth.js
 └── supabase/
     ├── SETUP.md
@@ -50,7 +52,7 @@ Arayüz, stil ve uygulama kodları tek dosyada toplanmaz. Her sistem kendi dosya
 
 - `js/core.js`: ortak yardımcılar, yerel kayıt ve uygulamanın temel başlangıç durumu.
 - `js/core/`: ortak durum, ekran çizimi, modal ve genel olay yönlendirmesi.
-- `js/modules/`: menü ve özellik bazlı uygulama kodları. `admin.js`, yönetim panelini; `shared-library.js`, öğrenci ortak not kütüphanesini yönetir.
+- `js/modules/`: menü ve özellik bazlı uygulama kodları. `admin.js`, yönetim panelini; `settings.js`, kullanıcı hedeflerini ve odak süresini; `shared-library.js`, öğrenci ortak not kütüphanesini yönetir.
 - `css/`: temel tasarım ve her özellik alanının stilleri.
 - `index.html`: sayfa yapısı ve dosyaların yüklenme sırası.
 - `supabase/`: veritabanı şeması ve kurulum belgeleri.
