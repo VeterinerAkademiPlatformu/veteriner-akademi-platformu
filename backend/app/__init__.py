@@ -1,9 +1,12 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from flask_login import LoginManager
 
 db = SQLAlchemy()
 migrate = Migrate()
+login_manager = LoginManager()
+login_manager.login_view = None
 
 
 def create_app(test_config=None):
@@ -14,6 +17,15 @@ def create_app(test_config=None):
 
     db.init_app(app)
     migrate.init_app(app, db)
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        from app.models import User
+        try:
+            return db.session.get(User, int(user_id))
+        except (TypeError, ValueError):
+            return None
 
     from app import models  # noqa: F401
     from app.routes.api import api_bp
