@@ -52,10 +52,11 @@
   const toast = msg => { const t=$('#toast'), m=$('#toastMessage'); if(!t||!m)return; m.textContent=msg;t.classList.add('show');clearTimeout(toast._timer);toast._timer=setTimeout(()=>t.classList.remove('show'),2600); };
   const empty = (title,desc,ico='book-open') => '<div class="empty-state">'+icon(ico)+'<strong>'+safe(title)+'</strong><p>'+safe(desc)+'</p></div>';
   const go = page => {
+    if(page==='admin' && !isLibraryAdmin()){toast('Yönetim paneli yalnızca yönetici hesabına açıktır.');return;}
     activePage=page;
     $$('.page').forEach(p=>p.classList.toggle('active',p.id==='page-'+page));
     $$('.nav-item[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===page));
-    const labels={dashboard:'Genel Bakış',courses:'Derslerim',exams:'Sınav Takvimi',library:'Ortak Ders Notları',notes:'Notlarım',flashcards:'Flash Kartlar',review:'Tekrar Listem',questions:'Soru Çöz',settings:'Ayarlar'};
+    const labels={dashboard:'Genel Bakış',courses:'Derslerim',exams:'Sınav Takvimi',library:'Ortak Ders Notları',admin:'Yönetim Paneli',notes:'Notlarım',flashcards:'Flash Kartlar',review:'Tekrar Listem',questions:'Soru Çöz',settings:'Ayarlar'};
     $('#crumbCurrent').textContent=labels[page]||'Veteriner Akademi';
     $('#sidebar').classList.remove('open');
     render(); window.scrollTo({top:0,behavior:'smooth'});
@@ -299,8 +300,23 @@
     const c=cs?.value||'all',t=ts?.value||'all',sort=$('#sharedNoteSort')?.value||'newest',list=sharedNotes.filter(n=>(n.title+' '+n.course+' '+(n.topic||'')+' '+n.content).toLocaleLowerCase('tr-TR').includes(q)&&(c==='all'||n.course===c)&&(t==='all'||n.topic===t));
     const dateValue=value=>{const time=Date.parse(value||'');return Number.isFinite(time)?time:0;};
     list.sort((a,b)=>{if(sort==='title')return (a.title||'').localeCompare(b.title||'','tr',{sensitivity:'base',numeric:true});if(sort==='course')return (a.course||'').localeCompare(b.course||'','tr',{sensitivity:'base',numeric:true})||(a.title||'').localeCompare(b.title||'','tr',{sensitivity:'base',numeric:true});if(sort==='updated')return dateValue(b.updated_at||b.created_at)-dateValue(a.updated_at||a.created_at);return dateValue(b.created_at)-dateValue(a.created_at);});
-    const add=$('#sharedNoteAddBtn');if(add)add.hidden=!isLibraryAdmin();const count=$('#sharedNoteResultCount');if(count)count.textContent=list.length+' not';
-    grid.innerHTML=list.length?list.map(n=>'<article class="note-card note-card-reader shared-note-card"><div class="note-meta shared-note-meta"><span class="shared-note-course">'+icon('book-open-text')+' '+safe(n.course)+'</span>'+(n.topic?'<span class="shared-note-topic">'+safe(n.topic)+'</span>':'')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.content)+'</p><div class="shared-note-actions"><button class="note-read-button" data-shared-note-read="'+safe(n.id)+'">'+icon('book-open-text')+' Notu oku <span>→</span></button>'+(isLibraryAdmin()?'<button class="note-edit-button" data-shared-note-edit="'+safe(n.id)+'" title="Notu düzenle">'+icon('pencil')+'</button><button class="note-delete-button" data-shared-note-delete="'+safe(n.id)+'" title="Ortak notu sil">'+icon('trash-2')+'</button>':'')+'</div><footer><span>'+icon('calendar-days')+' '+safe((n.updated_at||n.created_at||'').slice(0,10)||'Ortak not')+'</span><span>Ortak kütüphane</span></footer></article>').join(''):empty(sharedLibraryLoading?'Notlar yükleniyor':sharedNotes.length?'Eşleşen not bulunamadı':'Henüz yayınlanmış not yok',sharedLibraryLoading?'Ortak kütüphane kontrol ediliyor.':sharedNotes.length?'Arama kelimesini değiştirebilir veya filtreleri temizleyebilirsin.':'Yeni ortak notlar eklendiğinde burada ders ve konu başlıklarına göre görünecek.',sharedNotes.length?'search':'library-big');
+    const count=$('#sharedNoteResultCount');if(count)count.textContent=list.length+' not';
+    grid.innerHTML=list.length?list.map(n=>'<article class="note-card note-card-reader shared-note-card"><div class="note-meta shared-note-meta"><span class="shared-note-course">'+icon('book-open-text')+' '+safe(n.course)+'</span>'+(n.topic?'<span class="shared-note-topic">'+safe(n.topic)+'</span>':'')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.content)+'</p><div class="shared-note-actions"><button class="note-read-button" data-shared-note-read="'+safe(n.id)+'">'+icon('book-open-text')+' Notu oku <span>→</span></button></div><footer><span>'+icon('calendar-days')+' '+safe((n.updated_at||n.created_at||'').slice(0,10)||'Ortak not')+'</span><span>Ortak kütüphane</span></footer></article>').join(''):empty(sharedLibraryLoading?'Notlar yükleniyor':sharedNotes.length?'Eşleşen not bulunamadı':'Henüz yayınlanmış not yok',sharedLibraryLoading?'Ortak kütüphane kontrol ediliyor.':sharedNotes.length?'Arama kelimesini değiştirebilir veya filtreleri temizleyebilirsin.':'Yeni ortak notlar eklendiğinde burada ders ve konu başlıklarına göre görünecek.',sharedNotes.length?'search':'library-big');
+    refreshIcons();
+  };
+  const renderAdminPanel=()=>{
+    const host=$('#adminSharedNotesGrid');if(!host)return;
+    const admin=!!authUser&&isLibraryAdmin();
+    const nav=$('#adminNavItem'),label=$('#adminWorkspaceLabel');
+    if(nav)nav.hidden=!admin;if(label)label.hidden=!admin;
+    const notes=sharedNotes.slice().sort((a,b)=>(a.course||'').localeCompare(b.course||'','tr')||(a.topic||'').localeCompare(b.topic||'','tr')||(a.title||'').localeCompare(b.title||'','tr'));
+    const courses=new Set(notes.map(n=>(n.course||'').trim()).filter(Boolean));
+    const topics=new Set(notes.map(n=>((n.course||'').trim()+'::'+(n.topic||'').trim())).filter(k=>k!=='::'&&k.split('::')[1]));
+    const count=$('#adminSharedNoteCount'),courseCount=$('#adminSharedCourseCount'),topicCount=$('#adminSharedTopicCount');
+    if(count)count.textContent=String(notes.length);if(courseCount)courseCount.textContent=String(courses.size);if(topicCount)topicCount.textContent=String(topics.size);
+    if(!admin){host.innerHTML=empty('Yönetici erişimi gerekli','Bu bölüm yalnızca yönetici yetkili hesaplar içindir.','shield-check');return;}
+    if(sharedLibraryLoading){host.innerHTML=empty('İçerikler yükleniyor','Ortak ders notları kontrol ediliyor.','loader-circle');return;}
+    host.innerHTML=notes.length?notes.map(n=>'<article class="admin-note-row"><div class="admin-note-main"><div class="admin-note-tags"><span>'+icon('book-open-text')+' '+safe(n.course)+'</span>'+(n.topic?'<span>'+icon('list-tree')+' '+safe(n.topic)+'</span>':'')+'</div><h3>'+safe(n.title)+'</h3><p>'+safe(n.content)+'</p><small>'+icon('calendar-days')+' Son güncelleme: '+safe((n.updated_at||n.created_at||'').slice(0,10)||'Tarih yok')+'</small></div><div class="admin-note-actions"><button class="outline-button" data-shared-note-edit="'+safe(n.id)+'" type="button">'+icon('pencil')+' Düzenle</button><button class="note-delete-button" data-shared-note-delete="'+safe(n.id)+'" type="button" aria-label="Ortak notu sil">'+icon('trash-2')+'</button></div></article>').join(''):empty('Henüz ortak not yok','İlk akademik notunu ekleyerek kütüphaneyi oluşturmaya başla.','book-open-text');
     refreshIcons();
   };
   // Ortak not okuma: belge yakalama aşamasında işle; diğer tıklama
@@ -329,7 +345,7 @@
     if(!supabaseClient){sharedNotes=[];sharedLibraryLoading=false;renderSharedNotes();return;}
     sharedLibraryLoading=true;renderSharedNotes();
     const {data:rows,error}=await supabaseClient.from('shared_notes').select('id,course,topic,title,content,published,created_at,updated_at').eq('published',true).order('course',{ascending:true}).order('topic',{ascending:true}).order('title',{ascending:true});
-    sharedLibraryLoading=false;if(error){console.error('Ortak notlar yüklenemedi:',error.message);sharedNotes=[];renderSharedNotes();return;}sharedNotes=rows||[];renderSharedNotes();
+    sharedLibraryLoading=false;if(error){console.error('Ortak notlar yüklenemedi:',error.message);sharedNotes=[];renderSharedNotes();return;}sharedNotes=rows||[];renderSharedNotes();renderAdminPanel();
   };
   const openSharedNoteEditor=note=>{
     if(!isLibraryAdmin()){toast('Ortak not eklemek için yönetici yetkisi gerekir.');return;}
@@ -357,7 +373,7 @@
     host.innerHTML=review.map(({course,topic})=>'<article class="review-topic-card"><div class="review-topic-icon">'+icon('rotate-ccw')+'</div><div class="review-topic-copy"><span class="eyebrow">'+safe(course.name)+'</span><h3>'+safe(topic.title)+'</h3><p>'+safe(topic.summary.slice(0,180))+(topic.summary.length>180?'…':'')+'</p><small>'+(topic.lastReviewed?'Son tekrar: '+safe(topic.lastReviewed):'Henüz tekrar tarihi yok')+'</small></div><button class="primary-button" data-review-topic="'+safe(course.id)+'|'+safe(topic.id)+'">Tekrar çalış '+icon('arrow-right')+'</button></article>').join('')||'<div class="review-empty"><span>'+icon('check-circle-2')+'</span><h2>Tekrar bekleyen konu yok</h2><p>Bir konu çalışırken “Tekrar etmeliyim” seçeneğini işaretlediğinde burada görünecek.</p><button class="outline-button" data-page="courses">Derslerime dön</button></div>';
     refreshIcons();
   };
-  const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();renderReview();refreshIcons(); };
+  const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();renderReview();renderAdminPanel();refreshIcons(); };
 
   let activeTopicCourseId=null;
   const renderCourseTopics=id=>{
@@ -551,6 +567,8 @@
     const b=$('#accountButton'); if(!b)return;
     b.innerHTML = authUser ? icon(cloudReady?'cloud-check':'user-round')+'<span>'+(cloudReady?'Bulut bağlı':'Hesap açık')+'</span>' : icon('user-round')+'<span>Hesaba giriş</span>';
     b.title = authUser ? 'Oturum: '+authUser.email+(cloudReady?' · Bulut senkronizasyonu etkin':' · Bulut bağlantısı kontrol ediliyor') : 'Giriş yap veya hesap oluştur';
+    renderAdminPanel();
+    if(!isLibraryAdmin()&&activePage==='admin')go('dashboard');
     const signed=$('#authSignedIn'), form=$('#authForm'), toggle=$('#authModeToggle');
     if(signed)signed.hidden=!authUser; if(form)form.hidden=!!authUser; if(toggle)toggle.hidden=!!authUser;
     const email=$('#authUserEmail'); if(email&&authUser)email.textContent=authUser.email||'Oturum açıldı';
