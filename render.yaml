@@ -4,8 +4,7 @@ services:
     runtime: python
     plan: free
     buildCommand: pip install -r backend/requirements.txt
-    preDeployCommand: cd backend && flask --app run.py db upgrade
-    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT run:app
+    startCommand: cd backend && flask --app run.py db upgrade && gunicorn --bind 0.0.0.0:$PORT run:app
     healthCheckPath: /api/health
     envVars:
       - key: FLASK_ENV
