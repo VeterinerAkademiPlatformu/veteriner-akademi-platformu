@@ -28,10 +28,14 @@
       {id:'f2',course:'Fizyoloji',question:'PTH salgısını temel olarak hangi değişiklik artırır?',answer:'Serum iyonize kalsiyum düzeyinin düşmesi.'},
       {id:'f3',course:'Patoloji',question:'İnflamasyonun beş temel belirtisi nelerdir?',answer:'Rubor (kızarıklık), calor (ısı artışı), tumor (şişlik), dolor (ağrı) ve functio laesa (fonksiyon kaybı).'}
     ],
-    tasks:[true,true,false], dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0
+    tasks:[false,false,false], taskDate:new Date().toISOString().slice(0,10), dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0, activity:[], sessionHistory:[]
   };
   let data;
   try { data = JSON.parse(localStorage.getItem(storeKey)) || structuredClone(seed); } catch { data = structuredClone(seed); }
+  if(!Array.isArray(data.activity))data.activity=[]; if(!Array.isArray(data.sessionHistory))data.sessionHistory=[];
+  const todayKey=()=>new Date().toISOString().slice(0,10);
+  if(data.taskDate!==todayKey()){data.tasks=[false,false,false];data.taskDate=todayKey();}
+  const logActivity=(title,detail='',type='check-circle-2')=>{data.activity=Array.isArray(data.activity)?data.activity:[];data.activity.unshift({id:crypto.randomUUID(),title,detail,type,at:new Date().toISOString()});data.activity=data.activity.slice(0,30);};
   const writeLocal = () => { try { localStorage.setItem(storeKey, JSON.stringify(data)); } catch {} };
   const queueCloudSave = () => {
     clearTimeout(cloudSaveTimer);
@@ -67,10 +71,12 @@
   const renderDashboard = () => {
     $('#todayDate').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
     $('#weeklySessions').textContent=String(data.sessions||0);
-    $('#goalProgress').textContent=String((data.tasks||[]).filter(Boolean).length);
+    const completedTasks=(data.tasks||[]).filter(Boolean).length, goal=Math.max(1,Number(data.dailyGoal)||3), goalPct=Math.min(100,Math.round(completedTasks/goal*100));
+    $('#goalProgress').textContent=String(completedTasks);const goalTotal=$('#goalTotal');if(goalTotal)goalTotal.textContent='/ '+goal+' görev';const goalBar=$('#goalProgressBar');if(goalBar)goalBar.style.width=goalPct+'%';const goalCaption=$('#goalCaption');if(goalCaption)goalCaption.textContent=completedTasks>=goal?'Günlük hedef tamamlandı':(goal-completedTasks)+' görev daha tamamla';
     $('#savedCount').textContent=String(data.notes.length+data.cards.length);
     const focusTotal=$('#focusTotal');if(focusTotal)focusTotal.textContent=String(Math.max(0,Number(data.focusMinutes)||0));
-    $('#dashboardCourses').innerHTML=data.courses.slice(0,4).map(c=>courseCard(c,true)).join('')||empty('Henüz ders yok','Bir ders ekleyerek çalışma alanını oluştur.','book-open');
+    $('#dashboardCourses').innerHTML=data.courses.slice(0,4).map(c=>{const topics=Array.isArray(c.topicList)?c.topicList:[];const progress=topics.length?Math.round(topics.filter(t=>t.done).length/topics.length*100):0;return courseCard({...c,topics:topics.length,progress},true);}).join('')||empty('Henüz ders yok','Bir ders ekleyerek çalışma alanını oluştur.','book-open');
+    const activityHost=$('#dashboardActivity');if(activityHost){const activities=(data.activity||[]).slice(0,5);activityHost.innerHTML=activities.map(a=>'<div class="dashboard-activity-item"><span class="dashboard-activity-icon">'+icon(a.type||'check-circle-2')+'</span><span class="dashboard-activity-copy"><strong>'+safe(a.title)+'</strong><small>'+safe(a.detail||'Çalışma alanı')+' · '+new Date(a.at).toLocaleString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})+'</small></span></div>').join('')||empty('Henüz etkinlik yok','Bir konuyu tamamla veya odak oturumu bitir; geçmişin burada görünsün.','activity');}
     const today=new Date();today.setHours(0,0,0,0);
     const upcomingExams=data.exams.filter(e=>e.date&&new Date(e.date+'T12:00:00')>=today).sort((a,b)=>a.date.localeCompare(b.date));
     $('#dashboardExams').innerHTML=upcomingExams.slice(0,3).map(examRow).join('')||empty('Yaklaşan sınav yok','Sınav takvimine yeni bir tarih ekleyebilirsin.','calendar-days');
@@ -412,7 +418,7 @@
     refreshIcons();
     $('#topicAddNote').addEventListener('click',()=>{openModal('note');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=course.name;const t=$('[name="title"]');if(t)t.value=topic.title;const b=$('[name="body"]');if(b)b.value=topic.summary+(topic.keypoint?'\n\nSınavda hatırla: '+topic.keypoint:'');},0);});
     $('#topicAddCard').addEventListener('click',()=>{openModal('card');setTimeout(()=>{const s=$('[name="course"]');if(s)s.value=course.name;const q=$('[name="question"]');if(q)q.value=topic.title+' konusunun temel noktası nedir?';const a=$('[name="answer"]');if(a)a.value=topic.keypoint||topic.summary.slice(0,220);},0);});
-    $('#markTopicDone').addEventListener('click',()=>{topic.done=!topic.done;course.progress=course.topicList.length?Math.round(course.topicList.filter(t=>t.done).length/course.topicList.length*100):0;save();renderCourses();renderDashboard();renderCourseTopics(activeTopicCourseId);toast(topic.done?'Konu tamamlandı olarak işaretlendi.':'Konu tekrar listesine alındı.');});
+    $('#markTopicDone').addEventListener('click',()=>{topic.done=!topic.done;course.progress=course.topicList.length?Math.round(course.topicList.filter(t=>t.done).length/course.topicList.length*100):0;logActivity(topic.done?'Konu tamamlandı':'Konu tekrar açıldı',course.name+' · '+topic.title,topic.done?'check-circle-2':'rotate-ccw');save();renderCourses();renderDashboard();renderCourseTopics(activeTopicCourseId);toast(topic.done?'Konu tamamlandı olarak işaretlendi.':'Konu tekrar listesine alındı.');});
     $('#revealRecallAnswer').addEventListener('click',()=>{$('#recallAnswer').hidden=false;$('#recallRating').hidden=false;$('#revealRecallAnswer').hidden=true;});
     $('#recallNeedsReview').addEventListener('click',()=>{topic.needsReview=true;topic.lastReviewed=new Date().toISOString().slice(0,10);save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Konu tekrar listene eklendi.');});
     $('#recallGotIt').addEventListener('click',()=>{topic.needsReview=false;topic.lastReviewed=new Date().toISOString().slice(0,10);topic.recalledCount=(topic.recalledCount||0)+1;save();renderReview();renderCourseTopics(activeTopicCourseId);studyTopic(topic.id);toast('Harika! Konu tekrar durumun güncellendi.');});
@@ -464,9 +470,9 @@
     if(modalType==='course'&&activeEditId){const item=data.courses.find(x=>x.id===activeEditId);if(item){const oldName=item.name;item.name=f.name.trim();item.year=f.year;item.description=f.description.trim()||'Ders çalışma alanı';data.exams.forEach(x=>{if(x.course===oldName)x.course=item.name;});data.notes.forEach(x=>{if(x.course===oldName)x.course=item.name;});data.cards.forEach(x=>{if(x.course===oldName)x.course=item.name;});}}
     else if(modalType==='course')data.courses.push({id:crypto.randomUUID(),name:f.name.trim(),year:f.year,color:['teal','purple','blue','gold'][data.courses.length%4],description:f.description.trim()||'Ders çalışma alanı',topics:0,progress:0});
     if(modalType==='exam')data.exams.push({id:crypto.randomUUID(),course:f.course.trim(),type:f.type,date:f.date,priority:f.priority});
-    if(modalType==='note')data.notes.unshift({id:crypto.randomUUID(),title:f.title.trim(),course:f.course||'Genel',body:f.body.trim(),date:new Date().toISOString().slice(0,10)});
+    if(modalType==='note'){data.notes.unshift({id:crypto.randomUUID(),title:f.title.trim(),course:f.course||'Genel',body:f.body.trim(),date:new Date().toISOString().slice(0,10)});logActivity('Ders notu oluşturuldu',f.course||'Genel','notebook-pen');}
     if(modalType==='card'&&activeEditId){const item=data.cards.find(x=>x.id===activeEditId);if(item){item.course=f.course.trim();item.question=f.question.trim();item.answer=f.answer.trim();}}
-    else if(modalType==='card')data.cards.push({id:crypto.randomUUID(),course:f.course.trim(),question:f.question.trim(),answer:f.answer.trim()});
+    else if(modalType==='card'){data.cards.push({id:crypto.randomUUID(),course:f.course.trim(),question:f.question.trim(),answer:f.answer.trim()});logActivity('Flash kart oluşturuldu',f.course.trim(),'layers');}
     if(modalType==='topic'&&activeEditId){const course=data.courses.find(c=>c.id===activeTopicCourseId),item=course?.topicList?.find(x=>x.id===activeEditId);if(item){const destination=data.courses.find(c=>c.name===f.course);if(destination&&destination.id!==course.id){course.topicList=course.topicList.filter(x=>x.id!==item.id);course.topics=course.topicList.length;destination.topicList=destination.topicList||[];destination.topicList.push({...item,title:f.title.trim(),summary:f.summary.trim(),keypoint:(f.keypoint||'').trim()});destination.topics=destination.topicList.length;activeTopicCourseId=destination.id;}else{item.title=f.title.trim();item.summary=f.summary.trim();item.keypoint=(f.keypoint||'').trim();}}}
     else if(modalType==='topic'){const course=data.courses.find(c=>c.name===f.course);if(course){course.topicList=course.topicList||[];course.topicList.push({id:crypto.randomUUID(),title:f.title.trim(),summary:f.summary.trim(),keypoint:(f.keypoint||'').trim(),done:false});course.topics=course.topicList.length;activeTopicCourseId=course.id;}}
     const wasEditing=!!activeEditId;save();closeModal();render();if(submittedType==='topic'&&activeTopicCourseId)renderCourseTopics(activeTopicCourseId);if(submittedType==='course'&&activeTopicCourseId&&data.courses.some(c=>c.id===activeTopicCourseId))renderCourseTopics(activeTopicCourseId);toast(wasEditing?'Değişiklikler kaydedildi.':'Kaydın başarıyla oluşturuldu.');
@@ -504,14 +510,14 @@
   $('#menuToggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
   $('#notificationBtn').addEventListener('click',()=>toast(data.exams.length?'Sınav takvimini kontrol etmeyi unutma.':'Henüz bildirim yok.'));
   $('#editPlanBtn').addEventListener('click',()=>{const next=prompt('Günlük hedef kaç görev olsun? (2–5)',String(data.dailyGoal||3));const n=Number(next);if(Number.isInteger(n)&&n>=2&&n<=5){data.dailyGoal=n;save();toast('Günlük hedef güncellendi.');render();}});
-  $('#taskList').addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]')){const items=$$('#taskList input');data.tasks=items.map(x=>x.checked);save();renderDashboard();toast('Günlük plan güncellendi.');}});
+  $('#taskList').addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]')){const items=$('#taskList input');data.tasks=items.map(x=>x.checked);data.taskDate=todayKey();logActivity(e.target.checked?'Günlük görev tamamlandı':'Günlük görev yeniden açıldı',e.target.closest('.task-item')?.querySelector('strong')?.textContent||'Plan görevi',e.target.checked?'check-circle-2':'rotate-ccw');save();renderDashboard();toast('Günlük plan güncellendi.');}});
   $('#dailyGoal').addEventListener('change',e=>{data.dailyGoal=Number(e.target.value);save();toast('Günlük hedef kaydedildi.');renderDashboard();});
   $('#focusLength').addEventListener('change',e=>{data.focusLength=Number(e.target.value);timerSeconds=data.focusLength*60;updateTimer();save();});
   const overlay=$('#focusOverlay');
   const openFocus=()=>{timerSeconds=(data.focusLength||25)*60;timerRunning=false;clearInterval(timerInterval);updateTimer();overlay.hidden=false;};
   const closeFocus=()=>{overlay.hidden=true;timerRunning=false;clearInterval(timerInterval);$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();};
   const updateTimer=()=>{$('#timerDisplay').textContent=String(Math.floor(timerSeconds/60)).padStart(2,'0')+':'+String(timerSeconds%60).padStart(2,'0');};
-  const toggleTimer=()=>{if(timerRunning){clearInterval(timerInterval);timerRunning=false;$('#timerToggle').innerHTML=icon('play')+' Devam et';refreshIcons();}else{timerRunning=true;$('#timerToggle').innerHTML=icon('pause')+' Duraklat';refreshIcons();timerInterval=setInterval(()=>{timerSeconds--;updateTimer();if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;data.sessions=(data.sessions||0)+1;data.focusMinutes=(data.focusMinutes||0)+(data.focusLength||25);save();renderDashboard();toast('Odak oturumu tamamlandı. Harika iş!');$('#timerToggle').innerHTML=icon('play')+' Yeniden başlat';refreshIcons();}},1000);}};
+  const toggleTimer=()=>{if(timerRunning){clearInterval(timerInterval);timerRunning=false;$('#timerToggle').innerHTML=icon('play')+' Devam et';refreshIcons();}else{timerRunning=true;$('#timerToggle').innerHTML=icon('pause')+' Duraklat';refreshIcons();timerInterval=setInterval(()=>{timerSeconds--;updateTimer();if(timerSeconds<=0){clearInterval(timerInterval);timerRunning=false;data.sessions=(data.sessions||0)+1;data.focusMinutes=(data.focusMinutes||0)+(data.focusLength||25);data.sessionHistory=Array.isArray(data.sessionHistory)?data.sessionHistory:[];data.sessionHistory.push(new Date().toISOString());data.sessionHistory=data.sessionHistory.slice(-500);logActivity('Odak oturumu tamamlandı',(data.focusLength||25)+' dakikalık çalışma','timer');save();renderDashboard();toast('Odak oturumu tamamlandı. Harika iş!');$('#timerToggle').innerHTML=icon('play')+' Yeniden başlat';refreshIcons();}},1000);}};
   $('#focusStart').addEventListener('click',openFocus);$('#focusClose').addEventListener('click',closeFocus);$('#timerToggle').addEventListener('click',toggleTimer);$('#timerReset').addEventListener('click',()=>{clearInterval(timerInterval);timerRunning=false;timerSeconds=(data.focusLength||25)*60;updateTimer();$('#timerToggle').innerHTML=icon('play')+' Başlat';refreshIcons();});
   overlay.addEventListener('click',e=>{if(e.target===overlay)closeFocus();});
   const startDeck=name=>{activeDeck=data.cards.filter(c=>(c.course||'Genel kartlar')===name);activeCard=0;answerShown=false;showDeck();};
@@ -646,7 +652,7 @@
   const normalizeWorkspace = saved => {
     const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
     for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
-    next.dailyGoal=Number(next.dailyGoal)||3; next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0);
+    next.dailyGoal=Number(next.dailyGoal)||3; next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0); if(!Array.isArray(next.activity))next.activity=[];if(!Array.isArray(next.sessionHistory))next.sessionHistory=[];
     return next;
   };
   const loadCloudWorkspace = async user => {
