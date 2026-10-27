@@ -94,3 +94,25 @@ def test_production_rejects_development_secret():
         assert "SECRET_KEY" in str(error)
     else:
         raise AssertionError("Production must reject the development secret")
+
+
+def test_initial_migration_upgrades_empty_database(tmp_path):
+    from sqlalchemy import inspect
+
+    database_path = tmp_path / "migration-test.db"
+    app = create_app({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": f"sqlite:///{database_path}",
+        "SECRET_KEY": "migration-test-secret",
+        "SESSION_COOKIE_SECURE": False,
+        "RATELIMIT_ENABLED": False,
+    })
+    result = app.test_cli_runner().invoke(args=["db", "upgrade"])
+    assert result.exit_code == 0, result.output
+
+    with app.app_context():
+        table_names = set(inspect(db.engine).get_table_names())
+    assert {
+        "users", "subjects", "topics", "flashcards", "study_sessions",
+        "calendar_entries", "notes", "mind_maps", "alembic_version",
+    }.issubset(table_names)
