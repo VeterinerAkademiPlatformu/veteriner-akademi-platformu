@@ -6,7 +6,7 @@ on:
       - "backend/**"
       - ".github/workflows/backend-tests.yml"
   push:
-    branches: [main]
+    branches: [main, "architecture/flask-study-platform-phase-1"]
     paths:
       - "backend/**"
       - ".github/workflows/backend-tests.yml"
