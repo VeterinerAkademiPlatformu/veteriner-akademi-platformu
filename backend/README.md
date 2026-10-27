@@ -26,7 +26,7 @@ flask --app run.py db migrate -m "initial schema"
 flask --app run.py db upgrade
 python run.py
 ```
-İlk migration için `db init` yalnızca bir kez çalıştırılır. Migration dosyaları repoda tutulmalıdır. Sağlık kontrolü: `GET /api/health`.
+Başlangıç migration'ı `migrations/versions/0001_initial.py` içinde repoya eklenmiştir. Yeni ortamda `flask --app run.py db upgrade` komutuyla uygulanır. Yeni şema değişikliklerinde `flask --app run.py db migrate -m "açıklama"` ile migration üret, dosyayı gözden geçir ve repoya ekle. Sağlık kontrolü: `GET /api/health`.
 
 ## API uçları
 - `GET /api/auth/csrf` — oturumla ilişkili CSRF token alır; tüm POST/PUT/DELETE istekleri `X-CSRFToken` başlığıyla bu token'ı göndermelidir.
