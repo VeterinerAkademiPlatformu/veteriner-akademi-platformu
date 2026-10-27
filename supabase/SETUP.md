@@ -6,7 +6,7 @@ The browser app is now wired to Supabase Auth and the `student_workspaces` table
 ## Database and access control
 The table `public.student_workspaces` has RLS enabled. Authenticated users can read/insert/update/delete only the row where `user_id = auth.uid()`. Anonymous access is revoked. The setup SQL is in `supabase/schema.sql`.
 
-The text-only shared library uses `public.shared_notes`. Published notes are readable publicly; only users whose trusted `app_metadata.role` is `admin` can create, edit, or delete shared notes. Its repeatable table/policy setup is in `supabase/shared_notes.sql`. Both tables revoke browser-role `TRUNCATE`, `REFERENCES`, and `TRIGGER` privileges.
+The text-only shared library uses `public.shared_notes`. Published notes are readable publicly; only users whose trusted `app_metadata.role` is `admin` can create, edit, or delete shared notes. Its repeatable table/policy setup is in `supabase/shared_notes.sql`.\n\nThe academic course catalog uses `public.shared_courses` and `public.shared_course_topics`; student progress is stored separately in `public.student_topic_progress`. Their table definitions and row-level security policies are in `supabase/shared_catalog.sql`. Run this script in the Supabase SQL Editor for this application. It grants public read access only to published courses/topics, restricts course/topic writes to trusted admins, and limits progress rows to the signed-in student. The catalog tables revoke browser-role `TRUNCATE`, `REFERENCES`, and `TRIGGER` privileges.
 
 ## Authentication setup
 In the [Supabase project](https://supabase.com/dashboard/project/jvbpoibzjihznlljeech):

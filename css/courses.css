@@ -12,3 +12,9 @@
 .topic-keypoint{margin-top:22px;padding:17px;border:1px solid #2a6c62;border-radius:14px;background:#12302f}.topic-keypoint strong{display:flex;align-items:center;gap:8px;color:var(--teal)}.topic-keypoint p{margin:9px 0 0;line-height:1.7;white-space:normal}
 .topic-study-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:26px}
 @media(max-width:620px){.topics-header{align-items:flex-start;gap:12px}.topics-heading{order:2;flex-basis:100%}.topics-header>#addTopicBtn{margin-left:auto}.topic-item{align-items:flex-start;flex-wrap:wrap}.topic-copy{flex-basis:calc(100% - 60px)}.topic-open{margin-left:58px}.topic-study-actions>*{width:100%;justify-content:center}}
+
+
+/* Quick access to practice tools from within a course. */
+.course-study-shortcuts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.course-study-shortcuts .outline-button{font-size:12px;padding:8px 10px}
+@media(max-width:620px){.course-study-shortcuts{width:100%}.course-study-shortcuts .outline-button{flex:1;justify-content:center}}

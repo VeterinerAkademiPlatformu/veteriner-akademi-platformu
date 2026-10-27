@@ -2,8 +2,8 @@
   const renderAdminPanel=()=>{
     const host=$('#adminSharedNotesGrid');if(!host)return;
     const admin=!!authUser&&isLibraryAdmin();
-    const nav=$('#adminNavItem'),label=$('#adminWorkspaceLabel');
-    if(nav)nav.hidden=!admin;if(label)label.hidden=!admin;
+    const adminEntry=$('#adminQuickEntry');
+    if(adminEntry)adminEntry.hidden=!admin;
     const notes=sharedNotes.slice().sort((a,b)=>(a.course||'').localeCompare(b.course||'','tr')||(a.topic||'').localeCompare(b.topic||'','tr')||(a.title||'').localeCompare(b.title||'','tr'));
     const published=notes.filter(n=>n.published!==false),drafts=notes.filter(n=>n.published===false);
     const courses=new Set(notes.map(n=>(n.course||'').trim()).filter(Boolean));

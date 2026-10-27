@@ -10,6 +10,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/base.css">
+  <link rel="stylesheet" href="css/navigation.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/exams.css">
   <link rel="stylesheet" href="css/notes.css">
@@ -35,19 +36,16 @@
         <span class="brand-copy"><strong>Veteriner<span>Akademi</span></strong><small>Öğren · Uygula · Geliş</small></span>
       </a>
       <div class="workspace-label">ÇALIŞMA ALANI</div>
-      <nav class="nav-list" aria-label="Ana menü">
-        <button class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Genel Bakış</span></button>
-        <button class="nav-item" data-page="courses"><i data-lucide="book-open"></i><span>Derslerim</span><span class="nav-count" id="courseCount">6</span></button>
-        <button class="nav-item" data-page="exams"><i data-lucide="calendar-days"></i><span>Sınav Takvimi</span></button>
-        <button class="nav-item" data-page="library"><i data-lucide="library-big"></i><span>Ortak Ders Notları</span></button>
+      <nav class="nav-list workspace-nav" aria-label="Çalışma alanı menüsü">
+        <button class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Çalışma masası</span></button>
+        <button class="nav-item" data-page="courses"><i data-lucide="book-open"></i><span>Dersler</span><span class="nav-count" id="courseCount">0</span></button>
+        <button class="nav-item" data-page="questions"><i data-lucide="list-checks"></i><span>Soru çöz</span></button>
+        <button class="nav-item" data-page="flashcards"><i data-lucide="layers"></i><span>Flash kartlar</span></button>
+        <button class="nav-item" data-page="library"><i data-lucide="library-big"></i><span>Akademik kütüphane</span></button>
         <button class="nav-item" data-page="notes"><i data-lucide="notebook-pen"></i><span>Notlarım</span></button>
-        <button class="nav-item" data-page="flashcards"><i data-lucide="layers"></i><span>Flash Kartlar</span></button>
-        <button class="nav-item" data-page="review"><i data-lucide="rotate-ccw"></i><span>Tekrar Listem</span><span class="nav-count" id="reviewCount">0</span></button>
-        <button class="nav-item" data-page="questions"><i data-lucide="list-checks"></i><span>Soru Çöz</span></button>
-      </nav>
-      <div class="workspace-label admin-workspace-label" id="adminWorkspaceLabel" hidden>YÖNETİM</div>
-      <nav class="nav-list admin-nav-list" aria-label="Yönetim menüsü">
-        <button class="nav-item admin-nav-item" id="adminNavItem" data-page="admin" hidden><i data-lucide="shield-check"></i><span>Yönetim Paneli</span></button>
+        <button class="nav-item" data-page="review"><i data-lucide="rotate-ccw"></i><span>Tekrar listem</span><span class="nav-count" id="reviewCount">0</span></button>
+        <button class="nav-item" data-page="exams"><i data-lucide="calendar-days"></i><span>Sınav takvimi</span></button>
+        <button class="nav-item" data-page="settings"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
       </nav>
       <div class="sidebar-bottom">
         <div class="focus-card">
@@ -69,13 +67,14 @@
         <div class="top-actions">
           <label class="search-box"><i data-lucide="search"></i><input id="globalSearch" type="search" placeholder="Ders, konu veya not ara..." aria-label="Ara"><kbd>⌘ K</kbd></label>
           <button class="icon-button notification-btn" aria-label="Bildirimler" id="notificationBtn"><i data-lucide="bell"></i><span></span></button>
+          <button class="outline-button admin-quick-entry" id="adminQuickEntry" data-page="admin" type="button" hidden aria-label="Yönetim panelini aç"><i data-lucide="shield-check"></i><span>Yönetim</span></button>
           <button class="outline-button account-button" id="accountButton" type="button"><i data-lucide="user-round"></i><span>Hesaba giriş</span></button>
         </div>
       </header>
 
       <section class="page active" id="page-dashboard">
         <div class="welcome-row">
-          <div><div class="eyebrow"><span class="eyebrow-dot"></span> AKADEMİK ÇALIŞMA ALANI</div><h1>Bugün ne öğreniyoruz?</h1><p class="page-subtitle">Planlı çalış, bilgini güçlendir ve sınavlara güvenle hazırlan.</p></div>
+          <div><div class="eyebrow"><span class="eyebrow-dot"></span> AKADEMİK ÇALIŞMA ALANI</div><h1>Çalışma masan</h1><p class="page-subtitle">Kaldığın yerden devam et; ders, soru ve tekrar araçlarına tek yerden ulaş.</p></div>
           <div class="date-chip"><i data-lucide="calendar"></i><span id="todayDate">Bugün</span></div>
         </div>
         <div class="hero-panel">
@@ -102,7 +101,7 @@
           </div>
           <aside class="right-column">
             <div class="panel-card daily-card"><div class="panel-title"><span class="panel-title-icon"><i data-lucide="check-check"></i></span><div><h3>Bugünün planı</h3><p>Az ama istikrarlı ilerle.</p></div><span class="tiny-pill">0/3</span></div><div class="task-list" id="taskList"><label class="task-item done"><input type="checkbox" checked><span class="fake-check"><i data-lucide="check"></i></span><span><strong>Önceki konuyu tekrar et</strong><small>15 dakika</small></span></label><label class="task-item done"><input type="checkbox" checked><span class="fake-check"><i data-lucide="check"></i></span><span><strong>10 test sorusu çöz</strong><small>20 dakika</small></span></label><label class="task-item"><input type="checkbox"><span class="fake-check"><i data-lucide="check"></i></span><span><strong>Bir flash kart seti tamamla</strong><small>10 dakika</small></span></label></div><button class="outline-button full-width" id="editPlanBtn"><i data-lucide="list-todo"></i> Planı düzenle</button></div>
-            <div class="panel-card quick-card"><div class="panel-title"><span class="panel-title-icon purple"><i data-lucide="zap"></i></span><div><h3>Hızlı erişim</h3><p>Bir sonraki adımını seç.</p></div></div><button class="quick-link" data-page="notes"><span class="quick-link-icon"><i data-lucide="notebook-pen"></i></span><span><strong>Not oluştur</strong><small>Önemli bilgiyi kaydet</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="questions"><span class="quick-link-icon pink"><i data-lucide="brain"></i></span><span><strong>Kendini sına</strong><small>Bilgini sorularla ölç</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="flashcards"><span class="quick-link-icon gold"><i data-lucide="layers"></i></span><span><strong>Flash kartları aç</strong><small>Aktif hatırlama zamanı</small></span><i data-lucide="arrow-up-right"></i></button></div>
+            <div class="panel-card quick-card"><div class="panel-title"><span class="panel-title-icon purple"><i data-lucide="zap"></i></span><div><h3>Hızlı erişim</h3><p>Bir sonraki adımını seç.</p></div></div><button class="quick-link" data-page="notes"><span class="quick-link-icon"><i data-lucide="notebook-pen"></i></span><span><strong>Not oluştur</strong><small>Önemli bilgiyi kaydet</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="questions"><span class="quick-link-icon pink"><i data-lucide="brain"></i></span><span><strong>Kendini sına</strong><small>Bilgini sorularla ölç</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="flashcards"><span class="quick-link-icon gold"><i data-lucide="layers"></i></span><span><strong>Flash kartları aç</strong><small>Aktif hatırlama zamanı</small></span><i data-lucide="arrow-up-right"></i></button><button class="quick-link" data-page="library"><span class="quick-link-icon"><i data-lucide="library-big"></i></span><span><strong>Akademik kütüphane</strong><small>Ortak ders notlarına göz at</small></span><i data-lucide="arrow-up-right"></i></button></div>
             <div class="quote-card"><i data-lucide="quote"></i><p>Öğrenmek, tekrar ettikçe kalıcı hâle gelir.</p><span>BUGÜNÜN HATIRLATMASI</span></div>
           </aside>
         </div>
@@ -220,6 +219,26 @@
   <script src="js/modules/note-reader.js"></script>
   <script src="js/modules/shared-library.js"></script>
   <script src="js/modules/admin.js"></script>
+  <nav class="mobile-bottom-nav" id="mobileBottomNav" aria-label="Alt gezinme">
+    <button class="mobile-nav-item active" type="button" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Ana sayfa</span></button>
+    <button class="mobile-nav-item" type="button" data-page="courses"><i data-lucide="book-open"></i><span>Dersler</span></button>
+    <button class="mobile-nav-item" type="button" data-mobile-focus><i data-lucide="timer"></i><span>Odaklan</span></button>
+    <button class="mobile-nav-item" type="button" data-more-open aria-expanded="false" aria-controls="moreMenuPanel"><i data-lucide="grid-2x2"></i><span>Daha fazla</span></button>
+  </nav>
+  <div class="more-menu-backdrop" id="moreMenuBackdrop" hidden></div>
+  <section class="more-menu-panel" id="moreMenuPanel" role="dialog" aria-modal="true" aria-labelledby="moreMenuTitle" hidden>
+    <div class="more-menu-handle" aria-hidden="true"></div>
+    <div class="more-menu-heading"><div><span class="eyebrow">ÇALIŞMA ALANIN</span><h2 id="moreMenuTitle">Daha fazla</h2></div><button class="icon-button" type="button" data-more-close aria-label="Menüyü kapat"><i data-lucide="x"></i></button></div>
+    <div class="more-menu-grid">
+      <button class="more-menu-link" type="button" data-page="flashcards"><i data-lucide="layers"></i><span><strong>Flash kartlar</strong><small>Aktif hatırlama</small></span></button>
+      <button class="more-menu-link" type="button" data-page="questions"><i data-lucide="list-checks"></i><span><strong>Soru çöz</strong><small>Bilgini sınama</small></span></button>
+      <button class="more-menu-link" type="button" data-page="library"><i data-lucide="library-big"></i><span><strong>Akademik kütüphane</strong><small>Ortak ders notları</small></span></button>
+      <button class="more-menu-link" type="button" data-page="notes"><i data-lucide="notebook-pen"></i><span><strong>Notlarım</strong><small>Kişisel notların</small></span></button>
+      <button class="more-menu-link" type="button" data-page="review"><i data-lucide="rotate-ccw"></i><span><strong>Tekrar listem</strong><small>Gözden geçirilecekler</small></span></button>
+      <button class="more-menu-link" type="button" data-page="exams"><i data-lucide="calendar-days"></i><span><strong>Sınav takvimi</strong><small>Yaklaşan sınavların</small></span></button>
+      <button class="more-menu-link" type="button" data-page="settings"><i data-lucide="settings-2"></i><span><strong>Ayarlar</strong><small>Çalışma tercihleri</small></span></button>
+    </div>
+  </section>
   <script src="js/modules/notes.js"></script>
   <script src="js/modules/flashcards.js"></script>
   <script src="js/modules/review.js"></script>
@@ -232,5 +251,7 @@
   <script src="js/modules/flashcard-session.js"></script>
   <script src="js/modules/questions.js"></script>
   <script src="js/modules/auth.js"></script>
+  <script src="js/modules/navigation.js"></script>
+  <script src="js/modules/mobile-navigation.js"></script>
 </body>
 </html>
