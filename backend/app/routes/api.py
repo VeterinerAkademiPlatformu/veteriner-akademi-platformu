@@ -116,48 +116,32 @@ def generate_schedule():
     except (TypeError, ValueError):
         return jsonify(error="subject_id, exam_date ve topic_ids alanlarını kontrol edin."), 400
 
-    subject = db.session.scalar(select(Subject).where(
-        Subject.id == subject_id, Subject.user_id == current_user.id
-    ))
-    if not subject:
-        return jsonify(error="Ders bulunamadı."), 404
-    today = date.today()
-    if exam_date <= today:
-        return jsonify(error="Sınav tarihi bugünden sonra olmalıdır."), 400
-
-    topics = db.session.scalars(select(Topic).where(
-        Topic.subject_id == subject.id, Topic.id.in_(topic_ids), Topic.completed.is_(False)
-    ).order_by(Topic.sort_order, Topic.id)).all() if topic_ids else []
-    if len(topics) != len(topic_ids):
-        return jsonify(error="Konu listesindeki bazı kayıtlar bulunamadı veya tamamlandı."), 400
-
-    # Keep completed history. Replace only future planned entries for these topics.
-    for topic in topics:
-        db.session.query(CalendarEntry).filter(
-            CalendarEntry.user_id == current_user.id,
-            CalendarEntry.topic_id == topic.id,
-            CalendarEntry.status == "planned",
-            CalendarEntry.study_date >= today,
-        ).delete(synchronize_session=False)
-
-    days = (exam_date - today).days  # exam day reserved for light review
-    for index, topic in enumerate(topics):
-        study_day = today + timedelta(days=index % days)
-        db.session.add(CalendarEntry(
-            user_id=current_user.id,
-            topic_id=topic.id,
-            study_date=study_day,
-            status="planned",
-            planned_minutes=max(10, topic.estimated_minutes or 25),
-            order_index=index,
-        ))
+    from app.services.scheduler import generate_schedule as build_schedule
+    try:
+        entries = build_schedule(current_user.id, subject_id, exam_date, topic_ids)
+    except LookupError as error:
+        return jsonify(error=str(error)), 404
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
     db.session.commit()
-    return jsonify(
-        created=len(topics),
-        exam_date=exam_date.isoformat(),
-        entries=[{"topic_id": topic.id, "date": (today + timedelta(days=i % days)).isoformat()}
-                 for i, topic in enumerate(topics)],
-    ), 201
+    return jsonify(created=len(entries), exam_date=exam_date.isoformat(), entries=entries), 201
+
+
+@api_bp.post("/schedule/reschedule")
+@login_required
+def reschedule_schedule():
+    data = request.get_json(silent=True) or {}
+    try:
+        exam_date = date.fromisoformat(str(data.get("exam_date")))
+    except (TypeError, ValueError):
+        return jsonify(error="exam_date YYYY-MM-DD biçiminde olmalıdır."), 400
+    from app.services.scheduler import reschedule_unfinished
+    try:
+        entries = reschedule_unfinished(current_user.id, exam_date)
+    except ValueError as error:
+        return jsonify(error=str(error)), 400
+    db.session.commit()
+    return jsonify(moved=len(entries), entries=entries), 200
 
 
 @api_bp.post("/pomodoro/save")
@@ -286,3 +270,85 @@ def update_mindmap(mindmap_id):
         mindmap.title = str(data["title"]).strip()[:240]
     db.session.commit()
     return jsonify(id=mindmap.id, status="saved")
+
+
+
+@api_bp.get("/notes")
+@login_required
+def list_notes():
+    rows = db.session.scalars(select(Note).where(
+        Note.user_id == current_user.id
+    ).order_by(Note.updated_at.desc())).all()
+    return jsonify(notes=[{
+        "id": note.id, "topic_id": note.topic_id, "title": note.title,
+        "content": note.content, "updated_at": note.updated_at.isoformat()
+    } for note in rows])
+
+
+@api_bp.post("/notes")
+@login_required
+def create_note():
+    data = request.get_json(silent=True) or {}
+    title = str(data.get("title", "")).strip()
+    body = data.get("content", "")
+    topic_id = data.get("topic_id")
+    if not title or len(title) > 240 or not isinstance(body, str):
+        return jsonify(error="Başlık (1-240 karakter) ve metin içerik gereklidir."), 400
+    if len(body) > 200000:
+        return jsonify(error="Not içeriği çok uzun (en fazla 200.000 karakter)."), 400
+    if topic_id is not None:
+        try:
+            topic_id = int(topic_id)
+        except (TypeError, ValueError):
+            return jsonify(error="topic_id geçersiz."), 400
+        if not owned_topic(topic_id, current_user.id):
+            return jsonify(error="Konu bulunamadı."), 404
+    note = Note(user_id=current_user.id, topic_id=topic_id, title=title, content=body)
+    db.session.add(note)
+    db.session.commit()
+    return jsonify(id=note.id, title=note.title, topic_id=note.topic_id), 201
+
+
+@api_bp.put("/notes/<int:note_id>")
+@login_required
+def update_note(note_id):
+    note = db.session.scalar(select(Note).where(
+        Note.id == note_id, Note.user_id == current_user.id
+    ))
+    if not note:
+        return jsonify(error="Not bulunamadı."), 404
+    data = request.get_json(silent=True) or {}
+    if "title" in data:
+        title = str(data["title"]).strip()
+        if not title or len(title) > 240:
+            return jsonify(error="Başlık 1-240 karakter olmalıdır."), 400
+        note.title = title
+    if "content" in data:
+        if not isinstance(data["content"], str) or len(data["content"]) > 200000:
+            return jsonify(error="Not içeriği geçersiz veya çok uzun."), 400
+        note.content = data["content"]
+    if "topic_id" in data:
+        topic_id = data["topic_id"]
+        if topic_id is not None:
+            try:
+                topic_id = int(topic_id)
+            except (TypeError, ValueError):
+                return jsonify(error="topic_id geçersiz."), 400
+            if not owned_topic(topic_id, current_user.id):
+                return jsonify(error="Konu bulunamadı."), 404
+        note.topic_id = topic_id
+    db.session.commit()
+    return jsonify(id=note.id, status="saved", updated_at=note.updated_at.isoformat())
+
+
+@api_bp.delete("/notes/<int:note_id>")
+@login_required
+def delete_note(note_id):
+    note = db.session.scalar(select(Note).where(
+        Note.id == note_id, Note.user_id == current_user.id
+    ))
+    if not note:
+        return jsonify(error="Not bulunamadı."), 404
+    db.session.delete(note)
+    db.session.commit()
+    return jsonify(status="deleted")
