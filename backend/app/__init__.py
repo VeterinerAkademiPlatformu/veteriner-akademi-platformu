@@ -1,4 +1,5 @@
 from flask import Flask, jsonify
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
@@ -25,6 +26,19 @@ def create_app(test_config=None):
 
     if app.config.get("ENV") == "production" and app.config.get("SECRET_KEY") == "dev-only-change-this-secret":
         raise RuntimeError("Production ortamında güçlü bir SECRET_KEY tanımlanmalıdır.")
+
+    # Credentialed CORS is restricted to an explicit origin allowlist. Never
+    # use "*" with cookie-based sessions.
+    allowed_origins = app.config.get("CORS_ORIGINS", [])
+    if allowed_origins:
+        CORS(
+            app,
+            resources={r"/api/*": {"origins": allowed_origins}},
+            supports_credentials=True,
+            allow_headers=["Content-Type", "X-CSRFToken"],
+            methods=["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+            vary_header=True,
+        )
 
     db.init_app(app)
     migrate.init_app(app, db)
