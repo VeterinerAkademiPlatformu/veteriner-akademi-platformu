@@ -150,3 +150,72 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Page-level finishing: consistent toolbars, reading surfaces, and work cards. */
+#page-courses .filter-row,
+#page-notes .note-toolbar,
+#page-library .library-toolbar{
+  padding:12px;
+  border:1px solid #26394e;
+  border-radius:14px;
+  background:rgba(14,25,40,.78);
+}
+#page-courses .filter-row{gap:10px}
+#page-courses .all-course-grid{gap:15px}
+#page-courses .all-course-grid .course-card{min-height:164px}
+#page-notes .note-toolbar,
+#page-library .library-toolbar{gap:9px}
+#page-notes .note-toolbar .filter-search,
+#page-library .library-toolbar .filter-search{min-height:40px}
+#page-library .library-intro{
+  border-color:#2a4a58;
+  background:linear-gradient(115deg,rgba(17,48,57,.96),rgba(15,27,43,.98) 74%);
+}
+#page-library .shared-note-card,
+#page-notes .note-card{min-height:190px}
+#page-exams .summary-tile{
+  background:linear-gradient(145deg,#142337,#101a29);
+  border-color:#293d52;
+}
+#page-exams .exam-row{transition:border-color .18s ease,background .18s ease,transform .18s ease}
+#page-exams .exam-row:hover{border-color:#3b646d;background:#132337;transform:translateY(-1px)}
+#page-flashcards .flash-intro{
+  border-color:#2b4b5c;
+  background:radial-gradient(ellipse at 82% 10%,rgba(63,163,158,.14),transparent 35%),linear-gradient(115deg,#15283a,#111c2d 74%);
+}
+#page-flashcards .flash-set{min-height:190px;display:flex;flex-direction:column}
+#page-flashcards .flash-set button{margin-top:auto}
+#page-questions .quiz-layout{align-items:start;gap:18px}
+#page-questions .quiz-setup,
+#page-questions .quiz-side{border-color:#293d52;background:linear-gradient(150deg,#121f31,#101a29)}
+#page-questions .choice-chip{min-width:74px}
+#page-review .review-stat{background:linear-gradient(145deg,#142337,#101a29);border-color:#293d52}
+#page-review .review-topic-card{background:linear-gradient(120deg,#132235,#101a29);border-color:#293d52;transition:border-color .18s ease,transform .18s ease}
+#page-review .review-topic-card:hover{border-color:#5b6251;transform:translateY(-1px)}
+#page-settings .settings-panel{margin-top:4px;border-color:#293d52;background:linear-gradient(150deg,#121f31,#101a29)}
+#page-settings .setting-row{gap:24px}
+#page-admin .admin-welcome,
+#page-admin .admin-content-panel{box-shadow:0 8px 26px #02071118}
+#page-admin .admin-summary-card{background:linear-gradient(145deg,#142337,#101a29);border-color:#293d52}
+#page-admin .admin-note-row{transition:border-color .18s ease,background .18s ease}
+#page-admin .admin-note-row:hover{border-color:#36576a;background:#122135}
+.note-reader-backdrop{backdrop-filter:blur(10px)}
+.note-reader{border-color:#2b4055;box-shadow:0 24px 80px #0207118c}
+@media(min-width:1201px){
+  #page-courses .all-course-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #page-notes .notes-grid,
+  #page-library .shared-notes-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  #page-courses .filter-row,
+  #page-notes .note-toolbar,
+  #page-library .library-toolbar{padding:10px}
+  #page-courses .all-course-grid .course-card{min-height:0}
+  #page-notes .note-card,
+  #page-library .shared-note-card{min-height:0}
+}
+@media(max-width:600px){
+  #page-questions .quiz-setup,
+  #page-questions .quiz-side{padding:16px}
+  #page-settings .setting-row{gap:12px}
+}
