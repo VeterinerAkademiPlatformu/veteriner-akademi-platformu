@@ -39,6 +39,20 @@ test.describe('Veteriner Akademi çalışma istasyonu', () => {
     await expect(page.locator('#sidebar')).toBeVisible();
   });
 
+
+  test('masaüstü menü grupları açılır ve seçim doğru sayfaya gider', async ({ page }) => {
+    await page.setViewportSize({ width: 1365, height: 900 });
+    await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('#sidebar .nav-group')).toHaveCount(4);
+
+    const learningGroup = page.locator('#sidebar [data-nav-group]').filter({ has: page.locator('.nav-group-toggle', { hasText: 'Aktif öğrenme' }) });
+    await learningGroup.locator('.nav-group-toggle').click();
+    await expect(learningGroup.locator('.nav-submenu')).toBeVisible();
+    await learningGroup.locator('[data-page="flashcards"]').click();
+    await expect(page.locator('#page-flashcards')).toHaveClass(/active/);
+    await expect(learningGroup.locator('.nav-submenu')).toBeVisible();
+  });
+
   test('yönetim bağlantısı oturum/yetki yokken görünmez', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await page.goto('http://127.0.0.1:4173/', { waitUntil: 'domcontentloaded' });
