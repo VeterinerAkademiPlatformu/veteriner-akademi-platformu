@@ -30,6 +30,14 @@
       const courseInput = document.getElementById('quizCourse');
       if (courseInput) courseInput.value = courseShortcut.dataset.courseName || '';
     }
+    if (courseShortcut?.dataset.page === 'flashcards') {
+      preferredFlashcardCourse = courseShortcut.dataset.courseName || '';
+      renderFlashcards();
+    }
+    if (event.target.closest('[data-clear-flashcard-course]')) {
+      preferredFlashcardCourse = '';
+      renderFlashcards();
+    }
     const pageButton = event.target.closest('.nav-item[data-page]');
     if (!pageButton || !sidebar.contains(pageButton)) return;
     const parentGroup = pageButton.closest('[data-nav-group]');
