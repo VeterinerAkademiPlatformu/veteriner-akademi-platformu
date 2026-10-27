@@ -25,6 +25,7 @@
   <link rel="stylesheet" href="css/shared-library.css">
   <link rel="stylesheet" href="css/content-management.css">
   <link rel="stylesheet" href="css/admin.css">
+  <link rel="stylesheet" href="css/design-system.css">
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script>
 </head>
@@ -36,16 +37,44 @@
         <span class="brand-copy"><strong>Veteriner<span>Akademi</span></strong><small>Öğren · Uygula · Geliş</small></span>
       </a>
       <div class="workspace-label">ÇALIŞMA ALANI</div>
-      <nav class="nav-list workspace-nav" aria-label="Çalışma alanı menüsü">
-        <button class="nav-item active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Çalışma masası</span></button>
-        <button class="nav-item" data-page="courses"><i data-lucide="book-open"></i><span>Dersler</span><span class="nav-count" id="courseCount">0</span></button>
-        <button class="nav-item" data-page="questions"><i data-lucide="list-checks"></i><span>Soru çöz</span></button>
-        <button class="nav-item" data-page="flashcards"><i data-lucide="layers"></i><span>Flash kartlar</span></button>
-        <button class="nav-item" data-page="library"><i data-lucide="library-big"></i><span>Akademik kütüphane</span></button>
-        <button class="nav-item" data-page="notes"><i data-lucide="notebook-pen"></i><span>Notlarım</span></button>
-        <button class="nav-item" data-page="review"><i data-lucide="rotate-ccw"></i><span>Tekrar listem</span><span class="nav-count" id="reviewCount">0</span></button>
-        <button class="nav-item" data-page="exams"><i data-lucide="calendar-days"></i><span>Sınav takvimi</span></button>
-        <button class="nav-item" data-page="settings"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
+      <nav class="nav-list workspace-nav grouped-nav" aria-label="Çalışma alanı menüsü">
+        <section class="nav-group" data-nav-group>
+          <button class="nav-group-toggle" type="button" aria-expanded="true">
+            <span class="nav-group-label"><i data-lucide="layout-dashboard"></i>Genel çalışma alanı</span><i class="nav-chevron" data-lucide="chevron-down"></i>
+          </button>
+          <div class="nav-submenu">
+            <button class="nav-item nav-subitem active" data-page="dashboard"><i data-lucide="layout-dashboard"></i><span>Çalışma masası</span></button>
+            <button class="nav-item nav-subitem" data-page="courses"><i data-lucide="book-open"></i><span>Dersler</span><span class="nav-count" id="courseCount">0</span></button>
+          </div>
+        </section>
+        <section class="nav-group" data-nav-group>
+          <button class="nav-group-toggle" type="button" aria-expanded="false">
+            <span class="nav-group-label"><i data-lucide="brain"></i>Aktif öğrenme</span><i class="nav-chevron" data-lucide="chevron-down"></i>
+          </button>
+          <div class="nav-submenu" hidden>
+            <button class="nav-item nav-subitem" data-page="questions"><i data-lucide="list-checks"></i><span>Soru çöz</span></button>
+            <button class="nav-item nav-subitem" data-page="flashcards"><i data-lucide="layers"></i><span>Flash kartlar</span></button>
+            <button class="nav-item nav-subitem" data-page="review"><i data-lucide="rotate-ccw"></i><span>Tekrar listem</span><span class="nav-count" id="reviewCount">0</span></button>
+          </div>
+        </section>
+        <section class="nav-group" data-nav-group>
+          <button class="nav-group-toggle" type="button" aria-expanded="false">
+            <span class="nav-group-label"><i data-lucide="library-big"></i>Akademik kaynaklar</span><i class="nav-chevron" data-lucide="chevron-down"></i>
+          </button>
+          <div class="nav-submenu" hidden>
+            <button class="nav-item nav-subitem" data-page="library"><i data-lucide="library-big"></i><span>Akademik kütüphane</span></button>
+            <button class="nav-item nav-subitem" data-page="notes"><i data-lucide="notebook-pen"></i><span>Notlarım</span></button>
+          </div>
+        </section>
+        <section class="nav-group" data-nav-group>
+          <button class="nav-group-toggle" type="button" aria-expanded="false">
+            <span class="nav-group-label"><i data-lucide="calendar-days"></i>Planlama</span><i class="nav-chevron" data-lucide="chevron-down"></i>
+          </button>
+          <div class="nav-submenu" hidden>
+            <button class="nav-item nav-subitem" data-page="exams"><i data-lucide="calendar-days"></i><span>Sınav takvimi</span></button>
+            <button class="nav-item nav-subitem" data-page="settings"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
+          </div>
+        </section>
       </nav>
       <div class="sidebar-bottom">
         <div class="focus-card">
@@ -53,7 +82,6 @@
           <div><strong>Odaklanma zamanı</strong><p>Küçük adımlar, büyük gelişim.</p></div>
           <button class="icon-button subtle" id="focusStart" aria-label="Odaklanma sayacını başlat"><i data-lucide="play"></i></button>
         </div>
-        <button class="nav-item" data-page="settings"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
         <div class="profile">
           <div class="avatar">VA</div><div class="profile-text"><strong>Öğrenci Alanı</strong><small>Kişisel çalışma alanın</small></div><i data-lucide="chevrons-up-down" class="profile-more"></i>
         </div>

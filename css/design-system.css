@@ -1,0 +1,221 @@
+/* Veteriner Akademi — premium academic design system.
+   Shared visual refinements only; feature behavior stays in its own modules. */
+:root{
+  --bg:#09111d;
+  --panel:#101b2b;
+  --panel2:#142338;
+  --line:#26394e;
+  --text:#edf5fb;
+  --muted:#91a6b9;
+  --teal:#55e0c7;
+  --teal2:#24b8a5;
+  --shadow:0 18px 48px #02071142;
+  --surface-glass:rgba(13,24,39,.92);
+}
+html{scroll-padding-top:88px}
+body{
+  background:
+    radial-gradient(ellipse at 78% -18%,rgba(25,86,100,.22),transparent 38%),
+    radial-gradient(ellipse at 5% 40%,rgba(25,48,76,.14),transparent 34%),
+    var(--bg);
+  text-rendering:optimizeLegibility;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:#2b8c80;color:#fff}
+button,input,select,textarea{accent-color:var(--teal)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:2px solid var(--teal);
+  outline-offset:3px;
+}
+.sidebar{
+  width:264px;
+  padding:23px 15px 16px;
+  background:linear-gradient(180deg,#0b1422 0%,#09111d 100%);
+  border-right-color:#203247;
+}
+.main-area{margin-left:264px;min-width:0}
+.brand{padding:0 8px 27px}
+.brand-mark{border-radius:13px;box-shadow:0 7px 24px #31d8ba22}
+.workspace-label{padding-bottom:9px}
+.workspace-nav{gap:9px}
+.nav-group{padding:2px 0}
+.nav-group-toggle{
+  min-height:38px;
+  padding:9px 10px;
+  border-radius:9px;
+  font-size:10px;
+  letter-spacing:.45px;
+}
+.nav-group-label{gap:8px}
+.nav-group-label svg{width:15px;height:15px}
+.nav-submenu{
+  gap:4px;
+  margin:3px 0 4px 8px;
+  padding:4px 0 4px 8px;
+  border-left-color:#263b50;
+}
+.nav-item.nav-subitem{
+  min-height:39px;
+  padding:9px 10px;
+  font-size:12px;
+  border-radius:9px;
+}
+.nav-item.nav-subitem svg{width:16px;height:16px}
+.nav-item.nav-subitem.active{
+  background:linear-gradient(100deg,rgba(35,112,105,.28),rgba(20,39,56,.9));
+  border-color:#28545a;
+  box-shadow:inset 2px 0 var(--teal);
+}
+.nav-count{font-variant-numeric:tabular-nums}
+.sidebar-bottom{gap:12px}
+.focus-card{border-color:#294750;background:linear-gradient(145deg,#142d39,#101c2b)}
+.profile{padding-top:12px}
+.topbar{
+  height:72px;
+  padding-inline:clamp(22px,3vw,42px);
+  background:var(--surface-glass);
+  border-bottom-color:#203247;
+}
+.page{
+  width:100%;
+  max-width:1740px;
+  margin-inline:auto;
+  padding:clamp(24px,2.5vw,38px) clamp(22px,3vw,42px) 0;
+}
+.welcome-row,.page-header{margin-bottom:25px}
+.welcome-row h1,.page-header h1{letter-spacing:-1.1px}
+.page-subtitle{max-width:64ch;line-height:1.65}
+.section-heading{margin-bottom:16px}
+.section-heading h2{letter-spacing:-.45px}
+.stat-card,.panel-card,.course-card,.note-card,.flash-set{
+  border-color:#26394e;
+  box-shadow:0 5px 18px #0207110d;
+}
+.panel-card{padding:19px}
+.course-card,.note-card,.flash-set{
+  background:linear-gradient(145deg,rgba(18,31,48,.98),rgba(14,25,40,.98));
+}
+.course-card:hover,.note-card:hover,.flash-set:hover{
+  border-color:#3c7778;
+  box-shadow:0 14px 32px #02071130;
+}
+.primary-button,.hero-button,.outline-button,.secondary-button,.mini-action,.choice-chip{
+  min-height:38px;
+}
+.primary-button:active,.hero-button:active,.outline-button:active,.secondary-button:active{transform:translateY(1px)}
+.search-box,.filter-search{
+  background:#0f1a2a;
+  border-color:#293d53;
+}
+.search-box:focus-within,.filter-search:focus-within{
+  border-color:#438f88;
+  box-shadow:0 0 0 3px #43d9c412;
+}
+.modal{
+  background:linear-gradient(155deg,#142338,#0d1726 78%);
+  border-color:#344b61;
+}
+.empty-state{background:#0d18261c}
+.app-footer{max-width:1740px;margin-inline:auto;padding-inline:clamp(22px,3vw,42px)}
+@media(min-width:901px){
+  .workspace-nav{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:#2a4054 transparent}
+  .workspace-nav::-webkit-scrollbar{width:5px}
+  .workspace-nav::-webkit-scrollbar-thumb{background:#2a4054;border-radius:10px}
+  .main-area>.page.active{flex:1}
+  .hero-panel{isolation:isolate}
+}
+@media(max-width:1200px) and (min-width:901px){
+  .sidebar{width:238px;padding-inline:12px}
+  .main-area{margin-left:238px}
+  .topbar{padding-inline:22px}
+  .page{padding-inline:22px}
+  .workspace-nav .nav-item{gap:8px}
+  .nav-item.nav-subitem{font-size:11px}
+  .search-box input{width:125px;min-width:110px}
+  .breadcrumb{gap:7px}
+}
+@media(max-width:900px){
+  .sidebar{display:none!important}
+  .main-area{margin-left:0!important}
+  .topbar{height:66px;padding-inline:16px}
+  .page{padding:24px 18px 0}
+  .app-footer{padding-inline:18px}
+}
+@media(max-width:600px){
+  .topbar{height:62px;padding-inline:12px}
+  .page{padding:20px 14px 0}
+  .app-footer{padding-inline:14px}
+  .panel-card{padding:14px}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+}
+
+/* Page-level finishing: consistent toolbars, reading surfaces, and work cards. */
+#page-courses .filter-row,
+#page-notes .note-toolbar,
+#page-library .library-toolbar{
+  padding:12px;
+  border:1px solid #26394e;
+  border-radius:14px;
+  background:rgba(14,25,40,.78);
+}
+#page-courses .filter-row{gap:10px}
+#page-courses .all-course-grid{gap:15px}
+#page-courses .all-course-grid .course-card{min-height:164px}
+#page-notes .note-toolbar,
+#page-library .library-toolbar{gap:9px}
+#page-notes .note-toolbar .filter-search,
+#page-library .library-toolbar .filter-search{min-height:40px}
+#page-library .library-intro{
+  border-color:#2a4a58;
+  background:linear-gradient(115deg,rgba(17,48,57,.96),rgba(15,27,43,.98) 74%);
+}
+#page-library .shared-note-card,
+#page-notes .note-card{min-height:190px}
+#page-exams .summary-tile{
+  background:linear-gradient(145deg,#142337,#101a29);
+  border-color:#293d52;
+}
+#page-exams .exam-row{transition:border-color .18s ease,background .18s ease,transform .18s ease}
+#page-exams .exam-row:hover{border-color:#3b646d;background:#132337;transform:translateY(-1px)}
+#page-flashcards .flash-intro{
+  border-color:#2b4b5c;
+  background:radial-gradient(ellipse at 82% 10%,rgba(63,163,158,.14),transparent 35%),linear-gradient(115deg,#15283a,#111c2d 74%);
+}
+#page-flashcards .flash-set{min-height:190px;display:flex;flex-direction:column}
+#page-flashcards .flash-set button{margin-top:auto}
+#page-questions .quiz-layout{align-items:start;gap:18px}
+#page-questions .quiz-setup,
+#page-questions .quiz-side{border-color:#293d52;background:linear-gradient(150deg,#121f31,#101a29)}
+#page-questions .choice-chip{min-width:74px}
+#page-review .review-stat{background:linear-gradient(145deg,#142337,#101a29);border-color:#293d52}
+#page-review .review-topic-card{background:linear-gradient(120deg,#132235,#101a29);border-color:#293d52;transition:border-color .18s ease,transform .18s ease}
+#page-review .review-topic-card:hover{border-color:#5b6251;transform:translateY(-1px)}
+#page-settings .settings-panel{margin-top:4px;border-color:#293d52;background:linear-gradient(150deg,#121f31,#101a29)}
+#page-settings .setting-row{gap:24px}
+#page-admin .admin-welcome,
+#page-admin .admin-content-panel{box-shadow:0 8px 26px #02071118}
+#page-admin .admin-summary-card{background:linear-gradient(145deg,#142337,#101a29);border-color:#293d52}
+#page-admin .admin-note-row{transition:border-color .18s ease,background .18s ease}
+#page-admin .admin-note-row:hover{border-color:#36576a;background:#122135}
+.note-reader-backdrop{backdrop-filter:blur(10px)}
+.note-reader{border-color:#2b4055;box-shadow:0 24px 80px #0207118c}
+@media(min-width:1201px){
+  #page-courses .all-course-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  #page-notes .notes-grid,
+  #page-library .shared-notes-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+}
+@media(max-width:900px){
+  #page-courses .filter-row,
+  #page-notes .note-toolbar,
+  #page-library .library-toolbar{padding:10px}
+  #page-courses .all-course-grid .course-card{min-height:0}
+  #page-notes .note-card,
+  #page-library .shared-note-card{min-height:0}
+}
+@media(max-width:600px){
+  #page-questions .quiz-setup,
+  #page-questions .quiz-side{padding:16px}
+  #page-settings .setting-row{gap:12px}
+}
