@@ -47,10 +47,6 @@
         <button class="nav-item" data-page="exams"><i data-lucide="calendar-days"></i><span>Sınav takvimi</span></button>
         <button class="nav-item" data-page="settings"><i data-lucide="settings-2"></i><span>Ayarlar</span></button>
       </nav>
-      <div class="workspace-label admin-workspace-label" id="adminWorkspaceLabel" hidden>YÖNETİM</div>
-      <nav class="nav-list admin-nav-list" aria-label="Yönetim menüsü">
-        <button class="nav-item admin-nav-item" id="adminNavItem" data-page="admin" hidden><i data-lucide="shield-check"></i><span>Yönetim Paneli</span></button>
-      </nav>
       <div class="sidebar-bottom">
         <div class="focus-card">
           <span class="focus-icon"><i data-lucide="timer"></i></span>
@@ -71,6 +67,7 @@
         <div class="top-actions">
           <label class="search-box"><i data-lucide="search"></i><input id="globalSearch" type="search" placeholder="Ders, konu veya not ara..." aria-label="Ara"><kbd>⌘ K</kbd></label>
           <button class="icon-button notification-btn" aria-label="Bildirimler" id="notificationBtn"><i data-lucide="bell"></i><span></span></button>
+          <button class="outline-button admin-quick-entry" id="adminQuickEntry" data-page="admin" type="button" hidden aria-label="Yönetim panelini aç"><i data-lucide="shield-check"></i><span>Yönetim</span></button>
           <button class="outline-button account-button" id="accountButton" type="button"><i data-lucide="user-round"></i><span>Hesaba giriş</span></button>
         </div>
       </header>
