@@ -384,3 +384,14 @@ body.document-viewer-open{overflow:hidden}
 .dashboard-review-copy strong{font-size:12px;line-height:1.5;overflow-wrap:anywhere}
 .dashboard-review-copy small{font-size:10px;color:#8fa8bb;line-height:1.5;overflow-wrap:anywhere}
 .dashboard-review-item>svg{width:16px;height:16px;color:#7795a9;flex-shrink:0}
+
+/* Real-data learning summary */
+.activity-card{margin:0 0 22px;padding:18px}
+.dashboard-activity-list{display:grid;gap:0}
+.dashboard-activity-item{display:flex;align-items:center;gap:12px;padding:12px 2px;border-bottom:1px solid #203044}
+.dashboard-activity-item:last-child{border-bottom:0}
+.dashboard-activity-icon{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:10px;background:#17383c;color:#82e0d1}
+.dashboard-activity-icon svg{width:16px;height:16px}
+.dashboard-activity-copy{display:grid;gap:4px;min-width:0}
+.dashboard-activity-copy strong{font-size:12px;line-height:1.45;overflow-wrap:anywhere}
+.dashboard-activity-copy small{font-size:10px;color:#8fa8bb;line-height:1.45}
