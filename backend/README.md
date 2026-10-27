@@ -40,8 +40,10 @@ Başlangıç migration'ı `migrations/versions/0001_initial.py` içinde repoya e
 - `POST /api/pomodoro/save` — Pomodoro oturum kaydı.
 - `POST /api/mindmaps`, `PUT /api/mindmaps/<id>` — JSON tabanlı zihin haritaları.
 
-## Güvenlik
+## Güvenlik ve tarayıcı bağlantısı
 - CSRF koruması tüm güvenli olmayan HTTP metotlarında etkin; tarayıcı istemcileri önce `GET /api/auth/csrf` çağırıp token'ı `X-CSRFToken` ile göndermelidir. Örnek yardımcı: `frontend-example/api.js`.
+- CORS yalnızca `CORS_ORIGINS` içinde açıkça listelenen origin'lere açılır. Birden fazla origin virgülle ayrılır; tam origin yazılır, yol eklenmez. Kimlik bilgili isteklerde `*` kullanılmaz.
+- GitHub Pages arayüzü bu API'ye bağlanacaksa Render ortamında `CORS_ORIGINS=https://veterinerakademiplatformu.github.io`, `SESSION_COOKIE_SAMESITE=None` ve `SESSION_COOKIE_SECURE=true` ayarla. İsteklerde `credentials: "include"` kullanılmalı. API dağıtılmadan önce gerçek origin ve HTTPS davranışı doğrulanmalıdır.
 - Genel API sınırı IP başına 50 istek/saat ve 200 istek/gün; kayıt ve giriş için ek olarak 5 istek/dakika sınırı uygulanır.
 - Şifreler Werkzeug hash'iyle saklanır. Özel uçlar oturum açmayı gerektirir; sahiplik kontrolleri kullanıcı verilerini ayırır.
 - Üretimde `FLASK_ENV=production`, güçlü `SECRET_KEY`, HTTPS ve `SESSION_COOKIE_SECURE=true` kullan. Birden çok worker için `RATELIMIT_STORAGE_URI` değerini Redis gibi ortak bir depoya ayarla; varsayılan bellek deposu tek süreç içindir.
@@ -58,4 +60,4 @@ Başlangıç migration'ı `migrations/versions/0001_initial.py` içinde repoya e
 `backend/` klasöründe `pytest -q` çalıştır. GitHub Actions backend testlerini ve statik arayüz için tarayıcı smoke testlerini çalıştırır.
 
 ## Yayına alma sınırı
-Bu PR backend kodunu hazırlar ancak API'yi dağıtmaz ve canlı GitHub Pages arayüzüne bağlamaz. GitHub Pages Flask çalıştıramaz. Arayüz GitHub Pages'te kalacaksa API ayrı bir Python servisine dağıtılmalı; yalnızca tam frontend origin'ine credentialed CORS açılmalı ve cross-site cookie gereksinimleri (HTTPS, `SameSite=None; Secure`) birlikte ayarlanmalıdır. Daha sade seçenek, Flask'ın arayüzü ve `/api` uçlarını aynı origin'den sunmasıdır. Canlı entegrasyon, dağıtım adresi ve güvenlik ayarları doğrulandıktan sonra yapılmalıdır.
+Bu PR backend kodunu hazırlar ancak API'yi dağıtmaz ve canlı GitHub Pages arayüzüne bağlamaz. GitHub Pages Flask çalıştıramaz. Arayüz GitHub Pages'te kalacaksa API ayrı bir Python servisine dağıtılmalı; tam frontend origin'ine credentialed CORS açılmalı ve cross-site cookie gereksinimleri (HTTPS, `SameSite=None; Secure`) birlikte ayarlanmalıdır. Daha sade seçenek, Flask'ın arayüzü ve `/api` uçlarını aynı origin'den sunmasıdır. Canlı entegrasyon, dağıtım adresi ve güvenlik ayarları doğrulandıktan sonra yapılmalıdır.
