@@ -15,6 +15,8 @@ services:
       - key: SESSION_COOKIE_SECURE
         value: "true"
       - key: SESSION_COOKIE_SAMESITE
-        value: Lax
+        value: None
+      - key: CORS_ORIGINS
+        sync: false
       - key: DATABASE_URL
         sync: false
