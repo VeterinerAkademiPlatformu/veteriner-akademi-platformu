@@ -662,7 +662,8 @@
   const normalizeWorkspace = saved => {
     const next={...structuredClone(seed),...(saved&&typeof saved==='object'?saved:{})};
     for(const key of ['courses','exams','notes','cards','tasks']) if(!Array.isArray(next[key]))next[key]=structuredClone(seed[key]);
-    next.dailyGoal=Number(next.dailyGoal)||3; next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0); if(!Array.isArray(next.activity))next.activity=[];if(!Array.isArray(next.sessionHistory))next.sessionHistory=[];
+    next.dailyGoal=Math.max(2,Math.min(5,Number(next.dailyGoal)||3)); next.focusLength=Number(next.focusLength)||25; next.sessions=Number(next.sessions)||0; next.focusMinutes=Math.max(0,Number(next.focusMinutes)||0); if(!Array.isArray(next.activity))next.activity=[];if(!Array.isArray(next.sessionHistory))next.sessionHistory=[];
+    if(next.taskDate!==todayKey()){next.tasks=Array.from({length:next.dailyGoal},()=>false);next.taskDate=todayKey();}else next.tasks=Array.from({length:next.dailyGoal},(_,i)=>!!next.tasks[i]);
     return next;
   };
   const loadCloudWorkspace = async user => {
