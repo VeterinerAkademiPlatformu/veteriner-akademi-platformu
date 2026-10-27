@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: veteriner-akademi-study-api
+    runtime: python
+    plan: free
+    buildCommand: pip install -r backend/requirements.txt
+    preDeployCommand: cd backend && flask --app run.py db upgrade
+    startCommand: cd backend && gunicorn --bind 0.0.0.0:$PORT run:app
+    healthCheckPath: /api/health
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+      - key: SESSION_COOKIE_SAMESITE
+        value: Lax
+      - key: DATABASE_URL
+        sync: false
