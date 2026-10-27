@@ -310,3 +310,43 @@ body.document-viewer-open{overflow:hidden}
   .topic-item-actions .topic-open{flex:1}
   .flash-card-admin-item{align-items:flex-start}
 }
+
+
+/* Dedicated administrator navigation and content workspace */
+.admin-nav-list{margin-top:2px;padding-top:10px;border-top:1px solid #24364a}
+.admin-workspace-label{margin-top:14px}
+.admin-nav-item{color:#9bd8d1}
+.admin-nav-item.active{background:linear-gradient(100deg,#173a42,#152638);border:1px solid #2d6969;color:#b7fff0}
+.admin-nav-item[hidden],.admin-workspace-label[hidden]{display:none!important}
+.admin-welcome{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;padding:20px 22px;border:1px solid #294858;background:linear-gradient(120deg,#102b36,#111b2a 78%)}
+.admin-welcome-icon{display:grid;place-items:center;flex:0 0 46px;width:46px;height:46px;border:1px solid #2e7772;border-radius:14px;background:#143b3d;color:#7ce5d4}
+.admin-welcome-icon svg{width:23px;height:23px}
+.admin-welcome h2{margin:0 0 6px;color:#eef8fb;font-size:15px}
+.admin-welcome p{margin:0;color:#9fb4c5;font-size:12px;line-height:1.75}
+.admin-summary-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:20px}
+.admin-summary-card{display:grid;gap:16px;padding:18px;border:1px solid #263a4f;border-radius:15px;background:linear-gradient(145deg,#111f30,#0d1725)}
+.admin-summary-card>span{display:flex;align-items:center;gap:8px;color:#9eb4c6;font-size:11px;line-height:1.5}
+.admin-summary-card>span svg{width:16px;height:16px;color:#67d9c7}
+.admin-summary-card>strong{font:800 28px Manrope,sans-serif;color:#f0f8fc}
+.admin-content-panel{padding:20px}
+.admin-content-heading{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.admin-content-heading h2{margin:0 0 5px;font:750 17px Manrope,sans-serif;color:#edf6fb}
+.admin-content-heading p{margin:0;color:#8fa7ba;font-size:12px;line-height:1.6}
+.admin-live-status{display:inline-flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid #28574f;border-radius:99px;background:#122c2b;color:#7ee0cb;font-size:10px;white-space:nowrap}
+.admin-live-status span{width:6px;height:6px;border-radius:50%;background:#64d8be;box-shadow:0 0 0 4px #64d8be1c}
+.admin-note-list{display:grid;gap:10px}
+.admin-note-row{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:16px;border:1px solid #283c50;border-radius:13px;background:#101d2c}
+.admin-note-main{min-width:0;flex:1}
+.admin-note-tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px}
+.admin-note-tags span{display:inline-flex;align-items:center;gap:5px;max-width:100%;padding:5px 8px;border:1px solid #2a4a58;border-radius:7px;background:#112b37;color:#8fe3d3;font-size:10px;overflow-wrap:anywhere}
+.admin-note-tags svg{width:12px;height:12px}
+.admin-note-main h3{margin:0 0 7px;color:#e9f4fa;font-size:14px;line-height:1.5;overflow-wrap:anywhere}
+.admin-note-main p{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 10px;color:#9cb0c0;font-size:12px;line-height:1.7;overflow-wrap:anywhere;white-space:pre-line}
+.admin-note-main small{display:flex;align-items:center;gap:5px;color:#718ba0;font-size:10px}
+.admin-note-main small svg{width:12px;height:12px}
+.admin-note-actions{display:flex;align-items:center;gap:7px;flex-shrink:0}
+.admin-note-actions .outline-button{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.admin-note-actions svg{width:15px;height:15px}
+.admin-note-actions .note-delete-button{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;cursor:pointer}
+.admin-note-actions .note-delete-button:hover{border-color:#75434c;color:#ff9da8}
+@media(max-width:760px){.admin-summary-grid{grid-template-columns:1fr}.admin-summary-card{display:flex;align-items:center;justify-content:space-between;padding:15px}.admin-summary-card>strong{font-size:24px}.admin-content-heading{align-items:flex-start;flex-direction:column}.admin-note-row{flex-direction:column;gap:12px}.admin-note-actions{width:100%}.admin-note-actions .outline-button{flex:1;justify-content:center}.admin-page-header{align-items:stretch}.admin-page-header>.primary-button{width:100%;justify-content:center}}
