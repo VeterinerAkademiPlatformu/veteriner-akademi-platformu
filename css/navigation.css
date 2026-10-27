@@ -75,3 +75,7 @@
 }
 @keyframes morePanelIn{from{transform:translateY(18px);opacity:.7}to{transform:translateY(0);opacity:1}}
 @media(prefers-reduced-motion:reduce){.mobile-nav-item,.more-menu-link{transition:none}.more-menu-panel{animation:none}}
+
+.admin-quick-entry{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+#adminQuickEntry[hidden]{display:none!important}
+@media(max-width:600px){.admin-quick-entry{width:36px;min-width:36px;padding:0;justify-content:center}.admin-quick-entry span{display:none}}
