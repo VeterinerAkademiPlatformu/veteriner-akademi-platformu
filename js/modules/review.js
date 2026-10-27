@@ -1,0 +1,9 @@
+  const renderReview = () => {
+    const review=[];studentTopicProgress.filter(p=>p.needs_review).forEach(p=>{const topic=sharedCourseTopics.find(t=>t.id===p.topic_id),course=topic&&sharedCourses.find(c=>c.id===topic.course_id);if(topic&&course)review.push({course,topic,progress:p});});
+    const count=$('#reviewCount');if(count)count.textContent=String(review.length);
+    const summary=$('#reviewSummary');if(summary)summary.innerHTML='<article class="review-stat"><span>Tekrar bekleyen konu</span><strong>'+review.length+'</strong></article><article class="review-stat"><span>Hatırlama denemesi</span><strong>'+review.reduce((n,x)=>n+(x.progress.recalled_count||0),0)+'</strong></article>';
+    const host=$('#reviewTopicList');if(!host)return;
+    host.innerHTML=review.map(({course,topic,progress})=>'<article class="review-topic-card"><div class="review-topic-icon">'+icon('rotate-ccw')+'</div><div class="review-topic-copy"><span class="eyebrow">'+safe(course.name)+'</span><h3>'+safe(topic.title)+'</h3><p>'+safe(String(topic.summary||'').slice(0,180))+(String(topic.summary||'').length>180?'…':'')+'</p><small>'+(progress.last_reviewed?'Son tekrar: '+safe(progress.last_reviewed):'Henüz tekrar tarihi yok')+'</small></div><button class="primary-button" data-review-topic="'+safe(course.id)+'|'+safe(topic.id)+'">Tekrar çalış '+icon('arrow-right')+'</button></article>').join('')||'<div class="review-empty"><span>'+icon('check-circle-2')+'</span><h2>Tekrar bekleyen konu yok</h2><p>Bir ortak konuyu çalışırken “Tekrar etmeliyim” seçeneğini işaretlediğinde burada görünür.</p><button class="outline-button" data-page="courses">Derslerime dön</button></div>';
+    refreshIcons();
+  };
+  const render = () => { renderDashboard();renderCourses();renderExams();renderNotes();renderFlashcards();renderReview();renderAdminPanel();refreshIcons(); };
