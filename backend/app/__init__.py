@@ -2,11 +2,19 @@ from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_wtf.csrf import CSRFError, CSRFProtect
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 db = SQLAlchemy()
 migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_view = None
+csrf = CSRFProtect()
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["200 per day", "50 per hour"],
+)
 
 
 def create_app(test_config=None):
@@ -18,6 +26,8 @@ def create_app(test_config=None):
     db.init_app(app)
     migrate.init_app(app, db)
     login_manager.init_app(app)
+    csrf.init_app(app)
+    limiter.init_app(app)
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -45,6 +55,10 @@ def create_app(test_config=None):
     @app.get("/api/health")
     def health():
         return jsonify({"status": "ok", "service": "veteriner-akademi-study-api"})
+
+    @app.errorhandler(CSRFError)
+    def csrf_error(_error):
+        return jsonify({"error": "CSRF doğrulaması başarısız. Sayfayı yenileyip tekrar deneyin."}), 400
 
     @app.errorhandler(404)
     def not_found(_error):
