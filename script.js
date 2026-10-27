@@ -2,6 +2,7 @@
   const $ = (s, r=document) => r.querySelector(s);
   const $$ = (s, r=document) => [...r.querySelectorAll(s)];
   const storeKey = 'veterinerAkademi.v1';
+  const localDateKey = (date=new Date()) => date.getFullYear()+'-'+String(date.getMonth()+1).padStart(2,'0')+'-'+String(date.getDate()).padStart(2,'0');
   const supabaseClient = window.supabase?.createClient('https://jvbpoibzjihznlljeech.supabase.co', 'sb_publishable_BcGDhOHty5_NsY-wHMI_vg_pAfd1tT9');
   let authUser = null, cloudLoading = false, cloudReady = false, cloudSaveTimer = null, lastLoadedUserId = null;
   const ownerKey = 'veterinerAkademi.ownerId';
@@ -28,13 +29,16 @@
       {id:'f2',course:'Fizyoloji',question:'PTH salgısını temel olarak hangi değişiklik artırır?',answer:'Serum iyonize kalsiyum düzeyinin düşmesi.'},
       {id:'f3',course:'Patoloji',question:'İnflamasyonun beş temel belirtisi nelerdir?',answer:'Rubor (kızarıklık), calor (ısı artışı), tumor (şişlik), dolor (ağrı) ve functio laesa (fonksiyon kaybı).'}
     ],
-    tasks:[false,false,false], taskDate:new Date().toISOString().slice(0,10), dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0, activity:[], sessionHistory:[]
+    tasks:[false,false,false], taskDate:localDateKey(), dailyGoal:3, focusLength:25, sessions:0, focusMinutes:0, activity:[], sessionHistory:[]
   };
   let data;
   try { data = JSON.parse(localStorage.getItem(storeKey)) || structuredClone(seed); } catch { data = structuredClone(seed); }
   if(!Array.isArray(data.activity))data.activity=[]; if(!Array.isArray(data.sessionHistory))data.sessionHistory=[];
-  const todayKey=()=>new Date().toISOString().slice(0,10);
-  if(data.taskDate!==todayKey()){data.tasks=[false,false,false];data.taskDate=todayKey();}
+  const todayKey=localDateKey;
+  data.dailyGoal=Math.max(2,Math.min(5,Number(data.dailyGoal)||3));
+  if(!Array.isArray(data.tasks))data.tasks=[];
+  if(data.taskDate!==todayKey()){data.tasks=Array.from({length:data.dailyGoal},()=>false);data.taskDate=todayKey();}
+  else if(data.tasks.length!==data.dailyGoal)data.tasks=Array.from({length:data.dailyGoal},(_,i)=>!!data.tasks[i]);
   const logActivity=(title,detail='',type='check-circle-2')=>{data.activity=Array.isArray(data.activity)?data.activity:[];data.activity.unshift({id:crypto.randomUUID(),title,detail,type,at:new Date().toISOString()});data.activity=data.activity.slice(0,30);};
   const writeLocal = () => { try { localStorage.setItem(storeKey, JSON.stringify(data)); } catch {} };
   const queueCloudSave = () => {
@@ -70,7 +74,9 @@
   const examRow = e => { const d=new Date(e.date+'T12:00:00');const day=String(d.getDate()).padStart(2,'0');const month=d.toLocaleDateString('tr-TR',{month:'short'}).replace('.','');return '<div class="exam-row"><div class="exam-date"><strong>'+day+'</strong><small>'+safe(month)+'</small></div><div class="exam-info"><strong>'+safe(e.course)+'</strong><small>'+safe(e.type)+' sınavı · '+d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+'</small></div><span class="exam-type">'+safe(e.type)+'</span><button class="exam-delete" data-exam-delete="'+safe(e.id)+'" title="Sınavı sil">'+icon('x')+'</button></div>'; };
   const renderDashboard = () => {
     $('#todayDate').textContent=new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'});
-    $('#weeklySessions').textContent=String(data.sessions||0);
+    const now=new Date(), weekStart=new Date(now);weekStart.setHours(0,0,0,0);weekStart.setDate(weekStart.getDate()-((weekStart.getDay()+6)%7));
+    const weeklyCount=(data.sessionHistory||[]).filter(at=>{const stamp=Date.parse(at);return Number.isFinite(stamp)&&stamp>=weekStart.getTime()&&stamp<=now.getTime();}).length;
+    $('#weeklySessions').textContent=String(weeklyCount);
     const completedTasks=(data.tasks||[]).filter(Boolean).length, goal=Math.max(1,Number(data.dailyGoal)||3), goalPct=Math.min(100,Math.round(completedTasks/goal*100));
     $('#goalProgress').textContent=String(completedTasks);const goalTotal=$('#goalTotal');if(goalTotal)goalTotal.textContent='/ '+goal+' görev';const goalBar=$('#goalProgressBar');if(goalBar)goalBar.style.width=goalPct+'%';const goalCaption=$('#goalCaption');if(goalCaption)goalCaption.textContent=completedTasks>=goal?'Günlük hedef tamamlandı':(goal-completedTasks)+' görev daha tamamla';
     $('#savedCount').textContent=String(data.notes.length+data.cards.length);
@@ -82,8 +88,12 @@
     $('#dashboardExams').innerHTML=upcomingExams.slice(0,3).map(examRow).join('')||empty('Yaklaşan sınav yok','Sınav takvimine yeni bir tarih ekleyebilirsin.','calendar-days');
     const reviewTopics=[];data.courses.forEach(course=>(course.topicList||[]).forEach(topic=>{if(topic.needsReview)reviewTopics.push({course,topic});}));
     const reviewHost=$('#dashboardReviewTopics');if(reviewHost)reviewHost.innerHTML=reviewTopics.slice(0,3).map(({course,topic})=>'<button type="button" class="dashboard-review-item" data-page="review"><span class="dashboard-review-icon">'+icon('rotate-ccw')+'</span><span class="dashboard-review-copy"><strong>'+safe(topic.title)+'</strong><small>'+safe(course.name)+(topic.lastReviewed?' · Son tekrar: '+safe(topic.lastReviewed):' · Henüz tekrar edilmedi')+'</small></span>'+icon('arrow-right')+'</button>').join('')||empty('Tekrar bekleyen konu yok','Bir konuyu tekrar listene eklediğinde burada görünecek.','check-circle-2');
-    $$('.task-item input').forEach((el,i)=>{el.checked=!!data.tasks[i];el.closest('.task-item').classList.toggle('done',!!data.tasks[i]);});
-    const taskList=$('#taskList'); if(taskList){const count=(data.tasks||[]).filter(Boolean).length;const pill=$('.tiny-pill',taskList.parentElement);if(pill)pill.textContent=count+'/'+(data.dailyGoal||3);}
+    const taskList=$('#taskList');
+    if(taskList){
+      const taskTemplates=[['Önceki konuyu tekrar et','15 dakika','book-open'],['10 test sorusu çöz','20 dakika','list-checks'],['Bir flash kart seti tamamla','10 dakika','layers'],['Bir ders notu gözden geçir','10 dakika','notebook-pen'],['Zorlandığın bir konuyu çalış','15 dakika','brain']];
+      taskList.innerHTML=(data.tasks||[]).map((done,i)=>{const task=taskTemplates[i]||['Planlı çalışma görevini tamamla','10 dakika','check-circle-2'];return '<label class="task-item '+(done?'done':'')+'"><input type="checkbox" '+(done?'checked':'')+'><span class="fake-check">'+icon('check')+'</span><span><strong>'+task[0]+'</strong><small>'+task[1]+'</small></span></label>';}).join('');
+      const count=(data.tasks||[]).filter(Boolean).length;const pill=$('.tiny-pill',taskList.parentElement);if(pill)pill.textContent=count+'/'+(data.dailyGoal||3);
+    }
   };
   const renderCourses = () => {
     const q=($('#courseSearch')?.value||'').toLocaleLowerCase('tr-TR'), year=$('#semesterFilter')?.value||'all';
@@ -509,9 +519,9 @@
   $('#globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter'){const q=e.target.value.toLocaleLowerCase('tr-TR');if(data.courses.some(c=>c.name.toLocaleLowerCase('tr-TR').includes(q)))go('courses');else if(data.notes.some(n=>(n.title+n.body).toLocaleLowerCase('tr-TR').includes(q)))go('notes');else if(data.cards.some(c=>(c.question+c.answer).toLocaleLowerCase('tr-TR').includes(q)))go('flashcards');else toast('Bu ifadeyle eşleşen kayıt bulunamadı.');}});
   $('#menuToggle').addEventListener('click',()=>$('#sidebar').classList.toggle('open'));
   $('#notificationBtn').addEventListener('click',()=>toast(data.exams.length?'Sınav takvimini kontrol etmeyi unutma.':'Henüz bildirim yok.'));
-  $('#editPlanBtn').addEventListener('click',()=>{const next=prompt('Günlük hedef kaç görev olsun? (2–5)',String(data.dailyGoal||3));const n=Number(next);if(Number.isInteger(n)&&n>=2&&n<=5){data.dailyGoal=n;save();toast('Günlük hedef güncellendi.');render();}});
+  $('#editPlanBtn').addEventListener('click',()=>{const next=prompt('Günlük hedef kaç görev olsun? (2–5)',String(data.dailyGoal||3));const n=Number(next);if(Number.isInteger(n)&&n>=2&&n<=5){data.dailyGoal=n;data.tasks=Array.from({length:n},(_,i)=>!!data.tasks[i]);save();toast('Günlük hedef güncellendi.');render();}});
   $('#taskList').addEventListener('change',e=>{if(e.target.matches('input[type=checkbox]')){const items=$('#taskList input');data.tasks=items.map(x=>x.checked);data.taskDate=todayKey();logActivity(e.target.checked?'Günlük görev tamamlandı':'Günlük görev yeniden açıldı',e.target.closest('.task-item')?.querySelector('strong')?.textContent||'Plan görevi',e.target.checked?'check-circle-2':'rotate-ccw');save();renderDashboard();toast('Günlük plan güncellendi.');}});
-  $('#dailyGoal').addEventListener('change',e=>{data.dailyGoal=Number(e.target.value);save();toast('Günlük hedef kaydedildi.');renderDashboard();});
+  $('#dailyGoal').addEventListener('change',e=>{data.dailyGoal=Math.max(2,Math.min(5,Number(e.target.value)||3));data.tasks=Array.from({length:data.dailyGoal},(_,i)=>!!data.tasks[i]);save();toast('Günlük hedef kaydedildi.');renderDashboard();});
   $('#focusLength').addEventListener('change',e=>{data.focusLength=Number(e.target.value);timerSeconds=data.focusLength*60;updateTimer();save();});
   const overlay=$('#focusOverlay');
   const openFocus=()=>{timerSeconds=(data.focusLength||25)*60;timerRunning=false;clearInterval(timerInterval);updateTimer();overlay.hidden=false;};
