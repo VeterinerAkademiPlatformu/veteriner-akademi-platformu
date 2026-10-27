@@ -1,0 +1,77 @@
+/* Profesyonel not okuma deneyimi */
+.note-reader-backdrop{position:fixed;inset:0;z-index:1000;background:#050b14eF;backdrop-filter:blur(12px);display:flex;align-items:stretch;justify-content:center;padding:0;animation:readerFadeIn .22s ease}
+.note-reader-backdrop[hidden]{display:none!important}
+body.note-reader-open{overflow:hidden}
+.note-reader{width:100%;height:100%;display:flex;flex-direction:column;background:radial-gradient(ellipse at 50% 0,#183247 0,transparent 40%),#0b1220;overflow:hidden}
+.note-reader-topbar{height:68px;min-height:68px;padding:0 clamp(16px,4vw,54px);display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #22334a;background:#0b1220d9}
+.reader-back-button,.reader-tool{display:inline-flex;align-items:center;justify-content:center;gap:8px;color:#b5c8d7;border:1px solid #293b50;background:#111e30;border-radius:10px;padding:9px 12px;font-size:12px;font-weight:650;transition:.2s}
+.reader-back-button:hover,.reader-tool:hover{border-color:#3a8a84;color:#67e5d0}
+.reader-back-button svg{width:16px;height:16px}.reader-tools{display:flex;gap:7px}.reader-tool{min-width:38px;height:37px;padding:7px 10px}.reader-tool:first-child,.reader-tool:nth-child(2){font-weight:800;color:#d8e7f0}
+.reader-tool svg{width:15px;height:15px}
+.reader-progress-track{height:3px;background:#1c2a3d;flex-shrink:0}.reader-progress-track span{display:block;height:100%;width:0;background:linear-gradient(90deg,#23b9a6,#6cebd4);box-shadow:0 0 12px #42dfc05c;transition:width .12s linear}
+.note-reader-scroll{flex:1;overflow-y:auto;overscroll-behavior:contain;padding:clamp(24px,5vh,54px) 18px 60px;scrollbar-color:#2b4a5a transparent}
+.note-reading-paper{max-width:820px;margin:0 auto;padding:clamp(24px,5vw,58px);background:linear-gradient(150deg,#111e2e,#101a29);border:1px solid #273a50;border-radius:22px;box-shadow:0 28px 80px #0003;min-height:420px}
+.reader-note-meta{display:flex;align-items:center;gap:12px;margin-bottom:30px}.reader-note-icon{width:44px;height:44px;display:grid;place-items:center;border-radius:13px;background:#183d43;border:1px solid #2c6868;color:#68e5d0}.reader-note-icon svg{width:21px;height:21px}.reader-note-meta>div{display:grid;gap:4px}.reader-note-meta>div span{font-size:10px;letter-spacing:1.4px;text-transform:uppercase;color:#70e0cc;font-weight:800}.reader-note-meta small{font-size:11px;color:#7e94a9}
+.note-reading-paper h1{font:800 clamp(26px,4vw,40px)/1.2 Manrope,sans-serif;letter-spacing:-1.2px;color:#f0f7fb;margin:0;overflow-wrap:anywhere}.reader-note-divider{height:1px;background:linear-gradient(90deg,#3b7778,#2b3b50 65%,transparent);margin:26px 0 30px}
+.note-reader-body{font-size:18px;line-height:1.95;color:#c6d5e1;overflow-wrap:anywhere;white-space:normal;letter-spacing:.005em}.note-reader-body br{content:"";display:block;margin-top:.48em}.reader-note-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:44px;padding-top:20px;border-top:1px solid #27394d;color:#7e96aa;font-size:11px}.reader-note-footer>span{display:flex;align-items:center;gap:8px}.reader-note-footer svg{width:15px;height:15px;color:#55d8c2}.reader-back-bottom{display:inline-flex;align-items:center;gap:8px;border:0;background:transparent;color:#67e0ca;font-size:11px;font-weight:700}.reader-back-bottom:hover{color:#b1fff0}
+.note-card-reader{display:flex;flex-direction:column;min-width:0}.note-card-reader>p{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;flex:1;margin-bottom:14px}.note-card-actions{display:flex;align-items:center;gap:8px;margin-top:auto}.note-read-button{flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid #28564f;background:linear-gradient(110deg,#153a3d,#14283a);border-radius:9px;padding:10px 12px;color:#72e5d1;font-size:11px;font-weight:750;transition:transform .2s,border-color .2s}.note-read-button:hover{transform:translateY(-1px);border-color:#4bdcc5}.note-read-button svg{width:15px;height:15px}.note-read-button span{font-size:16px}.note-delete-button{width:38px;height:37px;display:grid;place-items:center;background:#182337;border:1px solid #2a3b50;border-radius:9px;color:#8da3b6}.note-delete-button svg{width:15px;height:15px}.note-delete-button:hover{color:#ff8796;border-color:#77404d}.note-card-reader footer{display:flex;justify-content:space-between;align-items:center;gap:8px}.note-card-reader footer span{display:flex;align-items:center;gap:5px}.note-card-reader footer svg{width:12px;height:12px}
+@keyframes readerFadeIn{from{opacity:0}to{opacity:1}}
+@media(max-width:640px){.note-reader-topbar{height:60px;min-height:60px;padding:0 12px}.reader-back-button{padding:8px 9px;font-size:11px}.reader-back-button span{display:inline}.reader-tool{min-width:34px;height:34px;padding:6px 8px}.reader-tool span{display:none}.reader-tools{gap:5px}.note-reader-scroll{padding:20px 10px 35px}.note-reading-paper{padding:25px 20px;border-radius:16px;min-height:360px}.reader-note-meta{margin-bottom:24px}.reader-note-divider{margin:22px 0}.note-reader-body{line-height:1.85}.reader-note-footer{align-items:flex-start;flex-direction:column;margin-top:32px}.note-card-reader{min-height:175px}}
+
+/* Not okuma: yer imi, vurgu ve kaldığın yerden devam */
+.reader-tool[aria-pressed="true"]{color:#71e6d1;border-color:#328c7d;background:#143c3c}
+.reader-highlight{background:#f4d66a;color:#282315;border-radius:3px;padding:0 .12em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+#noteBookmarksFilter[aria-pressed="true"],#noteBookmarksFilter.active{border-color:#3c9c8c;color:#72e5d1;background:#143c3c}
+
+/* Profesyonel not okuyucu: bölüm navigasyonu ve not içi arama */
+.reader-search-row{display:flex;align-items:center;gap:10px;max-width:820px;margin:0 auto 14px;padding:10px 14px;border:1px solid #2a4055;border-radius:12px;background:#101d2c;color:#83a0b5}
+.reader-search-row>svg{width:17px;height:17px;flex-shrink:0}
+.reader-search-row input{flex:1;min-width:0;border:0;outline:0;background:transparent;color:#e7f1f8;font:500 13px Manrope,sans-serif}
+.reader-search-row input::placeholder{color:#71879a}
+.reader-search-row span{font-size:11px;white-space:nowrap;color:#69dfca}
+.reader-search-row button{width:27px;height:27px;display:grid;place-items:center;border:0;border-radius:7px;background:#1b2c40;color:#a9bdcd}
+.reader-search-row button svg{width:14px;height:14px}
+.reader-toc{margin:0 0 28px;padding:0;border:1px solid #2b4055;border-radius:13px;background:#0d1927;overflow:hidden}
+.reader-toc[hidden]{display:none!important}
+.reader-toc-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:13px 15px;border:0;background:transparent;color:#d9e7f1;font-size:12px;font-weight:750;text-align:left}
+.reader-toc-toggle span{display:flex;align-items:center;gap:8px}
+.reader-toc-toggle svg{width:15px;height:15px;color:#67dfcc}
+#noteReaderTocList{margin:0;padding:0 12px 12px 38px;display:grid;gap:3px}
+#noteReaderTocList[hidden]{display:none}
+#noteReaderTocList li{padding-left:2px;color:#66869b}
+.reader-toc-link{width:100%;padding:8px 10px;border:0;border-radius:7px;background:transparent;color:#9fb5c7;text-align:left;font-size:12px;line-height:1.5}
+.reader-toc-link:hover,.reader-toc-link.active{background:#173b40;color:#78e7d5}
+.reader-section-heading{scroll-margin-top:18px;margin:30px 0 12px;color:#f0f7fb;font:750 clamp(20px,2.8vw,25px)/1.35 Manrope,sans-serif;letter-spacing:-.35px}
+.reader-section-heading:first-child{margin-top:0}
+.reader-section-heading::before{content:"";display:inline-block;width:4px;height:1em;margin-right:10px;vertical-align:-.12em;border-radius:3px;background:#51d5c0}
+.reader-paragraph{margin:0 0 14px}
+.reader-paragraph-space{height:8px}
+.reader-search-match{outline:2px solid #4dd9c4!important;outline-offset:5px;border-radius:4px;background:#153b3b!important;scroll-margin:24px}
+@media(max-width:640px){.reader-search-row{margin-bottom:10px;padding:8px 10px;gap:7px}.reader-search-row input{font-size:12px}.reader-toc{margin-bottom:22px}.reader-section-heading{margin-top:24px}}
+
+/* PDF ve görsel için ayrı belge okuyucu */
+.document-viewer-backdrop{position:fixed;inset:0;z-index:1100;background:#050b14f2;backdrop-filter:blur(12px);display:flex;align-items:stretch;justify-content:center}
+.document-viewer-backdrop[hidden]{display:none!important}
+body.document-viewer-open{overflow:hidden}
+.document-viewer{display:flex;flex-direction:column;width:100%;height:100%;background:#0b1220;color:#e8f1f8;overflow:hidden}
+.document-viewer-topbar{min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:10px clamp(12px,3vw,34px);border-bottom:1px solid #25384d;background:#0d1725}
+.document-viewer-heading{display:flex;align-items:center;justify-content:center;gap:10px;min-width:0;flex:1}
+.document-viewer-heading>svg{width:20px;height:20px;color:#66dfcc;flex-shrink:0}
+.document-viewer-heading strong{max-width:min(40vw,520px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.document-viewer-heading small{font-size:11px;color:#8ba2b6;white-space:nowrap}
+.document-viewer-tools{display:flex;align-items:center;gap:8px}
+.document-viewer-tools[hidden],.pdf-page-toolbar[hidden]{display:none!important}
+#pdfZoomLabel{min-width:42px;text-align:center;font-size:11px;color:#b8c9d8}
+.pdf-page-toolbar{display:flex;align-items:center;justify-content:center;gap:18px;padding:9px;border-bottom:1px solid #22354a;background:#101b2a}
+.pdf-page-toolbar span{font-size:12px;color:#a9bdcd}.pdf-page-toolbar strong{color:#eff7fb}
+.pdf-page-toolbar .reader-tool{height:32px;padding:6px 12px}
+.reader-tool:disabled{opacity:.35;cursor:not-allowed}
+.document-viewer-content{flex:1;min-height:0;overflow:auto;display:flex;align-items:flex-start;justify-content:center;padding:24px;background:#151f2d;overscroll-behavior:contain}
+#pdfCanvas{display:block;max-width:none;background:#fff;box-shadow:0 12px 40px #0005}
+#imageDocumentPreview{display:block;max-width:100%;max-height:calc(100vh - 150px);height:auto;object-fit:contain;margin:auto;box-shadow:0 12px 40px #0005}
+.document-viewer-loading,.document-viewer-error{margin:auto;min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;color:#8fa7bb}
+.document-viewer-loading[hidden],.document-viewer-error[hidden]{display:none!important}
+.document-viewer-loading svg,.document-viewer-error svg{width:32px;height:32px;color:#63dfcb}
+.document-viewer-loading strong,.document-viewer-error strong{font-size:15px;color:#e5eff7}
+.document-viewer-loading span,.document-viewer-error p{max-width:420px;font-size:12px;line-height:1.7}
+@media(max-width:640px){.document-viewer-topbar{min-height:60px;gap:7px;padding:8px}.document-viewer-heading{flex-direction:column;gap:3px}.document-viewer-heading>svg{display:none}.document-viewer-heading strong{max-width:34vw;font-size:11px}.document-viewer-heading small{max-width:34vw;overflow:hidden;text-overflow:ellipsis;font-size:9px}.document-viewer-tools{gap:4px}.document-viewer-tools .reader-tool{min-width:30px;height:31px;padding:5px 8px}.pdf-page-toolbar{gap:9px;padding:7px}.pdf-page-toolbar .reader-tool{font-size:10px;padding:6px 8px}.document-viewer-content{padding:12px 6px}}
